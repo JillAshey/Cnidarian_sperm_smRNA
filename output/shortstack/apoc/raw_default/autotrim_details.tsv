@@ -1,0 +1,4 @@
+Input_file	Trimmed_file	Adapter	Input_reads	Output_reads	Too_short_reads	No_adapter_reads
+apoc_2_S31_L001_R1_001.fastq	/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_raw_shortstack/tapoc_2_S31_L001_R1_001.fastq	TGGAATTCTCGGGTGCCAAG	6896525	6813485	24856	58184
+apoc_3_S32_L001_R1_001.fastq	/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_raw_shortstack/tapoc_3_S32_L001_R1_001.fastq	TGGAATTCTCGGGTGCCAAG	6790067	6338015	400271	51781
+apoc_4_S33_L001_R1_001.fastq	/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_raw_shortstack/tapoc_4_S33_L001_R1_001.fastq	TGGAATTCTCGGGTGCCAAG	6194770	5481827	670731	42212

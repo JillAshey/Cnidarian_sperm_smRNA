@@ -1,0 +1,17 @@
+Genome: /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+Alignments: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_raw_shortstack/merged_alignments.bam
+Location: Ap3:21652205-21652298 minus
+PDF file name: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_raw_shortstack/strucVis/Cluster_733.ps.pdf
+Locus Name: Cluster_733
+ACAGUUUGCAGCAGGGAAUCUGGCUUGGAGUUCUAGUGAUUGAUUCACUGAUUCACUGAACUCCAAACCUGAUUUCCUGUUUGCUAUAGGCGAG
+...(((((((((((((((((.((.(((((((((.(((((.............)))))))))))))).)).))))))))).))))...))))... (-40.30)
+....................UGGCUUGGAGUUCUAGUGAUUGA................................................... len:23 al:79
+....................UGcCUUGGAGUUCUAGUGAUUGA................................................... len:23 al:1
+....................UGGCUUGGAGUUCUAGUGAUUG.................................................... len:22 al:13
+....................UGGCUUGGAGUUCUAGUGAU...................................................... len:20 al:2
+....................UGGCaUGGAGUUCUAGUGAUUGA................................................... len:23 al:1
+....................UGGCUUGGAGUUCUAGUGAc...................................................... len:20 al:1
+....................UGGCUaGGAGUUCUAGUGAUUGA................................................... len:23 al:2
+..................................................AUUCACUGAACUCCAAACCUGA...................... len:22 al:1
+..................................................AUUCACUGAACUCCAAACCUGAU..................... len:23 al:1
+..................................................AUUCACUGAACUCCAAACCUG....................... len:21 al:1

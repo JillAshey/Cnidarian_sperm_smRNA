@@ -1,0 +1,52 @@
+---
+title: "miRNA discovery"
+author: "Jill Ashey"
+date: "2025-09-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+### mincov 0.1 w/ trimmed filess - apoc
+
+Load data
+```{r}
+mirna <- read.table("../output/shortstack/apoc/mincov0.1/Results.txt", header = T)
+```
+
+Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
+```{r}
+mirna_y <- mirna %>%
+  dplyr::filter(MIRNA == "Y") %>%
+  mutate(Length = End - Start) %>%
+  mutate(mature_length = nchar(MajorRNA))
+```
+
+Select mirnas 
+```{r}
+mirna_known <- mirna %>%
+  dplyr::filter(!is.na(known_miRNAs)) %>%
+  mutate(mature_length = nchar(MajorRNA))
+```
+
+
+
+### miRNAs from trimmed reads but default mincov 
+
+Load data
+```{r}
+mirna_trim <- read.table("../output/shortstack/apoc/trimmed_default/Results.txt", header = T)
+```
+
+Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
+```{r}
+mirna_trim_y <- mirna_trim %>%
+  dplyr::filter(MIRNA == "Y") %>%
+  mutate(Length = End - Start) %>%
+  mutate(mature_length = nchar(MajorRNA))
+```
+
