@@ -1,0 +1,12 @@
+Genome: /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta
+Alignments: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/nvec_shortstack/merged_alignments.bam
+Location: chr13:9526420-9526511 plus
+PDF file name: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/nvec_shortstack/strucVis/Cluster_2666.ps.pdf
+Locus Name: Cluster_2666
+UAUUUACAAUGACGACACACCCUUAUAAAUCAUCCUUGCACUACUUAUGUCGUACAUUGAUGAUUUAUGAAGGUGUGUUGCUGACUCUGCUA
+............(((((((((.((((((((((((..((.((.((....)).)).))..)))))))))))).)))))))))............ (-31.90)
+......................UUAUAAAUCAUCCUUGCA.................................................... len:18 al:4
+......................UUAUAAAUCAUCCUUGCACUA................................................. len:21 al:1
+......................UUAUAAAUCAUCCUUGCACUAC................................................ len:22 al:10
+..................................................CGUACAUUGAUGuUUUAUGAAG.................... len:22 al:1
+..................................................CGUACAUUGAUGAUUUAUGAAG.................... len:22 al:6
