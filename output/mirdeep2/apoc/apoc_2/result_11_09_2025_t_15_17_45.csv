@@ -1,0 +1,107 @@
+miRDeep2 score	novel miRNAs reported by miRDeep2	novel miRNAs, estimated false positives	novel miRNAs, estimated true positives	known miRNAs in species	known miRNAs in data	known miRNAs detected by miRDeep2	estimated signal-to-noise	excision gearing
+10	3	1 +/- 1	2 +/- 1 (77 +/- 28%)	49661	133	84 (63%)	9.5	1
+9	3	1 +/- 1	2 +/- 1 (76 +/- 29%)	49661	133	84 (63%)	9.2	1
+8	3	1 +/- 1	2 +/- 1 (76 +/- 29%)	49661	133	84 (63%)	9.1	1
+7	4	1 +/- 1	3 +/- 1 (81 +/- 22%)	49661	133	84 (63%)	9.9	1
+6	6	1 +/- 1	5 +/- 1 (87 +/- 14%)	49661	133	85 (64%)	13.1	1
+5	6	1 +/- 1	5 +/- 1 (86 +/- 15%)	49661	133	88 (66%)	16.1	1
+4	8	1 +/- 1	7 +/- 1 (90 +/- 11%)	49661	133	88 (66%)	17.8	1
+3	10	1 +/- 1	9 +/- 1 (91 +/- 9%)	49661	133	88 (66%)	19.1	1
+2	17	1 +/- 1	16 +/- 1 (94 +/- 6%)	49661	133	95 (71%)	27.8	1
+1	24	2 +/- 1	22 +/- 1 (90 +/- 6%)	49661	133	96 (72%)	15.2	1
+0	36	7 +/- 3	29 +/- 3 (81 +/- 7%)	49661	133	101 (76%)	7.6	1
+-1	43	14 +/- 4	29 +/- 4 (67 +/- 8%)	49661	133	101 (76%)	4.2	1
+-2	77	23 +/- 5	54 +/- 5 (70 +/- 6%)	49661	133	107 (80%)	4	1
+-3	168	35 +/- 6	133 +/- 6 (79 +/- 4%)	49661	133	120 (90%)	5.3	1
+-4	307	67 +/- 8	240 +/- 8 (78 +/- 3%)	49661	133	122 (92%)	4.9	1
+-5	384	212 +/- 13	172 +/- 13 (45 +/- 3%)	49661	133	123 (92%)	1.9	1
+-6	433	470 +/- 17	0 +/- 0 (0 +/- 0%)	49661	133	124 (93%)	1	1
+-7	469	766 +/- 22	0 +/- 0 (0 +/- 0%)	49661	133	124 (93%)	0.7	1
+-8	599	1052 +/- 26	0 +/- 0 (0 +/- 0%)	49661	133	124 (93%)	0.6	1
+-9	832	1299 +/- 30	0 +/- 0 (0 +/- 0%)	49661	133	124 (93%)	0.7	1
+-10	1105	1506 +/- 32	0 +/- 0 (0 +/- 0%)	49661	133	124 (93%)	0.8	1
+
+
+
+novel miRNAs predicted by miRDeep2
+provisional id	miRDeep2 score	estimated probability that the miRNA candidate is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+Ap12_6959	18.2	77 +/- 28%	-	35	33	0	2	yes	-	-	-	-	uuugcaaguagauagucacagc	ugucacuaucuacuugaauuga	uuugcaaguagauagucacagccuuuaacccugucacuaucuacuugaauuga	Ap12:13785888..13785941:-
+Ap12_6957	18.1	77 +/- 28%	-	35	33	0	2	yes	-	-	-	-	uuugcaaguagauagucacagc	ugucacuaucuacuugaauuga	uuugcaaguagauagucacagccuuuaacccugucacuaucuacuugaauuga	Ap12:13785736..13785789:-
+Ap8_10314	12.6	77 +/- 28%	-	24	23	0	1	yes	-	-	-	-	uucaagagcugagauuaagucgc	ugcuuaaucuuggacuugaaua	ugcuuaaucuuggacuugaauauuuaauauucaagagcugagauuaagucgc	Ap8:4792668..4792720:-
+Ap1_22772	7.1	81 +/- 22%	-	12	10	0	2	yes	-	-	-	-	aaacaccugaacccuguga	cacagaguuugggugucu	cacagaguuugggugucugaaucaauuuggaugucaaacaccugaacccuguga	Ap1:15058236..15058290:-
+Ap4_28136	6.4	87 +/- 14%	-	9	6	0	3	yes	-	-	-	-	ugcauuacaaaagaacuggucu	accaguucuuuuguaaugcug	ugcauuacaaaagaacuggucuucuugugagagaccaguucuuuuguaaugcug	Ap4:57806488..57806542:+
+Ap4_32219	6	87 +/- 14%	-	27	16	0	11	no	-	-	-	-	agugugucgcuaucuuggcu	uccaagacgaagcacaccaac	agugugucgcuaucuuggcuuguuuauuaauaauauuccaagacgaagcacaccaac	Ap4:44708959..44709016:-
+Ap12_6753	4.1	90 +/- 11%	-	6	5	0	1	yes	-	-	-	-	uauugcuuuuccuauguugaacu	uugcucguaggaaaaaca	uauugcuuuuccuauguugaacuuuucaaaaguugcucguaggaaaaaca	Ap12:5809272..5809322:-
+Ap1_21279	4	90 +/- 11%	-	6	5	0	1	yes	-	-	-	-	acaaacaugacuguacaucgaa	acacuguacagucauguuacu	acacuguacagucauguuacuacauuauguacaaacaugacuguacaucgaa	Ap1:9868555..9868607:+
+Ap5_8632	3.6	91 +/- 9%	-	5	2	0	3	yes	-	-	-	-	uuuacuaaucuuccagcaguaua	uacuguuaggagauuagugaaua	uuuacuaaucuuccagcaguauauucacuauacuguuaggagauuagugaaua	Ap5:9688477..9688530:-
+Ap5_8392	3	91 +/- 9%	-	2	1	0	1	yes	-	-	-	-	uugguucuuguccuugcuc	uaaggauaagaaccaacgacaaa	uugguucuuguccuugcuccgagggaguaaggauaagaaccaacgacaaa	Ap5:1197858..1197908:-
+Ap3_4586	2.9	94 +/- 6%	-	3	2	0	1	yes	-	-	-	-	aacagagaacaauugaccug	aagucaaucgucuucuguuccau	aagucaaucgucuucuguuccauuucaaauggaacagagaacaauugaccug	Ap3:21660775..21660827:+
+Ap4_27388	2.7	94 +/- 6%	-	3	2	0	1	yes	-	-	-	-	uagagcacgauuuaugauacu	uauuaggaaucaugcucu	uagagcacgauuuaugauacucauaucaguauuaggaaucaugcucu	Ap4:38347606..38347653:+
+Ap7_13673	2.7	94 +/- 6%	-	12	12	0	0	yes	-	-	-	-	aauuaucaaagacgugaggcug	gccucacgucuuucauaauucu	aauuaucaaagacgugaggcuguuacggccucacgucuuucauaauucu	Ap7:1210859..1210908:-
+Ap11_5	2.6	94 +/- 6%	-	48	48	0	0	yes	-	-	-	-	uaagacucugaggauggaaugg	cuuccuucuucaaggucuuaca	cuuccuucuucaaggucuuacauuuuuuguaagacucugaggauggaaugg	Ap11:70464..70515:+
+Ap14_2942	2.4	94 +/- 6%	-	15	15	0	0	yes	-	-	-	-	auagagacaacagaauacugcu	cuguguucuguugucuuuauaa	auagagacaacagaauacugcuuugacggcuguguucuguugucuuuauaa	Ap14:12685835..12685886:+
+Ap13_17944	2.1	94 +/- 6%	-	106	106	0	0	yes	-	-	-	-	guucgaauccaccucccu	gacgcuggacuuguaaucc	gacgcuggacuuguaauccgaaggccccggguucgaauccaccucccu	Ap13:7843501..7843549:-
+Ap6_16822	2	94 +/- 6%	-	95	95	0	0	yes	-	-	-	-	uaaaccuucugaacuuaaugagg	ccauuaaguuaaggagauuuaaa	ccauuaaguuaaggagauuuaaauuuaauuuuaaaccuucugaacuuaaugagg	Ap6:33589078..33589132:-
+Ap2_19047	1.8	90 +/- 6%	-	3	2	0	1	yes	-	-	-	-	accauugguguuauugcaug	augcaauaucacaaaugaucaga	augcaauaucacaaaugaucagaauuuuuucugaccauugguguuauugcaug	Ap2:14943381..14943434:+
+Ap7_12943	1.8	90 +/- 6%	-	36	36	0	0	yes	-	-	-	-	auuagcucaguugguagag	aaaccacugagcuguugg	aaaccacugagcuguuggguuuagaaauugaccgccgaccgauuagcucaguugguagag	Ap7:8467919..8467979:+
+Ap10_1427	1.7	90 +/- 6%	-	25	25	0	0	yes	-	-	-	-	guucaaauccugcucccu	ggcacuggacuuuaaaucu	ggcacuggacuuuaaaucuggauaucccggguucaaauccugcucccu	Ap10:8145869..8145917:+
+Ap13_18491	1.6	90 +/- 6%	-	10	10	0	0	yes	-	-	-	-	uucaguagacucuuucuuggcgu	gguaagaaagaaucugcugaagu	uucaguagacucuuucuuggcguuuaagagcgguaagaaagaaucugcugaagu	Ap13:29941303..29941357:-
+Ap3_3917	1.5	90 +/- 6%	-	136	135	0	1	yes	-	-	-	-	ucaagucuaggcugguuaguc	uaccaacauaggcuuuucaug	uaccaacauaggcuuuucauguuuauuuugucaagucuaggcugguuaguc	Ap3:1651023..1651074:+
+Ap7_13986	1.5	90 +/- 6%	-	220	220	0	0	yes	-	-	-	-	guucgaaucucguuuucc	aaaacggaaacgaaaug	aaaacggaaacgaaaugggaaguucgaaucucguuuucc	Ap7:12897717..12897756:-
+Ap6_16826	1.2	90 +/- 6%	-	27	27	0	0	yes	-	-	-	-	gacacuagcucaguugguagag	uuacccaacuugcuaguguugu	uuacccaacuugcuaguguugucaagacacuagcucaguugguagag	Ap6:33640558..33640605:-
+Ap7_12798	0.9	81 +/- 7%	-	9	8	0	1	yes	-	-	-	-	uagcaaugucugauugagcca	ucagacauugcuaauuuuga	uagcaaugucugauugagccauuuaauggcccaaucagacauugcuaauuuuga	Ap7:3523902..3523956:+
+Ap12_6786	0.8	81 +/- 7%	-	82	80	2	0	yes	-	-	-	-	guucgaaucccgucggag	ucgaaacgggacucgaaccc	ucgaaacgggacucgaacccuaaugcguagcgccgaagauugcggguucgaaucccgucggag	Ap12:7040596..7040659:-
+Ap8_11077	0.8	81 +/- 7%	-	9	9	0	0	yes	-	-	-	-	aaaaacaacucgaaaaggacu	uccuuuucaaguugucuuuug	aaaaacaacucgaaaaggacuauuuaauaguccuuuucaaguugucuuuug	Ap8:30370284..30370335:-
+Ap6_15258	0.6	81 +/- 7%	-	12	12	0	0	yes	-	-	-	-	ugcauuaaaccguggucaaggcc	ccaugacacgagguaaucuuggcagc	ugcauuaaaccguggucaaggccaugaauuguagucaaaacacuucagaagcgccaugacacgagguaaucuuggcagc	Ap6:19569863..19569942:+
+Ap7_14008	0.6	81 +/- 7%	-	9	9	0	0	yes	-	-	-	-	uaaaauucaugucuuguagcu	cgccaagaaaugaauuuuguu	cgccaagaaaugaauuuuguuuuuaagaauaaaauucaugucuuguagcu	Ap7:13585375..13585425:-
+Ap7_14010	0.5	81 +/- 7%	-	9	9	0	0	yes	-	-	-	-	uaaaauucaugucuuguagcu	cgccaagguaugaauuuuguu	cgccaagguaugaauuuuguuuucaagaauaaaauucaugucuuguagcu	Ap7:13586424..13586474:-
+Ap2_20389	0.4	81 +/- 7%	-	9	9	0	0	yes	-	-	-	-	ugcauaaucguugaucuugua	caagagcaaccauuaugauac	ugcauaaucguugaucuuguaacuuucauguugcaagagcaaccauuaugauac	Ap2:19739359..19739413:-
+Ap12_6961	0.3	81 +/- 7%	-	9	9	0	0	yes	-	-	-	-	uuucaaguagauaguucacagccu	ccugucacuaucuauuugaauug	uuucaaguagauaguucacagccuuuaacccugucacuaucuauuugaauug	Ap12:13786042..13786094:-
+Ap13_16977	0.2	81 +/- 7%	-	44	38	0	6	yes	-	-	-	-	caccacaaaaagaccugccu	uaucaggccuuuucgugauacu	uaucaggccuuuucgugauacuuuuaaagcaccacaaaaagaccugccu	Ap13:5010944..5010993:+
+Ap4_28393	0.2	81 +/- 7%	-	8	8	0	0	yes	-	-	-	-	caacagcagccaucgucaagg	uuggccaggcgcaguaacguc	caacagcagccaucgucaaggaugaacggagcuggaucuuucaugauccuuucgaccuucuuggccaggcgcaguaacguc	Ap4:7593705..7593786:-
+Ap5_7419	0.2	81 +/- 7%	-	8	6	0	2	yes	-	-	-	-	ucagacucacucaacccaaa	uaugggucgauugagucugggg	uaugggucgauugagucugggguuuaaccucagacucacucaacccaaa	Ap5:197508..197557:+
+Ap3_4674	0.1	81 +/- 7%	-	124	118	0	6	yes	-	-	-	-	auccacaaguagucagcaaacc	guuuugcguuacacuuguggga	auccacaaguagucagcaaaccgguguuauuucuugacugguuuugcguuacacuuguggga	Ap3:23155674..23155736:+
+
+
+
+mature miRBase miRNAs detected by miRDeep2
+tag id	miRDeep2 score	estimated probability that the miRNA is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	mature miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+Ap8_10803	4672.1	77 +/- 28%	-	9161	9158	0	3	yes	ola-miR-100	-	-	-	acccguagauccgaacuugugg	acaaguucggcuccauggucc	acccguagauccgaacuugugggauuuuucuccacaaguucggcuccauggucc	Ap8:21599196..21599250:-
+Ap3_5453	151.4	77 +/- 28%	-	294	165	0	129	yes	Cluster_995.mature::chromosome_4:21646399-21646420(-)::Astrangia_poculata	-	-	-	uggcuuggaguucuagugauuga	auucacugaacuccaaaccu	uggcuuggaguucuagugauugauucacugauucacugaacuccaaaccu	Ap3:21652228..21652278:-
+Ap3_5435	151.4	77 +/- 28%	-	294	165	0	129	yes	Cluster_995.mature::chromosome_4:21646399-21646420(-)::Astrangia_poculata	-	-	-	uggcuuggaguucuagugauuga	auucacugaacuccaaaccu	uggcuuggaguucuagugauugauucacugauucacugaacuccaaaccu	Ap3:21643423..21643473:-
+Ap1_23084	10.4	77 +/- 28%	-	18	17	0	1	yes	Cluster_4646.mature::chromosome_13:25927789-25927810(-)::Astrangia_poculata	-	-	-	ucagucgcugcaauuucauuacg	uagugaaauuguagcggcu	uagugaaauuguagcggcuuauauugacuaucagucgcugcaauuucauuacg	Ap1:25927757..25927810:-
+Ap1_21415	6.2	87 +/- 14%	-	10	5	0	5	yes	Cluster_4531.mature::chromosome_13:14325139-14325160(+)::Astrangia_poculata	-	-	-	aucaaaacacaaaauacugacu	ucaguaucuuguguguuguu	ucaguaucuuguguguuguugauuaucucaucaaaacacaaaauacugacu	Ap1:14325109..14325160:+
+Ap6_15736	5.7	86 +/- 15%	-	10	9	0	1	yes	Cluster_3331.mature::chromosome_10:30762031-30762052(+)::Astrangia_poculata	-	-	-	ucuaggcugguuacuuuacagu	uuguaaacuaagcagcuuaaacc	ucuaggcugguuacuuuacaguuauuaucauuguaaacuaagcagcuuaaacc	Ap6:30952333..30952386:+
+Ap6_15732	5.7	86 +/- 15%	-	10	9	0	1	yes	Cluster_3337.mature::chromosome_10:30943334-30943355(+)::Astrangia_poculata	-	-	-	ucuaggcugguuacuuuacagu	uuguaaacuaagcagcuuaaacc	ucuaggcugguuacuuuacaguuauuaucauuguaaacuaagcagcuuaaacc	Ap6:30943333..30943386:+
+Ap6_15720	5.6	86 +/- 15%	-	10	9	0	1	yes	Cluster_3338.mature::chromosome_10:30952334-30952355(+)::Astrangia_poculata	-	-	-	ucuaggcugguuacuuuacagu	uuguaaacuaagcagcuuaaacc	ucuaggcugguuacuuuacaguuauuaucauuguaaacuaagcagcuuaaacc	Ap6:30762030..30762083:+
+Ap4_32429	2.6	94 +/- 6%	-	160	160	0	0	yes	Cluster_9205.mature::chromosome_14:53448698-53448719(-)::Astrangia_poculata	-	-	-	uuaaagacggaucugcacccu	ggugcagauccgucuuugaau	uuaaagacggaucugcacccuuuuuuaagagggugcagauccgucuuugaau	Ap4:53448667..53448719:-
+Ap2_18908	2.5	94 +/- 6%	-	12	12	0	0	yes	Cluster_3889.mature::chromosome_12:9275040-9275060(+)::Astrangia_poculata	-	-	-	auaucccgcugucacuug	agugccuugugggauauuc	auaucccgcugucacuuguauuuucuugguacaagugccuugugggauauuc	Ap2:9275039..9275091:+
+Ap3_5444	2.5	94 +/- 6%	-	75	75	0	0	yes	Cluster_996.mature::chromosome_4:21646992-21647012(-)::Astrangia_poculata	-	-	-	acugaacuccaaacaugauu	uuuuguuuggaguuccagugu	uuuuguuuggaguuccaguguuuuaugcacugaacuccaaacaugauu	Ap3:21646992..21647040:-
+Ap2_19158	2.4	94 +/- 6%	-	102	102	0	0	yes	Cluster_8887.mature::Porites_evermani_scaffold_910:118742-118762(+)::Porites_evermanni	-	-	-	caauguuucggcuuguuccc	gugcaagccgaaacauugua	caauguuucggcuuguucccguucuugggugcaagccgaaacauugua	Ap2:19826692..19826740:+
+Ap4_32427	2.2	94 +/- 6%	-	160	160	0	0	yes	Cluster_9205.mature::chromosome_14:53448698-53448719(-)::Astrangia_poculata	-	-	-	uuaaagacggaucugcacccu	cgaugcagauccgucuuugaau	uuaaagacggaucugcacccuuuuuuaagacgaugcagauccgucuuugaau	Ap4:53439652..53439704:-
+Ap8_11000	2.1	94 +/- 6%	-	11	11	0	0	yes	Cluster_2073.mature::chromosome_7:28589915-28589936(-)::Astrangia_poculata	-	-	-	guuaggauuauuguugcucaca	ucaacaacaauaauccuaacac	ucaacaacaauaauccuaacacuucaaggguuaggauuauuguugcucaca	Ap8:28589914..28589965:-
+Ap6_16164	2	94 +/- 6%	-	13	13	0	0	yes	Cluster_3037.mature::chromosome_10:11981323-11981343(-)::Astrangia_poculata	-	-	-	uaagaaguacaagugguaggg	cugccacuuguauuuucuucca	cugccacuuguauuuucuuccacguucaucgauguaagaaguacaagugguaggg	Ap6:11981322..11981377:-
+Ap8_10998	1.9	90 +/- 6%	-	11	11	0	0	yes	Cluster_2073.mature::chromosome_7:28589915-28589936(-)::Astrangia_poculata	-	-	-	uuaggauuauuguugcucaca	ucaacaacaauaauccuuaca	ucaacaacaauaauccuuacacuucaaggguuaggauuauuguugcucaca	Ap8:28589751..28589802:-
+Ap5_7682	1.7	90 +/- 6%	-	10	10	0	0	yes	Cluster_1452.mature::chromosome_6:9195277-9195298(+)::Astrangia_poculata	-	-	-	auuacgucuagaacacugaaaga	uuuggguguucuagacgugaucg	auuacgucuagaacacugaaagauucaaucuuuggguguucuagacgugaucg	Ap5:9195246..9195299:+
+Ap1_22118	0.7	81 +/- 7%	-	8	8	0	0	yes	Cluster_4754.mature::chromosome_13:36030297-36030318(+)::Astrangia_poculata	-	-	-	aaagaaagcccugaccacc	ugguaggggguuucuuugu	aaagaaagcccugaccaccuucucuuaaugugagggugguaggggguuucuuugu	Ap1:36030296..36030351:+
+Ap1_23506	0.3	81 +/- 7%	-	137	137	0	0	yes	Cluster_4831.mature::chromosome_13:39611502-39611523(-)::Astrangia_poculata	-	-	-	ucagaaagagaaugaacaccaga	ugguguccaucuucuaucuaacu	ugguguccaucuucuaucuaacuguuguugucagaaagagaaugaacaccaga	Ap1:39611470..39611523:-
+Ap1_23071	0.3	81 +/- 7%	-	7	7	0	0	yes	Cluster_4640.mature::chromosome_13:25495293-25495314(-)::Astrangia_poculata	-	-	-	ugucaaucgucuucaaguaca	uacuugaagucgauugacaug	ugucaaucgucuucaaguacauguaacauguacuugaagucgauugacaug	Ap1:25495292..25495343:-
+Ap4_27680	0	81 +/- 7%	-	9	9	0	0	yes	Cluster_9082.mature::chromosome_14:44009497-44009518(+)::Astrangia_poculata	-	-	-	acucgucugauucaauaucuuu	cgauauugugugagacgaguuu	acucgucugauucaauaucuuuauuauaacgauauugugugagacgaguuu	Ap4:44009496..44009547:+
+Ap10_1282	0	81 +/- 7%	-	6	6	0	0	yes	Cluster_247.mature::chromosome_2:2155540-2155561(+)::Astrangia_poculata	-	-	-	cugaaauuaaaggacuugcca	gcaaguccuuuaauugcagcg	cugaaauuaaaggacuugccacggauugcguggcaaguccuuuaauugcagcg	Ap10:2155538..2155591:+
+Ap8_10214	-1.2	70 +/- 6%	-	5	5	0	0	yes	Cluster_1108.mature::Pocillopora_meandrina_HIv1___Sc0000003:495116-495138(+)::Pocillopora_meandrina	-	-	-	uauauuguacgacucucau	gaaagucgucucaauaaaca	gaaagucgucucaauaaacauuuuacuguauauuguacgacucucau	Ap8:2303841..2303888:-
+Ap4_27480	-1.4	70 +/- 6%	-	4	4	0	0	yes	Cluster_9000.mature::chromosome_14:40086363-40086384(+)::Astrangia_poculata	-	-	-	uuacuuguugguagagcauu	uguacuaccagcaaguuaau	uuacuuguugguagagcauuccauuuaauggaauguacuaccagcaaguuaau	Ap4:40086361..40086414:+
+Ap3_5447	-1.7	70 +/- 6%	-	4	4	0	0	yes	Cluster_998.mature::chromosome_4:21649594-21649614(-)::Astrangia_poculata	-	-	-	uaugguuuggaguuucag	uaaacuccaaacuauucu	uaugguuuggaguuucaguguuuuaugcgcuaaacuccaaacuauucu	Ap3:21649566..21649614:-
+Ap2_19303	-2.1	79 +/- 4%	-	6	6	0	0	yes	Cluster_4044.mature::chromosome_12:23069004-23069025(+)::Astrangia_poculata	-	-	-	uauuucucggccauauacac	gaacauggcuguaugauaau	gaacauggcuguaugauaauauuguuaauuauuucucggccauauacac	Ap2:23069235..23069284:+
+Ap14_2728	-2.1	79 +/- 4%	-	3	3	0	0	yes	Cluster_492.mature::chromosome_3:3503370-3503391(+)::Astrangia_poculata	-	-	-	ugaucuuguagguuccaucuuau	uggaugggaccuauaaguucaca	ugaucuuguagguuccaucuuauuuaauuggaugggaccuauaaguucaca	Ap14:3503369..3503420:+
+Ap2_19301	-2.1	79 +/- 4%	-	6	6	0	0	yes	Cluster_4044.mature::chromosome_12:23069004-23069025(+)::Astrangia_poculata	-	-	-	uauuucucggccauauacac	guacauggcuguauaauaau	guacauggcuguauaauaauauuguuaauuauuucucggccauauacac	Ap2:23068974..23069023:+
+Ap12_6808	-2.1	79 +/- 4%	-	6	6	0	0	yes	Cluster_1155.mature::chromosome_5:8149619-8149640(-)::Astrangia_poculata	-	-	-	ucuuagagcaauaaggaucaga	uggucuuuaucacucuaaaauu	uggucuuuaucacucuaaaauugauuaccaaucuuagagcaauaaggaucaga	Ap12:8149587..8149640:-
+Ap5_7586	-2.2	79 +/- 4%	-	2	1	0	1	yes	Cluster_1411.mature::chromosome_6:4849436-4849457(+)::Astrangia_poculata	-	-	-	ugauguaagagcuugaacuucu	aaaguuaaagcuuugacauc	ugauguaagagcuugaacuucuuuuucaaaaaguuaaagcuuugacauc	Ap5:4849435..4849484:+
+Ap12_6445	-2.2	79 +/- 4%	-	3	3	0	0	yes	Cluster_15316.mature::ptg000024l:4086254-4086275(+)::Acropora_pulchra	-	-	-	auuuuuagcccgcggaaguugc	aacuuucacugguuaaaaauuc	aacuuucacugguuaaaaauuccuuuaugugaauuuuuagcccgcggaaguugc	Ap12:26230036..26230090:+
+Ap4_27409	-2.5	79 +/- 4%	-	2	2	0	0	yes	Cluster_8986.mature::chromosome_14:39292029-39292050(+)::Astrangia_poculata	-	-	-	uguacauagacauguagcgu	gcuacauguacauguacaug	gcuacauguacauguacauguucgacauguacauagacauguagcgu	Ap4:39292001..39292048:+
+Ap10_1727	-2.8	79 +/- 4%	-	1	1	0	0	yes	Cluster_449.mature::chromosome_2:20014653-20014674(+)::Astrangia_poculata	-	-	-	auaagucaaaaguguauuccc	gaguagacauuugacuuguua	gaguagacauuugacuuguuaauuaaaauaauaagucaaaaguguauuccc	Ap10:20014622..20014673:+
+Ap6_15587	-2.9	79 +/- 4%	-	1	1	0	0	yes	Cluster_3293.mature::chromosome_10:27379431-27379451(+)::Astrangia_poculata	-	-	-	uuacuuccgcucaaguucacg	gcaaccugagcggaagucuuc	gcaaccugagcggaagucuucuucaagauuacuuccgcucaaguucacg	Ap6:27379402..27379451:+
+Ap13_18627	-3.2	78 +/- 3%	-	1	1	0	0	yes	Cluster_3730.mature::chromosome_11:30949765-30949786(-)::Astrangia_poculata	-	-	-	uuuguccaaacgauaacacu	uguuaucauuuggauaaagg	uuuguccaaacgauaacacugguauuaugccaauguuaucauuuggauaaagg	Ap13:30949733..30949786:-
+Ap6_15021	-4	78 +/- 3%	-	2	2	0	0	yes	Cluster_3044.mature::chromosome_10:12450166-12450187(+)::Astrangia_poculata	-	-	-	uacauaugauauagaauuccac	ggauuucuuuacuauaugugca	ggauuucuuuacuauaugugcaauuuaauuuuacauaugauauagaauuccac	Ap6:12450166..12450219:+
+Ap5_8699	-4.8	45 +/- 3%	-	3	3	0	0	yes	Cluster_1483.mature::chromosome_6:11028886-11028907(-)::Astrangia_poculata	-	-	-	uuuccauuccuaucaaaaacua	cuuuuuguuagggagggaaugu	uuuccauuccuaucaaaaacuauauuuuuuacuuuuuguuagggagggaaugu	Ap5:11028854..11028907:-
+Ap9_11107	-6	0 +/- 0%	-	5	5	0	0	yes	Cluster_2097.mature::chromosome_8:223863-223884(+)::Astrangia_poculata	-	-	-	uugucuuuuuccaucguucucu	uggacaauggcaaaguacaauu	uggacaauggcaaaguacaauuuuaaauugucuuuuuccaucguucucu	Ap9:223835..223884:+
+Ap2_19304	-31.1	0.00 +/- 0.00	-	6	6	0	0	no	Cluster_4044.mature::chromosome_12:23069004-23069025(+)::Astrangia_poculata	-	-	-	uauuucucggccauauacac	gugcuguggacuaucaaaucaa	uauuucucggccauauacacuuuagcuuaucugugcuguggacuaucaaaucaa	Ap2:23069264..23069318:+
