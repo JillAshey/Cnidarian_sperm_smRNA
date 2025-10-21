@@ -1,0 +1,21 @@
+Genome: Ahyacinthus.chrsV1.fasta
+Alignments: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/merged_alignments.bam
+Location: chr13:15630120-15630213 minus
+PDF file name: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/strucVis/Cluster_18872.ps.pdf
+Locus Name: Cluster_18872
+CUGUUUACGGUUUAACUGGGUAGCAUAACAUUGUAAGAGAUCUUUAAAGGUCUCUUACAUUGUUGUGCUGCCUGGAAAAACUGAACUGAUUGCA
+.......((((((..(((((((((((((((.((((((((((((....)))))))))))).)))))))))))))))..))))))........... (-46.30)
+....................UAGCAUAACAUUGUAAGAGAUC.................................................... len:22 al:1
+....................UAGCAUAACAUUGUAuGAGAUCUU.................................................. len:24 al:1
+....................UAGCAUAACAUUGUAAGAGAUCUUUAAA.............................................. len:28 al:2
+....................UAGCAUAACAUUGUAAGAGAUCU................................................... len:23 al:6
+.................................................GUCUCUUACAUUGUUGUGCcGCC...................... len:23 al:1
+.................................................GUCUCUUACAUUGUUGUGCUGCC...................... len:23 al:37
+.................................................GUCUCUUuCAUUGUUGUGCUGCC...................... len:23 al:1
+.................................................GUCUCUUACAUUGaUGUGCUGCC...................... len:23 al:1
+.................................................GUCUCUUACAUUGUUGUGCUGCCU..................... len:24 al:5
+.................................................GUCUaUUACAUUGUUGUGCUGCC...................... len:23 al:3
+..................................................UCUCUUAuAUUGUUGUGCUGCC...................... len:22 al:1
+..................................................UCUCUUACAUUGUUGUGCUGCCU..................... len:23 al:9
+..................................................UCUCUUACAUUGUUGUGCUGCC...................... len:22 al:112
+..................................................UCUCUUACAUUGUUGUGCU......................... len:19 al:4

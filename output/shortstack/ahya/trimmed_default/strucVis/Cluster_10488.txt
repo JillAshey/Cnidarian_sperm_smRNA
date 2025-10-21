@@ -1,0 +1,35 @@
+Genome: Ahyacinthus.chrsV1.fasta
+Alignments: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/merged_alignments.bam
+Location: chr7:26192864-26192956 minus
+PDF file name: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/strucVis/Cluster_10488.ps.pdf
+Locus Name: Cluster_10488
+AGGAAGUAGUUAUUCAUCCACUUUUGACAUGAAAAAUGAACUCUUAGAGUUCAUUCUUUGUGUCAAAAGUGCAUGAAUUAUUACAUCAUUUCA
+..((.(((((.((((((.(((((((((((((((.(((((((((...))))))))).))))))))))))))).)))))).))))).))...... (-40.80)
+..................CACUUUUGACAUGAAAAAUGAACUCUUAG.............................................. len:29 al:2
+...................ACUUUUGACAUGAAAAAUGAACU................................................... len:23 al:20
+...................ACUUUUGACAUGAAAAAUGAAC.................................................... len:22 al:2
+...................ACaUUUGACAUGAAAAAUGAACU................................................... len:23 al:1
+....................CUUUUGACAUGAAAAAUGAACU................................................... len:22 al:22
+.....................UUUUGACAUGAAAAAUGAACU................................................... len:21 al:9
+.................................................aUCAUUCUUUGUGUCAAAAGUG...................... len:22 al:2
+.................................................UUCAUUCUaUGUGUCAAAAG........................ len:20 al:1
+.................................................UUuAUUCUUUGUGUCAAAAGUG...................... len:22 al:1
+.................................................UUCAUUCUUUGUGUCAAAAGaG...................... len:22 al:1
+.................................................UUCAUUCUaUGUGUCAAAAGUG...................... len:22 al:30
+.................................................UUCAUUCcUUGUGUCAAAAGUGC..................... len:23 al:1
+.................................................UaCAUUCUUUGUGUCAAAAGUG...................... len:22 al:4
+.................................................UUCAUUCUUUGUGUCAAAAG........................ len:20 al:10
+.................................................UUCAUUCUUUGUGUCAAcAGUG...................... len:22 al:2
+.................................................UUCAUUCUUUGUuUCAAAAGUG...................... len:22 al:1
+.................................................UUCAUUCUUUGUGUCgAAAGUG...................... len:22 al:5
+.................................................UUCAUUCcUUGUGUCAAAAGUG...................... len:22 al:1
+.................................................cUCAUUCUUUGUGUCAAAAGUG...................... len:22 al:1
+.................................................UUaAUUCUUUGUGUCAAAAGUG...................... len:22 al:2
+.................................................UUCAUUCUUUGaGUCAAAAGUG...................... len:22 al:1
+.................................................UUCAaUCUUUGUGUCAAAAGUG...................... len:22 al:1
+.................................................UUCAUUCUUUGUGUCAAAAGUG...................... len:22 al:1134
+.................................................UUCAUUCUUUGUGUCAAAAGUGC..................... len:23 al:4
+.................................................UUCAUUCUUUGUGUCAAAAGU....................... len:21 al:5
+.................................................UUCAUUCUUUGUGUCAAAgGUG...................... len:22 al:1
+.................................................UUCAUUCUUUGUGUCAgAAGUG...................... len:22 al:3
+...................................................CAUUCUUUGUGUCAAAAGUG...................... len:20 al:3

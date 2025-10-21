@@ -1,0 +1,15 @@
+Genome: Ahyacinthus.chrsV1.fasta
+Alignments: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/merged_alignments.bam
+Location: chr14:21967803-21967901 plus
+PDF file name: /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack/strucVis/Cluster_21327.ps.pdf
+Locus Name: Cluster_21327
+CUAAUAUGAACACAUGAAGGGUUGGGAGAAUUCGAGACAGUUGUCGAGGGUUUGCAUAACUGUCUCGAAUUCUCCUAACCCCUCUCGUGAAGAAGUUAA
+..........(((..((.(((((((((((((((((((((((((((((....))).)))))))))))))))))))))))))).))..))).......... (-51.50)
+.....................UUGGGAGAAUUCGAGACAGUUGU....................................................... len:23 al:6
+......................UGGGAGAAaUCGAGACAGUUGU....................................................... len:22 al:1
+......................UGGGAGAAUUCGAGACAGUUGU....................................................... len:22 al:23
+........................................................UAACUGUCUCGAAUUCUCCUAAC.................... len:23 al:14
+........................................................UAACUGUCUCGAAUUCUCCUAA..................... len:22 al:2
+........................................................UAACUGUCUCGAAUUCUCCUA...................... len:21 al:1
+.........................................................AACUGUCUCGAAUUCUCCUAAC.................... len:22 al:9
+.........................................................AACUGUCUCGAAUUCUCCUAACC................... len:23 al:1
