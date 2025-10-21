@@ -1,0 +1,56 @@
+miRDeep2 score	novel miRNAs reported by miRDeep2	novel miRNAs, estimated false positives	novel miRNAs, estimated true positives	known miRNAs in species	known miRNAs in data	known miRNAs detected by miRDeep2	estimated signal-to-noise	excision gearing
+10	1	0 +/- 1	1 +/- 0 (69 +/- 46%)	49661	68	16 (24%)	5	1
+9	1	0 +/- 1	1 +/- 0 (68 +/- 47%)	49661	68	16 (24%)	4.9	1
+8	1	0 +/- 1	1 +/- 0 (68 +/- 47%)	49661	68	16 (24%)	4.9	1
+7	1	0 +/- 1	1 +/- 0 (68 +/- 47%)	49661	68	16 (24%)	4.9	1
+6	1	0 +/- 1	1 +/- 0 (68 +/- 47%)	49661	68	16 (24%)	4.9	1
+5	1	0 +/- 1	1 +/- 0 (67 +/- 47%)	49661	68	16 (24%)	4.7	1
+4	1	0 +/- 1	1 +/- 0 (65 +/- 48%)	49661	68	16 (24%)	4.3	1
+3	1	0 +/- 1	1 +/- 0 (61 +/- 49%)	49661	68	16 (24%)	3.8	1
+2	2	1 +/- 1	1 +/- 1 (70 +/- 37%)	49661	68	16 (24%)	4.4	1
+1	5	1 +/- 1	4 +/- 1 (76 +/- 23%)	49661	68	19 (28%)	5.2	1
+0	6	6 +/- 2	1 +/- 1 (18 +/- 22%)	49661	68	22 (32%)	1.5	1
+-1	7	11 +/- 3	0 +/- 0 (1 +/- 4%)	49661	68	24 (35%)	1	1
+-2	15	17 +/- 4	1 +/- 1 (5 +/- 9%)	49661	68	24 (35%)	1.1	1
+-3	71	29 +/- 5	42 +/- 5 (60 +/- 7%)	49661	68	46 (68%)	2.9	1
+-4	206	78 +/- 9	128 +/- 9 (62 +/- 4%)	49661	68	48 (71%)	2.8	1
+-5	273	325 +/- 15	0 +/- 0 (0 +/- 0%)	49661	68	48 (71%)	0.9	1
+-6	330	761 +/- 21	0 +/- 0 (0 +/- 0%)	49661	68	48 (71%)	0.5	1
+-7	488	1120 +/- 26	0 +/- 0 (0 +/- 0%)	49661	68	48 (71%)	0.4	1
+-8	773	1457 +/- 29	0 +/- 0 (0 +/- 0%)	49661	68	50 (74%)	0.5	1
+-9	1096	1715 +/- 31	0 +/- 0 (0 +/- 0%)	49661	68	50 (74%)	0.6	1
+-10	1364	1909 +/- 32	0 +/- 0 (0 +/- 0%)	49661	68	50 (74%)	0.7	1
+
+
+
+novel miRNAs predicted by miRDeep2
+provisional id	miRDeep2 score	estimated probability that the miRNA candidate is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+chr5_13874	15.4	69 +/- 46%	-	37	31	0	6	no	-	-	-	-	ugccccucgccgcuacuagaccuuu	aagguccggauggugaggguuacccaug	aagguccggauggugaggguuacccauggaucuauaccggugcucaccuugccccucgccgcuacuagaccuuu	chr5:8102251..8102325:-
+chr2_3715	2.5	70 +/- 37%	-	4	3	0	1	yes	-	-	-	-	uaacaguacgacuaagaugcc	uccuuagcgguacuguuaga	uccuuagcgguacuguuagaucagccacacaaggcagcgaugcaauaacaguacgacuaagaugcc	chr2:8591645..8591711:+
+chr3_9364	1.5	76 +/- 23%	rRNA/tRNA	465	465	0	0	yes	-	-	-	-	cuuggucgcugguucgaaucc	gguagaacgggugacuguaga	gguagaacgggugacuguagauuuauaauuguaaucccuuggucgcugguucgaaucc	chr3:18702405..18702463:-
+chr3_9362	1.5	76 +/- 23%	rRNA/tRNA	465	465	0	0	yes	-	-	-	-	cuuggucgcugguucgaaucc	gguagaacgggugacuguaga	gguagaacgggugacuguagauuuauaauuguaaucccuuggucgcugguucgaaucc	chr3:18700862..18700920:-
+chr12_28900	1.4	76 +/- 23%	-	2	1	0	1	yes	-	-	-	-	gacacgccgccagaccucaagau	uagguauucuggaggcugaucu	uagguauucuggaggcugaucucaaugaagacacgccgccagaccucaagau	chr12:6902262..6902314:-
+chr7_19245	0.4	18 +/- 22%	-	49	49	0	0	yes	-	-	-	-	uuucugcccagugcucug	aaguaggggggggaug	uuucugcccagugcucugaaagucagaaauaacuaaacuuaacugguagugagggacuugaaguaggggggggaug	chr7:15981453..15981529:-
+
+
+
+mature miRBase miRNAs detected by miRDeep2
+tag id	miRDeep2 score	estimated probability that the miRNA is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	mature miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+chr7_16776	1042.8	69 +/- 46%	-	2044	2041	0	3	yes	api-miR-100	-	-	-	acccguagauccgaacuugugg	acaggcucguuucuacggauc	acccguagauccgaacuuguggaguuucaccacaggcucguuucuacggauc	chr7:4505333..4505385:+
+chr6_16400	1.1	76 +/- 23%	-	10	10	0	0	yes	nve-miR-2024e-5p	-	-	-	uugcacauuaccaauauucug	gaguauuggcgcugggcaaaa	gaguauuggcgcugggcaaaaggucacauuuugcacauuaccaauauucug	chr6:13385781..13385832:-
+chr5_14199	0.1	18 +/- 22%	-	7	7	0	0	yes	miR-2028_Nematostella_vectensis_Moran_et_al._2014_NA	-	-	-	uaauguuccugcuuguuccu	gaacuagcaggagcauuaag	uaauguuccugcuuguuccuauauauuaggaacuagcaggagcauuaag	chr5:12281357..12281406:-
+chr4_10712	-0.2	1 +/- 4%	-	6	6	0	0	yes	nve-miR-2040b-5p	-	-	-	ucgucucguaacugcccugaag	ucaggucagcuacgacacgagc	ucaggucagcuacgacacgagcgcuccucguucgucucguaacugcccugaag	chr4:161986..162039:-
+chr7_17187	-2.1	60 +/- 7%	-	3	3	0	0	yes	nve-miR-2036-5p	-	-	-	auauuguacgacucucaucgua	cggugagaacguacaguaagc	cggugagaacguacaguaagcacuugacgauguauauuguacgacucucaucgua	chr7:9582833..9582888:+
+chr1_2912	-2.1	60 +/- 7%	-	3	3	0	0	yes	miR-2029_Nematostella_vectensis_Moran_et_al._2014_NA	-	-	-	uaaacuauggauugcgcuucu	auacgcaaucccuagguuacc	auacgcaaucccuagguuaccaugucagaugguaaacuauggauugcgcuucu	chr1:18556947..18557000:-
+chr6_16412	-2.1	60 +/- 7%	-	3	3	0	0	yes	nve-miR-2024f-5p	-	-	-	uugcacaucaccaauguucugag	cagaauauugguacugggcaaaa	cagaauauugguacugggcaaaaggucacguuuugcacaucaccaauguucugag	chr6:13418925..13418980:-
+chr6_16406	-2.3	60 +/- 7%	-	3	3	0	0	yes	miR-2024f_Nematostella_vectensis_Moran_et_al._2014_NA	-	-	-	uugcacaucaccaauguucugag	cagaauauuggguacugggcaaaa	cagaauauuggguacugggcaaaaggucacguuuugcacaucaccaauguucugag	chr6:13403201..13403257:-
+chr6_16410	-2.6	60 +/- 7%	-	3	3	0	0	yes	nve-miR-2024g-5p	-	-	-	uuacacaguaccgauauug	auaucgguguuggguaaaa	auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug	chr6:13418683..13418730:-
+chr6_16414	-2.6	60 +/- 7%	-	3	3	0	0	yes	nve-miR-2024g-5p	-	-	-	uuacacaguaccgauauug	auaucgguguuggguaaaa	auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug	chr6:13422819..13422866:-
+chr6_16404	-2.6	60 +/- 7%	-	3	3	0	0	yes	nve-miR-2024g-5p	-	-	-	uuacacaguaccgauauug	auaucgguguuggguaaag	auaucgguguuggguaaaggucaauuuuacacaguaccgauauug	chr6:13402961..13403006:-
+chr14_32883	-2.8	60 +/- 7%	-	1	1	0	0	yes	nve-miR-9442	-	-	-	aauaucaggaggacgcauucg	caugcguccucgugauacuucc	aauaucaggaggacgcauucguuuuacgcaugcguccucgugauacuucc	chr14:2210935..2210985:-
+chr11_26081	-3	60 +/- 7%	-	1	1	0	0	yes	nve-miR-9429-5p	-	-	-	uuucgucuauauggagaaagg	uucuccauuagacgaaaua	uucuccauuagacgaaauagacuuauuucgucuauauggagaaagg	chr11:10233421..10233467:+
+chr7_18148	-3.1	62 +/- 4%	-	1	1	0	0	yes	nve-miR-2040a-5p	-	-	-	uuugucucguaacugcccugaag	ucgggucagcuacgacaugagcg	ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag	chr7:4305415..4305468:-
+chr7_16771	-3.1	62 +/- 4%	-	1	1	0	0	yes	nve-miR-2040a-5p	-	-	-	uuugucucguaacugcccugaag	ucgggucagcuacgacaugagcg	ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag	chr7:4442988..4443041:+
+chr1_1386	-7.4	0 +/- 0%	-	1	1	0	0	no	nve-miR-9427	-	-	-	cgcaaccucacuucccuccuc	ugagauugaagugaaugcugu	cgcaaccucacuucccuccucugucaggaagagaccagugagauugaagugaaugcugu	chr1:18761518..18761577:+
+chr12_28572	-11.6	0.00 +/- 0.00	-	2	2	0	0	no	dme-miR-2491-3p	-	-	-	ugcugcaguugguggucguc	agcagcagcaacagcagcaac	agcagcagcaacagcagcaacaacaacagcaagcgcagaugcucaggacgcaaggaagugcugcaguugguggucguc	chr12:3961611..3961689:-
+chr9_21710	-15.6	0.00 +/- 0.00	-	2	2	0	0	no	ath-miR5658	-	-	-	augaugaugaugaugaugaugau	gaugauauugaugaugaugacga	augaugaugaugaugaugaugaugaaagaugaugaugaugauuauaaugaugaugaugaugauuuuaaugaugauauugaugaugaugacga	chr9:8800857..8800949:+

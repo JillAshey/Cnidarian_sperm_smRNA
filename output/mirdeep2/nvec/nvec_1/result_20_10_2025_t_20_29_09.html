@@ -1,0 +1,1539 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+    <html>
+    <head>
+    <title>miRDeep2</title>
+    <!-- CSS code -->
+    <style type="text/css">
+    body{
+      font: .75em Arial,sans-serif;
+      background: #FFFFFF;
+      color: #333333
+    }
+div#
+container
+{
+  width: 1000px;
+  margin:0 auto
+  }
+h1{
+  color: #F60;
+  margin: 1em 0 0;
+    letter-spacing: -2px;
+}
+p{
+  margin: 0 0 1.7em;
+}
+
+a.tooltip{
+	text-decoration:none;
+	color:black;
+        font-weight:bold;
+}
+
+a.tooltip:hover
+{    position: relative;
+     background: transparent;
+
+}
+
+a.tooltip span
+{    position: absolute;
+     visibility: hidden;
+
+     width: 20em;
+     top: 1.5em;
+     background: #ffffdd;
+}
+
+a.tooltip:hover span
+{    visibility: visible;   }
+
+
+a.tooltip2{
+	text-decoration:none;
+	color:black;
+        font-weight:bold;
+}
+
+a.tooltip2:hover
+{    position: relative;
+     background: transparent;
+
+}
+
+a.tooltip2 span
+{    position: absolute;
+     visibility: hidden;
+
+     width: 20em;
+     top: 1.5em;left:-10em;
+     background: #ffffdd;
+}
+
+a.tooltip2:hover span
+{    visibility: visible;   }
+
+
+a.tooltip3{
+	text-decoration:none;
+	color:black;
+        font-weight:bold;
+}
+
+a.tooltip3:hover
+{    position: relative;
+     background: transparent;
+
+}
+
+a.tooltip3 span
+{    position: absolute;
+     visibility: hidden;
+
+     width: 20em;
+     top: 3em;
+     background: #ffffdd;
+}
+
+a.tooltip3:hover span
+{    visibility: visible;   }
+
+
+a.tooltip4{
+	text-decoration:none;
+	color:black;
+        font-weight:bold;
+}
+
+a.tooltip4:hover
+{    position: relative;
+     background: transparent;
+
+}
+
+a.tooltip4 span
+{    position: absolute;
+     visibility: hidden;
+
+     width: 20em;
+     top:3em;left:-10em;
+     background: #ffffdd;
+}
+
+a.tooltip4:hover span
+{    visibility: visible;   }
+
+
+
+</style>
+
+    </head>
+    <body>
+    <table border="0" width="100%">
+    <colgroup>
+    <col width="5*">
+    <col width="5*">
+    </colgroup>
+    <tr height="200" valign="top">
+    <td><font face="Times New Roman" size="8">
+    <b>miRDeep2</b>
+
+
+    <br>
+    <br>
+    </font></td>
+    <td>.</td>
+    </tr>
+    </table>
+<h2>Parameters used</h2>
+ <table border="0">
+<tr><td>miRDeep2 version</td><td>2.0.1.3</td></tr><br>
+<tr><td>Program call</td><td>/work/pi_hputnam_uri_edu/conda/envs/mirdeep2/bin/miRDeep2.pl nvec_1_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta nvec_1_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P</td><tr>
+<tr><td>Reads</td><td>nvec_1_processed.fa</td></tr>
+<tr><td>Genome</td><td>/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta</td></tr>
+<tr><td>Mappings</td><td>nvec_1_mappings.arf</td></tr>
+<tr><td>Reference mature miRNAs</td><td>/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta</td></tr>
+<tr><td>Other mature miRNAs</td><td>none</td></tr>
+<tr><td>Species</td><td>N.vectensis</td></tr>
+</table><br><br>
+<font face="Times New Roman" size="4">
+<b>Survey of miRDeep2 performance for score cut-offs -10 to 10</b>
+
+<font face="Times New Roman" size="3">
+<table border="1" >
+<tr><th></th><TH colspan="3">novel miRNAs</th><th colspan="3">known miRBase miRNAs</th><th></th><th></th></tr>
+<th><a href="http://www.nature.com/nbt/journal/v26/n4/abs/nbt1394.html" target="blank" class="tooltip">miRDeep2 score<span>for details on how the log-odds score is calculated, see Friedlander et al., Nature Biotechnology, 2008.</span></a></th></a>
+
+<th><a href="#" class="tooltip">predicted by miRDeep2<span>novel miRNA hairpins are here defined by not having any of the reference mature miRNAs mapping perfectly (full length, no mismatches). The numbers show how many novel miRNA hairpins have a score equal to or exceeding the cut-off.</span></a></th>
+
+<th><a href="#" class="tooltip">estimated false positives<span>number of false positive miRNA hairpins predicted at this cut-off, as estimated by the miRDeep2 controls (see Friedlander et al., Nature Biotechnology, 2008). Mean and standard deviation is estimated from 100 rounds of permuted controls.</span></a></th>
+
+<th><a href="#" class="tooltip">estimated true positives<span>the number of true positive miRNA hairpins is estimated as t = total novel miRNAs - false positive novel miRNAs. The percentage of the predicted novel miRNAs that is estimated to be true positives is calculated as p = t / total novel miRNAs. The number of false positives is estimated from 100 rounds of permuted controls. In each of the 100 rounds, t and p are calculated, generating mean and standard deviation of t and p. The variable p can be used as an estimation of miRDeep2 positive predictive value at the score cut-off. </span></a></th>
+
+<th><a href="#" class="tooltip">in species<span>number of reference mature miRNAs for that species given as input to miRDeep2.</span></a></th>
+
+<th><a href="#" class="tooltip">in data<span>number of reference mature miRNAs for that species that map perfectly (full length, no mismatches) to one or more of precursor candidates that have been excised from the genome by miRDeep2.</span></a></th>
+
+<th><a href="#" class="tooltip">detected by miRDeep2<span>number of reference mature miRNAs for that species that map perfectly (full length, no mismatches) to one or more of predicted miRNA hairpins that have a score equal to or exceeding the cut-off. The percentage of reference mature miRNAs in data that is detected by miRDeep2 is calculated as s = reference mature miRNAs detected / reference mature miRNAs in data. s can be used as an estimation of miRDeep2 sensitivity at the score cut-off.</span></a></th>
+
+<th><a href="#" class="tooltip">estimated signal-to-noise<span>for the given score cut-off, the signal-to-noise ratio is estimated as r = total miRNA hairpins reported / mean estimated false positive miRNA hairpins over 100 rounds of permuted controls.</span></a></th>
+
+<th><a href="#" class="tooltip2">excision gearing<span>this is the minimum read stack height required for excising a potential miRNA precursor from the genome in this analysis.</span></a></th>
+
+<tr><td>10<td>8<td>1 &#177 1<td>7 &#177 1 (89 &#177 14%)<td>49661<td>148<td>23 (16%)<td>11.5<td>1
+</td></tr>
+<tr><td>9<td>8<td>1 &#177 1<td>7 &#177 1 (89 &#177 14%)<td>49661<td>148<td>26 (18%)<td>12.5<td>1
+</td></tr>
+<tr><td>8<td>8<td>1 &#177 1<td>7 &#177 1 (89 &#177 14%)<td>49661<td>148<td>26 (18%)<td>12.2<td>1
+</td></tr>
+<tr><td>7<td>10<td>1 &#177 1<td>9 &#177 1 (91 &#177 11%)<td>49661<td>148<td>26 (18%)<td>13.7<td>1
+</td></tr>
+<tr><td>6<td>10<td>1 &#177 1<td>9 &#177 1 (91 &#177 11%)<td>49661<td>148<td>29 (20%)<td>14.4<td>1
+</td></tr>
+<tr><td>5<td>10<td>1 &#177 1<td>9 &#177 1 (90 &#177 11%)<td>49661<td>148<td>37 (25%)<td>17.1<td>1
+</td></tr>
+<tr><td>4<td>11<td>1 &#177 1<td>10 &#177 1 (91 &#177 10%)<td>49661<td>148<td>41 (28%)<td>17.7<td>1
+</td></tr>
+<tr><td>3<td>12<td>1 &#177 1<td>11 &#177 1 (91 &#177 10%)<td>49661<td>148<td>41 (28%)<td>17.4<td>1
+</td></tr>
+<tr><td>2<td>22<td>1 &#177 1<td>21 &#177 1 (94 &#177 5%)<td>49661<td>148<td>58 (39%)<td>27.3<td>1
+</td></tr>
+<tr><td>1<td>24<td>2 &#177 1<td>22 &#177 1 (90 &#177 6%)<td>49661<td>148<td>82 (55%)<td>16<td>1
+</td></tr>
+<tr><td>0<td>26<td>9 &#177 3<td>17 &#177 3 (67 &#177 11%)<td>49661<td>148<td>82 (55%)<td>5.1<td>1
+</td></tr>
+<tr bgcolor=silver><td>-1<td>30<td>17 &#177 4<td>13 &#177 4 (44 &#177 13%)<td>49661<td>148<td>82 (55%)<td>2.9<td>1
+</td></tr>
+<tr bgcolor=silver><td>-2<td>46<td>26 &#177 4<td>20 &#177 4 (44 &#177 10%)<td>49661<td>148<td>84 (57%)<td>2.6<td>1
+</td></tr>
+<tr bgcolor=silver><td>-3<td>128<td>37 &#177 6<td>91 &#177 6 (71 &#177 5%)<td>49661<td>148<td>98 (66%)<td>4<td>1
+</td></tr>
+<tr bgcolor=silver><td>-4<td>287<td>72 &#177 7<td>215 &#177 7 (75 &#177 2%)<td>49661<td>148<td>115 (78%)<td>4.3<td>1
+</td></tr>
+<tr bgcolor=silver><td>-5<td>395<td>270 &#177 13<td>125 &#177 13 (32 &#177 3%)<td>49661<td>148<td>121 (82%)<td>1.6<td>1
+</td></tr>
+<tr bgcolor=silver><td>-6<td>458<td>679 &#177 22<td>0 &#177 0 (0 &#177 0%)<td>49661<td>148<td>121 (82%)<td>0.7<td>1
+</td></tr>
+<tr bgcolor=silver><td>-7<td>531<td>1054 &#177 23<td>0 &#177 0 (0 &#177 0%)<td>49661<td>148<td>121 (82%)<td>0.5<td>1
+</td></tr>
+<tr bgcolor=silver><td>-8<td>798<td>1402 &#177 26<td>0 &#177 0 (0 &#177 0%)<td>49661<td>148<td>121 (82%)<td>0.6<td>1
+</td></tr>
+<tr bgcolor=silver><td>-9<td>1129<td>1678 &#177 29<td>0 &#177 0 (0 &#177 0%)<td>49661<td>148<td>121 (82%)<td>0.7<td>1
+</td></tr>
+<tr bgcolor=silver><td>-10<td>1465<td>1914 &#177 32<td>0 &#177 0 (0 &#177 0%)<td>49661<td>148<td>121 (82%)<td>0.8<td>1
+</td></tr>
+</table><br><br>
+
+<br>
+    <br>
+    <br><h2>novel miRNAs predicted by miRDeep2</h2><br>
+    <font face="Times New Roman" size="2">
+    <table border="1">
+<th><a href="" class="tooltip3">provisional id<span>this is a provisional miRNA name assigned by miRDeep2. The first part of the id designates the chromosome or genome contig on which the miRNA gene is located. The second part is a running number that is added to avoid identical ids. The running number is incremented by one for each potential miRNA precursor that is excised from the genome. Clicking this field will display a pdf of the structure, read signature and score breakdown of the reported miRNA.</span></a></th>
+
+<th><a href="" class="tooltip3">miRDeep2 score<span>the log-odds score assigned to the hairpin by miRDeep2</span></a></th>
+
+<th><a href="" class="tooltip3">estimated probability that the miRNA candidate is a true positive<span>the estimated probability that a predicted novel miRNA with a score of this or higher is a true positive. To see exactly how this probability is estimated, mouse over the 'novel miRNAs, true positives' in the table at the top of the webpage.</span></a></th>
+
+<th><a href="" class="tooltip3">rfam alert<span>this field indicates if the predicted miRNA hairpin has sequence similarity to reference rRNAs or tRNAs. Warnings in this field should overrule the estimated probability that a reported miRNA is a true positive (previous field).</span></a></th>
+
+<th><a href="" class="tooltip3">total read count<span>this is the sum of read counts for the predicted mature, loop and star miRNAs.</span></a></th>
+
+<th><a href="" class="tooltip3">mature read count<span>this is the number of reads that map to the predicted miRNA hairpin and are contained in the sequence covered by the predicted mature miRNA, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="" class="tooltip3">loop read count<span>this is the number of reads that map to the predicted miRNA hairpin and are contained in the sequence covered by the predicted miRNA loop, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="" class="tooltip3">star read count<span>this is the number of reads that map to the predicted miRNA hairpin and are contained in the sequence covered by the predicted star miRNA, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="http://www.ncbi.nlm.nih.gov/entrez/utils/fref.fcgi?PrId=3051&itool=AbstractPlus-def&uid=15217813&nlmid=9808944&db=pubmed&url=http://bioinformatics.oxfordjournals.org/cgi/pmidlookup?view=long&pmid=15217813" target="blank"class="tooltip3">significant randfold p-value<span>this field indicates if the estimated randfold p-value of the excised potential miRNA hairpin is equal to or lower than 0.05 (see Bonnet et al., Bioinformatics, 2004).</span></a></th>
+
+<th><a href="" class="tooltip3">miRBase miRNA<span>this field displays the ids of any reference mature miRNAs for the species that map perfectly (full length, no mismatches) to the reported miRNA hairpin. If this is the case, the reported miRNA hairpin is assigned as a known miRNA. If not, it is assigned as a novel miRNA. If more than one reference mature miRNA maps to the miRNA hairpin, then only the id of the reference miRBase miRNA that matches the predicted mature sequence is output.</span></a></th>
+
+<th><a href="" class="tooltip3">example miRBase miRNA with the same seed<span>this field displays the ids of any reference mature miRNAs from related species that have a seed sequence identical to that of the reported mature miRNA. The seed is here defined as nucleotides 2-8 from the 5' end of the mature miRNA. If more than one reference mature miRNA have identical seed, then only the id of the miRNA that occurs last in the input file of reference mature miRNAs from related species is displayed.</span></a></th>
+
+<th><a href="" class="tooltip3">UCSC browser<span>if a species name was input to miRDeep2, then clicking this field will initiate a UCSC blat search of the consensus precursor sequence against the reference genome.</span></a></th>
+
+<th><a href="" class="tooltip3">NCBI blastn<span>clicking this field will initiate a NCBI blastn search of the consensus precursor sequence against the nr/nt database (non-redundant collection of all NCBI nucleotide sequences).</span></a></th>
+
+<th><a href="" class="tooltip3">consensus mature sequence<span>this is the consensus mature miRNA sequence as inferred from the deep sequencing reads.</span></a></th>
+
+<th><a href="" class="tooltip3">consensus star sequence<span>this is the consensus star miRNA sequence as inferred from the deep sequencing reads.</span></a></th>
+
+<th><a href="" class="tooltip4">consensus precursor sequence<span>this is the consensus precursor miRNA sequence as inferred from the deep sequencing reads. Note that this is the inferred Drosha hairpin product, and therefore does not include substantial flanking genomic sequence as does most miRBase precursors.</span></a></th>
+
+<th><a href="" class="tooltip3">precursor coordinate<span>The given precursor coordinates refer do absolute position in the mapped reference sequence</span></a></th>
+
+            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_239.pdf">chr1_239</a></td>
+                <td nowrap="nowrap">8.4e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>163</td>
+                <td>40</td>
+                <td>121</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=acacauagauggacuggcagauacauagauggacuggcagacacauagauggacuggcagacacauagauggucuggcagacacauagauggacug&JOB_TITLE=chr1_239&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>acacauagauggacuggca</td>
+                <td>ggcagacacauagauggacug</td>
+                <td>acacauagauggacuggcagauacauagauggacuggcagacacauagauggacuggcagacacauagauggucuggcagacacauagauggacug</td>
+<td>chr1:4109554..4109650:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_14052.pdf">chr5_14052</a></td>
+                <td nowrap="nowrap">6.4e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>139</td>
+                <td>86</td>
+                <td>3</td>
+                <td>50</td>
+                <td>no</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=aagguccggauggcgaggguuaccacacaaaucgaagccaaaccaccccucuccgcuacuagaccuuu&JOB_TITLE=chr5_14052&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>caccccucuccgcuacuagaccuuu</td>
+                <td>aagguccggauggcgaggguuacc</td>
+                <td>aagguccggauggcgaggguuaccacacaaaucgaagccaaaccaccccucuccgcuacuagaccuuu</td>
+<td>chr5:9577894..9577962:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27239.pdf">chr11_27239</a></td>
+                <td nowrap="nowrap">4.0e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>76</td>
+                <td>75</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auacuauugcacuaccugaaggcaugugaugccuugaggaaauccaauaguauuc&JOB_TITLE=chr11_27239&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ugaggaaauccaauaguauuc</td>
+                <td>auacuauugcacuaccug</td>
+                <td>auacuauugcacuaccugaaggcaugugaugccuugaggaaauccaauaguauuc</td>
+<td>chr11:12557581..12557636:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3172.pdf">chr1_3172</a></td>
+                <td nowrap="nowrap">3.2e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>60</td>
+                <td>58</td>
+                <td>0</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag&JOB_TITLE=chr1_3172&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggagaauucaaacgagaag</td>
+                <td>uucuccuuugaccucuccagac</td>
+                <td>uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag</td>
+<td>chr1:19078044..19078094:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3180.pdf">chr1_3180</a></td>
+                <td nowrap="nowrap">3.2e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>60</td>
+                <td>58</td>
+                <td>0</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag&JOB_TITLE=chr1_3180&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggagaauucaaacgagaag</td>
+                <td>uucuccuuugaccucuccagac</td>
+                <td>uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag</td>
+<td>chr1:19146556..19146606:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3166.pdf">chr1_3166</a></td>
+                <td nowrap="nowrap">3.2e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>60</td>
+                <td>58</td>
+                <td>0</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag&JOB_TITLE=chr1_3166&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggagaauucaaacgagaag</td>
+                <td>uucuccuuugaccucuccagac</td>
+                <td>uucuccuuugaccucuccagacucuucgccuggagaauucaaacgagaag</td>
+<td>chr1:19041407..19041457:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3178.pdf">chr1_3178</a></td>
+                <td nowrap="nowrap">3.1e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td></td>
+                <td>59</td>
+                <td>58</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucuccuuugacuucuccagacucuucgccuggagaauucaaacgagaag&JOB_TITLE=chr1_3178&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggagaauucaaacgagaag</td>
+                <td>uucuccuuugacuucuccagac</td>
+                <td>uucuccuuugacuucuccagacucuucgccuggagaauucaaacgagaag</td>
+<td>chr1:19136826..19136876:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_1778.pdf">chr1_1778</a></td>
+                <td nowrap="nowrap">3.1e+1
+</td>
+                <td>0.89 &#177 0.14</td>
+                <td>rRNA/tRNA</td>
+                <td>74</td>
+                <td>61</td>
+                <td>0</td>
+                <td>13</td>
+                <td>no</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gccucuguagcucagugguuagaguacuggucuuguaaaccagggguccaaaguucaaaucucugcaggggcu&JOB_TITLE=chr1_1778&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>guucaaaucucugcaggggcu</td>
+                <td>gccucuguagcucagugg</td>
+                <td>gccucuguagcucagugguuagaguacuggucuuguaaaccagggguccaaaguucaaaucucugcaggggcu</td>
+<td>chr1:1714951..1715024:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr8_21741.pdf">chr8_21741</a></td>
+                <td nowrap="nowrap">7.8</td>
+                <td>0.91 &#177 0.11</td>
+                <td></td>
+                <td>12</td>
+                <td>8</td>
+                <td>0</td>
+                <td>4</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=aaaaacaaagaguugaggaaguuaaaacuuccucaacucuuuguuuuuug&JOB_TITLE=chr8_21741&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>aaaaacaaagaguugaggaag</td>
+                <td>uuccucaacucuuuguuuuuug</td>
+                <td>aaaaacaaagaguugaggaaguuaaaacuuccucaacucuuuguuuuuug</td>
+<td>chr8:12372203..12372253:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr8_20616.pdf">chr8_20616</a></td>
+                <td nowrap="nowrap">7.7</td>
+                <td>0.91 &#177 0.11</td>
+                <td></td>
+                <td>12</td>
+                <td>8</td>
+                <td>0</td>
+                <td>4</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=aaaaacaaagaguugaggaaguuuuaacuuccucaacucuuuguuuuuug&JOB_TITLE=chr8_20616&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>aaaaacaaagaguugaggaag</td>
+                <td>uuccucaacucuuuguuuuuug</td>
+                <td>aaaaacaaagaguugaggaaguuuuaacuuccucaacucuuuguuuuuug</td>
+<td>chr8:12372205..12372255:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27226.pdf">chr11_27226</a></td>
+                <td nowrap="nowrap">4.5</td>
+                <td>0.91 &#177 0.10</td>
+                <td></td>
+                <td>7</td>
+                <td>6</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auacuauuguacuaccugaaggcaugugaugcccugaggaaauccaauaguuuuc&JOB_TITLE=chr11_27226&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>auacuauuguacuaccugaagg</td>
+                <td>ugaggaaauccaauaguuuuc</td>
+                <td>auacuauuguacuaccugaaggcaugugaugcccugaggaaauccaauaguuuuc</td>
+<td>chr11:12549141..12549196:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3168.pdf">chr1_3168</a></td>
+                <td nowrap="nowrap">3.6</td>
+                <td>0.91 &#177 0.10</td>
+                <td></td>
+                <td>5</td>
+                <td>3</td>
+                <td>0</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucuccuuugaccucuccagacucuucgccuggauaauucaaacgagaac&JOB_TITLE=chr1_3168&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggauaauucaaacgagaac</td>
+                <td>uucuccuuugaccucuccagac</td>
+                <td>uucuccuuugaccucuccagacucuucgccuggauaauucaaacgagaac</td>
+<td>chr1:19050920..19050970:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr15_34958.pdf">chr15_34958</a></td>
+                <td nowrap="nowrap">2.9</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>6</td>
+                <td>5</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucugucuugaaguuguaauggaugaacccuucacaacuucaagacaaag&JOB_TITLE=chr15_34958&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ucacaacuucaagacaaag</td>
+                <td>uucugucuugaaguuguaau</td>
+                <td>uucugucuugaaguuguaauggaugaacccuucacaacuucaagacaaag</td>
+<td>chr15:3804627..3804677:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr13_32531.pdf">chr13_32531</a></td>
+                <td nowrap="nowrap">2.8</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=acguagauugauaauuggcaauuauuaaucuacgcgaaguggucccgacguagauugauaauuagcaauuauuaaucuacgcgg&JOB_TITLE=chr13_32531&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>acguagauugauaauuggcaau</td>
+                <td>uagcaauuauuaaucuacgcgg</td>
+                <td>acguagauugauaauuggcaauuauuaaucuacgcgaaguggucccgacguagauugauaauuagcaauuauuaaucuacgcgg</td>
+<td>chr13:7677295..7677379:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_14013.pdf">chr5_14013</a></td>
+                <td nowrap="nowrap">2.7</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=acguagauugauaauuggcaauuauuaaucuacgcgaaguggucccgacguagauugauaauuagcaauuauuaaucuacgcgg&JOB_TITLE=chr5_14013&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>acguagauugauaauuggcaau</td>
+                <td>uagcaauuauuaaucuacgcgg</td>
+                <td>acguagauugauaauuggcaauuauuaaucuacgcgaaguggucccgacguagauugauaauuagcaauuauuaaucuacgcgg</td>
+<td>chr5:8990914..8990998:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3182.pdf">chr1_3182</a></td>
+                <td nowrap="nowrap">2.5</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>58</td>
+                <td>58</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ucuccuuugaucucuccagacucuucgccuggagaauucaaacgagaag&JOB_TITLE=chr1_3182&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ccuggagaauucaaacgagaag</td>
+                <td>ucuccuuugaucucuccagacu</td>
+                <td>ucuccuuugaucucuccagacucuucgccuggagaauucaaacgagaag</td>
+<td>chr1:19156352..19156401:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27244.pdf">chr11_27244</a></td>
+                <td nowrap="nowrap">2.5</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>17</td>
+                <td>16</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ugagugauaguauugcuuuccugccauugugcaggaaagcaauaccaucag&JOB_TITLE=chr11_27244&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ugagugauaguauugcuuuccu</td>
+                <td>aggaaagcaauaccaucag</td>
+                <td>ugagugauaguauugcuuuccugccauugugcaggaaagcaauaccaucag</td>
+<td>chr11:12560377..12560428:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27228.pdf">chr11_27228</a></td>
+                <td nowrap="nowrap">2.4</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>17</td>
+                <td>16</td>
+                <td>0</td>
+                <td>1</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ugagugauaguauugcuuuccugcgauuguacaggaaagcaauaccaucag&JOB_TITLE=chr11_27228&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ugagugauaguauugcuuuccu</td>
+                <td>aggaaagcaauaccaucag</td>
+                <td>ugagugauaguauugcuuuccugcgauuguacaggaaagcaauaccaucag</td>
+<td>chr11:12551708..12551759:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_14014.pdf">chr5_14014</a></td>
+                <td nowrap="nowrap">2.4</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>13</td>
+                <td>13</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ugcuaauuauuuaucuacgcgagguggucccgacguagauugauaauuggcaau&JOB_TITLE=chr5_14014&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>acguagauugauaauuggcaau</td>
+                <td>ugcuaauuauuuaucuacgcga</td>
+                <td>ugcuaauuauuuaucuacgcgagguggucccgacguagauugauaauuggcaau</td>
+<td>chr5:8990976..8991030:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_237.pdf">chr1_237</a></td>
+                <td nowrap="nowrap">2.2</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>141</td>
+                <td>24</td>
+                <td>117</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=acacauagauggacuggcagacacguagauggucuggcagacacauagauggacuggcagacacauagauggucuggcagacacauagauggucu&JOB_TITLE=chr1_237&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>acacauagauggacuggca</td>
+                <td>gcagacacauagauggucu</td>
+                <td>acacauagauggacuggcagacacguagauggucuggcagacacauagauggacuggcagacacauagauggucuggcagacacauagauggucu</td>
+<td>chr1:4109394..4109489:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr8_20486.pdf">chr8_20486</a></td>
+                <td nowrap="nowrap">2.2</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>12</td>
+                <td>12</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gugauccagguucgaauccuggcuuaaacugggauuuuuuuuccuaguuccugccuugauucaaauuugugucacaa&JOB_TITLE=chr8_20486&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>gugauccagguucgaauccu</td>
+                <td>gauucaaauuugugucacaa</td>
+                <td>gugauccagguucgaauccuggcuuaaacugggauuuuuuuuccuaguuccugccuugauucaaauuugugucacaa</td>
+<td>chr8:10848160..10848237:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr14_33847.pdf">chr14_33847</a></td>
+                <td nowrap="nowrap">2.1</td>
+                <td>0.94 &#177 0.05</td>
+                <td></td>
+                <td>238</td>
+                <td>238</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gcgguagccauucuuguuacacagcgugaacaagaaugacuugcu&JOB_TITLE=chr14_33847&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ugaacaagaaugacuugcu</td>
+                <td>gcgguagccauucuuguuacaca</td>
+                <td>gcgguagccauucuuguuacacagcgugaacaagaaugacuugcu</td>
+<td>chr14:11618322..11618367:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr8_21487.pdf">chr8_21487</a></td>
+                <td nowrap="nowrap">1.4</td>
+                <td>0.90 &#177 0.06</td>
+                <td></td>
+                <td>4</td>
+                <td>2</td>
+                <td>0</td>
+                <td>2</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=guuuagaguuuugcguguauuguaguauugauaguuucucgcuguccguuuagaguuucgcguguauuguaguauuga&JOB_TITLE=chr8_21487&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>guuuagaguuuugcguguauugua</td>
+                <td>gaguuucgcguguauuguaguauuga</td>
+                <td>guuuagaguuuugcguguauuguaguauugauaguuucucgcuguccguuuagaguuucgcguguauuguaguauuga</td>
+<td>chr8:8118234..8118312:-</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr12_29391.pdf">chr12_29391</a></td>
+                <td nowrap="nowrap">1.1</td>
+                <td>0.90 &#177 0.06</td>
+                <td></td>
+                <td>16</td>
+                <td>16</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uccuacccauauugguauccacugcagaucucaauguuuguaggucu&JOB_TITLE=chr12_29391&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>ucucaauguuuguaggucu</td>
+                <td>uccuacccauauugguauc</td>
+                <td>uccuacccauauugguauccacugcagaucucaauguuuguaggucu</td>
+<td>chr12:12861318..12861365:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr9_22325.pdf">chr9_22325</a></td>
+                <td nowrap="nowrap">0.6</td>
+                <td>0.67 &#177 0.11</td>
+                <td></td>
+                <td>11</td>
+                <td>11</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cgaugauugagguaaaggccagauaguuuguucauuaucucuaucaucgcu&JOB_TITLE=chr9_22325&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>uucauuaucucuaucaucgcu</td>
+                <td>cgaugauugagguaaaggcca</td>
+                <td>cgaugauugagguaaaggccagauaguuuguucauuaucucuaucaucgcu</td>
+<td>chr9:8036770..8036821:+</td>
+</tr>            <tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr2_6025.pdf">chr2_6025</a></td>
+                <td nowrap="nowrap">0.5</td>
+                <td>0.67 &#177 0.11</td>
+                <td></td>
+                <td>46</td>
+                <td>46</td>
+                <td>0</td>
+                <td>0</td>
+                <td>yes</td>
+                <td nowrap="nowrap"></td>
+                <td nowrap="nowrap"></td>
+                <td></td>
+                <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gcacugcugaaaaucuguuuugguuuguucuuuaaccuuagcagaaaucccagugcaa&JOB_TITLE=chr2_6025&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3. target="_blank">blast</a></td>
+                <td>gcacugcugaaaaucuguuuugg</td>
+                <td>uuagcagaaaucccagugcaa</td>
+                <td>gcacugcugaaaaucuguuuugguuuguucuuuaaccuuagcagaaaucccagugcaa</td>
+<td>chr2:14612304..14612362:-</td>
+</tr></table></font>
+<br>
+    <br>
+    <br><h2>mature miRBase miRNAs detected by miRDeep2</h2><br>
+    <font face="Times New Roman" size="2">
+    <table border="1">
+<th><a href="" class="tooltip3">tag id<span>this is a tag id assigned by miRDeep2. The first part of the id designates the chromosome or genome contig on which the miRNA gene is located. The second part is a running number that is added to avoid identical ids. The running number is incremented by one for each potential miRNA precursor that is excised from the genome. Clicking this field will display a pdf of the structure, read signature and score breakdown of the miRNA.</span></a></th>
+
+<th><a href="" class="tooltip3">miRDeep2 score<span>the log-odds score assigned to the hairpin by miRDeep2</span></a></th>
+
+<th><a href="" class="tooltip3">estimated probability that the miRNA is a true positive<span>the estimated probability that a predicted miRNA with a score of this or higher is a true positive. To see exactly how this probability is estimated, mouse over the 'novel miRNAs, true positives' in the table at the top of the webpage. For miRBase miRNAs, this reflects the support that the data at hand lends to the miRNA.</span></a></th>
+
+<th><a href="" class="tooltip3">rfam alert<span>this field indicates if the miRNA hairpin has sequence similarity to reference rRNAs or tRNAs. Warnings in this field should overrule the estimated probability that a reported miRNA is a true positive (previous field).</span></a></th>
+
+<th><a href="" class="tooltip3">predicted mature seq. in accordance with miRBase mature seq.<span>If the predicted miRDeep2 sequence overlaps with the miRBase annotated mature sequence than this is indicated by 'TRUE'. If the predicted miRDeep2 star sequence overlaps with the miRBase annotated mature sequence this is inidicated by 'STAR'.</span></a></th>
+
+<th><a href="" class="tooltip3">total read count<span>this is the sum of read counts for the mature, loop and star miRNAs.</span></a></th>
+
+<th><a href="" class="tooltip3">mature read count<span>this is the number of reads that map to the miRNA hairpin and are contained in the sequence covered by the consensus mature miRNA, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="" class="tooltip3">loop read count<span>this is the number of reads that map to the miRNA hairpin and are contained in the sequence covered by the consensus miRNA loop, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="" class="tooltip3">star read count<span>this is the number of reads that map to the miRNA hairpin and are contained in the sequence covered by the consensus star miRNA, including 2 nts upstream and 5 nts downstream.</span></a></th>
+
+<th><a href="http://www.ncbi.nlm.nih.gov/entrez/utils/fref.fcgi?PrId=3051&itool=AbstractPlus-def&uid=15217813&nlmid=9808944&db=pubmed&url=http://bioinformatics.oxfordjournals.org/cgi/pmidlookup?view=long&pmid=15217813" target="blank"class="tooltip3">significant randfold p-value<span>this field indicates if the estimated randfold p-value of the miRNA hairpin is equal to or lower than 0.05 (see Bonnet et al., Bioinformatics, 2004).</span></a></th>
+
+<th><a href="" class="tooltip3">mature miRBase miRNA<span>this field displays the ids of any reference mature miRNAs for the species that map perfectly (full length, no mismatches) to the reported miRNA hairpin. If this is the case, the reported miRNA hairpin is assigned as a known miRNA. If not, it is assigned as a novel miRNA. If more than one reference mature miRNA maps to the miRNA hairpin, then only the id of the reference miRBase miRNA that matches the predicted mature sequence is output.</span></a></th>
+
+<th><a href="" class="tooltip3">example miRBase miRNA with the same seed<span>this field displays the ids of any reference mature miRNAs from related species that have a seed sequence identical to that of the reported mature miRNA. The seed is here defined as nucleotides 2-8 from the 5' end of the mature miRNA. If more than one reference mature miRNA have identical seed, then only the id of the miRNA that occurs last in the input file of reference mature miRNAs from related species is displayed.</span></a></th>
+
+<th><a href="" class="tooltip3">UCSC browser<span>if a species name was input to miRDeep2, then clicking this field will initiate a UCSC blat search of the consensus precursor sequence against the reference genome.</span></a></th>
+
+<th><a href="" class="tooltip3">NCBI blastn<span>clicking this field will initiate a NCBI blastn search of the consensus precursor sequence against the nr/nt database (non-redundant collection of all NCBI nucleotide sequences).</span></a></th>
+
+<th><a href="" class="tooltip3">consensus mature sequence<span>this is the consensus mature miRNA sequence as inferred from the deep sequencing reads.</span></a></th>
+
+<th><a href="" class="tooltip3">consensus star sequence<span>this is the consensus star miRNA sequence as inferred from the deep sequencing reads.</span></a></th>
+
+<th><a href="" class="tooltip4">consensus precursor sequence<span>this is the consensus precursor miRNA sequence as inferred from the deep sequencing reads. Note that this is the inferred Drosha hairpin product, and therefore does not include substantial flanking genomic sequence as does most miRBase precursors.</span></a></th>
+
+<th><a href="" class="tooltip3">precursor coordinate<span>The given precursor coordinates refer do absolute position in the mapped reference sequence</span></a></th>
+
+		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_17202.pdf">chr7_17202</a></td>
+			<td nowrap="nowrap">2.0e+3
+</td>
+            <td>0.89 &#177 0.14</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>4083</td>
+			<td>4073</td>
+            <td>0</td>
+            <td>10</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=api-miR-100" target="_blank"> api-miR-100</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=acccguagauccgaacuuguggaguuucaccacaggcucguuucuacggau&JOB_TITLE=chr7_17202&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>acccguagauccgaacuugugg</td>
+            <td>acaggcucguuucuacggau</td>
+            <td>acccguagauccgaacuuguggaguuucaccacaggcucguuucuacggau</td>
+<td>chr7:4505333..4505384:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr8_21462.pdf">chr8_21462</a></td>
+			<td nowrap="nowrap">3.0e+1
+</td>
+            <td>0.89 &#177 0.14</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>56</td>
+			<td>54</td>
+            <td>0</td>
+            <td>2</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9413" target="_blank"> nve-miR-9413</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cauaucacuuaucacuuaauggguuauccuaaaagugaucagugguaaggu&JOB_TITLE=chr8_21462&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaaaagugaucagugguaaggu</td>
+            <td>cauaucacuuaucacuuaauggguu</td>
+            <td>cauaucacuuaucacuuaauggguuauccuaaaagugaucagugguaaggu</td>
+<td>chr8:7818172..7818223:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16914.pdf">chr6_16914</a></td>
+			<td nowrap="nowrap">1.3e+1
+</td>
+            <td>0.89 &#177 0.14</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>24</td>
+			<td>23</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2032b_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2032b_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ucgcugcaacaguuagcuagcauuuauugcgagguaacuguugcagcaucc&JOB_TITLE=chr6_16914&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>cgagguaacuguugcagcaucc</td>
+            <td>ucgcugcaacaguuagcuag</td>
+            <td>ucgcugcaacaguuagcuagcauuuauugcgagguaacuguugcagcaucc</td>
+<td>chr6:15528956..15529007:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16802.pdf">chr6_16802</a></td>
+			<td nowrap="nowrap">9.2</td>
+            <td>0.89 &#177 0.14</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>15</td>
+			<td>14</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024f-5p" target="_blank"> nve-miR-2024f-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=agaauauugguacugggcaaaaggucacguuuugcacaucaccaauguucugag&JOB_TITLE=chr6_16802&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uugcacaucaccaauguucugag</td>
+            <td>agaauauugguacugggcaaaa</td>
+            <td>agaauauugguacugggcaaaaggucacguuuugcacaucaccaauguucugag</td>
+<td>chr6:13418925..13418979:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_3146.pdf">chr1_3146</a></td>
+			<td nowrap="nowrap">6.6</td>
+            <td>0.91 &#177 0.11</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>10</td>
+			<td>9</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2029_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2029_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uacgcaaucccuagguuaccaugucagaugguaaacuauggauugcgcuu&JOB_TITLE=chr1_3146&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>guaaacuauggauugcgcuu</td>
+            <td>uacgcaaucccuagguuacc</td>
+            <td>uacgcaaucccuagguuaccaugucagaugguaaacuauggauugcgcuu</td>
+<td>chr1:18556949..18556999:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr13_31288.pdf">chr13_31288</a></td>
+			<td nowrap="nowrap">5.5</td>
+            <td>0.90 &#177 0.11</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>10</td>
+			<td>6</td>
+            <td>0</td>
+            <td>4</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2042_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2042_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uuauaaaucauccuugcacuacuuaugucguacauugaugauuuaugaag&JOB_TITLE=chr13_31288&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuauaaaucauccuugcacuac</td>
+            <td>cguacauugaugauuuaugaag</td>
+            <td>uuauaaaucauccuugcacuacuuaugucguacauugaugauuuaugaag</td>
+<td>chr13:9526441..9526491:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr12_30197.pdf">chr12_30197</a></td>
+			<td nowrap="nowrap">5.4</td>
+            <td>0.90 &#177 0.11</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>9</td>
+			<td>7</td>
+            <td>0</td>
+            <td>2</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2027_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2027_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ugcuuguugguaauuuugcaucuguugcacaugcgauuuuaccaaaaugca&JOB_TITLE=chr12_30197&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ugcuuguugguaauuuugcaucu</td>
+            <td>augcgauuuuaccaaaaugca</td>
+            <td>ugcuuguugguaauuuugcaucuguugcacaugcgauuuuaccaaaaugca</td>
+<td>chr12:8728875..8728926:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr4_10127.pdf">chr4_10127</a></td>
+			<td nowrap="nowrap">5.1</td>
+            <td>0.90 &#177 0.11</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>7</td>
+			<td>4</td>
+            <td>0</td>
+            <td>3</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9435" target="_blank"> nve-miR-9435</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ucuugucaaguguaucuagugugagucacgugcuagagacacgugacuggugcu&JOB_TITLE=chr4_10127&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uagagacacgugacuggugcu</td>
+            <td>ucuugucaaguguaucuagug</td>
+            <td>ucuugucaaguguaucuagugugagucacgugcuagagacacgugacuggugcu</td>
+<td>chr4:7711485..7711539:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr12_29929.pdf">chr12_29929</a></td>
+			<td nowrap="nowrap">4.5</td>
+            <td>0.91 &#177 0.10</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>6</td>
+			<td>5</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2030_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2030_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uagcauaacauuguaagagauuguaagaaccucuuuacauuguugugcu&JOB_TITLE=chr12_29929&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uagcauaacauuguaagagauug</td>
+            <td>ccucuuuacauuguugugcu</td>
+            <td>uagcauaacauuguaagagauuguaagaaccucuuuacauuguugugcu</td>
+<td>chr12:5264086..5264135:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_18621.pdf">chr7_18621</a></td>
+			<td nowrap="nowrap">2.9</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>3</td>
+			<td>2</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2040a-5p" target="_blank"> nve-miR-2040a-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag&JOB_TITLE=chr7_18621&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ucgggucagcuacgacaugagcg</td>
+            <td>uuugucucguaacugcccugaag</td>
+            <td>ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag</td>
+<td>chr7:4305415..4305468:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_17200.pdf">chr7_17200</a></td>
+			<td nowrap="nowrap">2.9</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>3</td>
+			<td>2</td>
+            <td>0</td>
+            <td>1</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2040a-5p" target="_blank"> nve-miR-2040a-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag&JOB_TITLE=chr7_17200&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ucgggucagcuacgacaugagcg</td>
+            <td>uuugucucguaacugcccugaag</td>
+            <td>ucgggucagcuacgacaugagcgcuccucguuugucucguaacugcccugaag</td>
+<td>chr7:4442988..4443041:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr12_30138.pdf">chr12_30138</a></td>
+			<td nowrap="nowrap">2.7</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>21</td>
+			<td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-9422_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-9422_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gcguuucaauuuuccgucagucauggcugacagaagauagaagcgcug&JOB_TITLE=chr12_30138&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ugacagaagauagaagcgcug</td>
+            <td>gcguuucaauuuuccgucagu</td>
+            <td>gcguuucaauuuuccgucagucauggcugacagaagauagaagcgcug</td>
+<td>chr12:7343593..7343641:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr12_30140.pdf">chr12_30140</a></td>
+			<td nowrap="nowrap">2.6</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>21</td>
+			<td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9422" target="_blank"> nve-miR-9422</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gcguuucaaguuuccgucagucauggcugacagaagauagaagcgcug&JOB_TITLE=chr12_30140&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ugacagaagauagaagcgcug</td>
+            <td>gcguuucaaguuuccgucagu</td>
+            <td>gcguuucaaguuuccgucagucauggcugacagaagauagaagcgcug</td>
+<td>chr12:7344947..7344995:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_14237.pdf">chr5_14237</a></td>
+			<td nowrap="nowrap">2.5</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>33</td>
+			<td>33</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2028_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2028_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uaauguuccugcuuguuccuauauauuaggaacuagcaggagcauuaag&JOB_TITLE=chr5_14237&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaauguuccugcuuguuccu</td>
+            <td>gaacuagcaggagcauuaag</td>
+            <td>uaauguuccugcuuguuccuauauauuaggaacuagcaggagcauuaag</td>
+<td>chr5:12281357..12281406:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr14_34061.pdf">chr14_34061</a></td>
+			<td nowrap="nowrap">2.5</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>20</td>
+			<td>20</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-9442_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-9442_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=aauaucaggaggacgcauucguuuuacgcaugcguccucgugauacuucc&JOB_TITLE=chr14_34061&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>aauaucaggaggacgcauucg</td>
+            <td>caugcguccucgugauacuucc</td>
+            <td>aauaucaggaggacgcauucguuuuacgcaugcguccucgugauacuucc</td>
+<td>chr14:2210935..2210985:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_1154.pdf">chr1_1154</a></td>
+			<td nowrap="nowrap">2.4</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>11</td>
+			<td>11</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2047_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2047_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucgccgagcagaugucggagaguucaacuguccgacaucugcucggcgaauu&JOB_TITLE=chr1_1154&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uucgccgagcagaugucggaga</td>
+            <td>uccgacaucugcucggcgaauu</td>
+            <td>uucgccgagcagaugucggagaguucaacuguccgacaucugcucggcgaauu</td>
+<td>chr1:16026559..16026612:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16796.pdf">chr6_16796</a></td>
+			<td nowrap="nowrap">2.1</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>14</td>
+			<td>14</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2024f_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2024f_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cagaauauuggguacugggcaaaaggucacguuuugcacaucaccaauguucugag&JOB_TITLE=chr6_16796&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uugcacaucaccaauguucugag</td>
+            <td>cagaauauuggguacugggcaaaa</td>
+            <td>cagaauauuggguacugggcaaaaggucacguuuugcacaucaccaauguucugag</td>
+<td>chr6:13403201..13403257:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16790.pdf">chr6_16790</a></td>
+			<td nowrap="nowrap">2.0</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>60</td>
+			<td>60</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024e-5p" target="_blank"> nve-miR-2024e-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gaguauuggcgcugggcaaaaggucacauuuugcacauuaccaauauucug&JOB_TITLE=chr6_16790&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uugcacauuaccaauauucug</td>
+            <td>gaguauuggcgcugggcaaaa</td>
+            <td>gaguauuggcgcugggcaaaaggucacauuuugcacauuaccaauauucug</td>
+<td>chr6:13385781..13385832:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr2_5675.pdf">chr2_5675</a></td>
+			<td nowrap="nowrap">2.0</td>
+            <td>0.94 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>48</td>
+			<td>48</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2026-5p" target="_blank"> nve-miR-2026-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uuucaaaugucuacugauggaaguugguuccaucaguggguauuugaaguu&JOB_TITLE=chr2_5675&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuucaaaugucuacugaugga</td>
+            <td>caucaguggguauuugaaguu</td>
+            <td>uuucaaaugucuacugauggaaguugguuccaucaguggguauuugaaguu</td>
+<td>chr2:11739950..11740001:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr3_7171.pdf">chr3_7171</a></td>
+			<td nowrap="nowrap">1.9</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>11</td>
+			<td>11</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2023-5p" target="_blank"> nve-miR-2023-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cugccaccuguauuucuaucacgucagaugaaagaaguacaagugguaggg&JOB_TITLE=chr3_7171&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>aaagaaguacaagugguaggg</td>
+            <td>cugccaccuguauuucuauca</td>
+            <td>cugccaccuguauuucuaucacgucagaugaaagaaguacaagugguaggg</td>
+<td>chr3:6689230..6689281:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr3_7169.pdf">chr3_7169</a></td>
+			<td nowrap="nowrap">1.9</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>11</td>
+			<td>11</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2023-5p" target="_blank"> nve-miR-2023-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cugccaccuguauuucuaucacgucagaugaaagaaguacaagugguaggg&JOB_TITLE=chr3_7169&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>aaagaaguacaagugguaggg</td>
+            <td>cugccaccuguauuucuauca</td>
+            <td>cugccaccuguauuucuaucacgucagaugaaagaaguacaagugguaggg</td>
+<td>chr3:6673211..6673262:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16804.pdf">chr6_16804</a></td>
+			<td nowrap="nowrap">1.7</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>21</td>
+			<td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024g-5p" target="_blank"> nve-miR-2024g-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug&JOB_TITLE=chr6_16804&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuacacaguaccgauauug</td>
+            <td>auaucgguguuggguaaaa</td>
+            <td>auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug</td>
+<td>chr6:13422819..13422866:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16794.pdf">chr6_16794</a></td>
+			<td nowrap="nowrap">1.7</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>21</td>
+			<td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024g-5p" target="_blank"> nve-miR-2024g-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auaucgguguuggguaaaggucaauuuuacacaguaccgauauug&JOB_TITLE=chr6_16794&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuacacaguaccgauauug</td>
+            <td>auaucgguguuggguaaag</td>
+            <td>auaucgguguuggguaaaggucaauuuuacacaguaccgauauug</td>
+<td>chr6:13402961..13403006:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16800.pdf">chr6_16800</a></td>
+			<td nowrap="nowrap">1.7</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>21</td>
+			<td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024g-5p" target="_blank"> nve-miR-2024g-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug&JOB_TITLE=chr6_16800&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuacacaguaccgauauug</td>
+            <td>auaucgguguuggguaaaa</td>
+            <td>auaucgguguuggguaaaaggucacauuuuacacaguaccgauauug</td>
+<td>chr6:13418683..13418730:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27027.pdf">chr11_27027</a></td>
+			<td nowrap="nowrap">1.5</td>
+            <td>0.90 &#177 0.06</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>10</td>
+			<td>10</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9429-5p" target="_blank"> nve-miR-9429-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=ccuucuccauuagacgaaauagacuuauuucgucuauauggagaaaggcg&JOB_TITLE=chr11_27027&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uucgucuauauggagaaaggcg</td>
+            <td>ccuucuccauuagacgaaau</td>
+            <td>ccuucuccauuagacgaaauagacuuauuucgucuauauggagaaaggcg</td>
+<td>chr11:10233419..10233469:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_2981.pdf">chr1_2981</a></td>
+			<td nowrap="nowrap">-1.2</td>
+            <td>0.44 &#177 0.10</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>4</td>
+			<td>4</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2047_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2047_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucgccgagcagaugucggacaguugaacucuccgacaucugcucggcgaauu&JOB_TITLE=chr1_2981&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uucgccgagcagaugucg</td>
+            <td>acaucugcucggcgaauu</td>
+            <td>uucgccgagcagaugucggacaguugaacucuccgacaucugcucggcgaauu</td>
+<td>chr1:16026557..16026610:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16913.pdf">chr6_16913</a></td>
+			<td nowrap="nowrap">-1.5</td>
+            <td>0.44 &#177 0.10</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>23</td>
+			<td>23</td>
+            <td>0</td>
+            <td>0</td>
+            <td>no</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2032a_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2032a_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cgagguaacuguugcagcauccaugacugugaggucaguauuucagca&JOB_TITLE=chr6_16913&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>cgagguaacuguugcagcau</td>
+            <td>gacugugaggucaguauuucagca</td>
+            <td>cgagguaacuguugcagcauccaugacugugaggucaguauuucagca</td>
+<td>chr6:15528930..15528978:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16788.pdf">chr6_16788</a></td>
+			<td nowrap="nowrap">-2.0</td>
+            <td>0.44 &#177 0.10</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>4</td>
+			<td>4</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024g-5p" target="_blank"> nve-miR-2024g-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=auaucgguguuggguaaaaggucaccuuuuaacacaguaccgauauug&JOB_TITLE=chr6_16788&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaacacaguaccgauauug</td>
+            <td>auaucgguguuggguaaa</td>
+            <td>auaucgguguuggguaaaaggucaccuuuuaacacaguaccgauauug</td>
+<td>chr6:13385536..13385584:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27025.pdf">chr11_27025</a></td>
+			<td nowrap="nowrap">-2.2</td>
+            <td>0.71 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>2</td>
+			<td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9424b" target="_blank"> nve-miR-9424b</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cucgaugagccaacuauacagauaucuguaaagcugguuuaucgaggc&JOB_TITLE=chr11_27025&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaaagcugguuuaucgaggc</td>
+            <td>cucgaugagccaacuauaca</td>
+            <td>cucgaugagccaacuauacagauaucuguaaagcugguuuaucgaggc</td>
+<td>chr11:10223360..10223408:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16149.pdf">chr6_16149</a></td>
+			<td nowrap="nowrap">-2.5</td>
+            <td>0.71 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>2</td>
+			<td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9433" target="_blank"> nve-miR-9433</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uucggugaaauuuagaaccacuaagugauauagggaauucuaaauuucaccguacg&JOB_TITLE=chr6_16149&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uucggugaaauuuagaaccacu</td>
+            <td>gggaauucuaaauuucaccguacg</td>
+            <td>uucggugaaauuuagaaccacuaagugauauagggaauucuaaauuucaccguacg</td>
+<td>chr6:5106824..5106880:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_17709.pdf">chr7_17709</a></td>
+			<td nowrap="nowrap">-2.6</td>
+            <td>0.71 &#177 0.05</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>2</td>
+			<td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2036-5p" target="_blank"> nve-miR-2036-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gagaacguacaguaagcacuugacgauguauauuguacgacucucau&JOB_TITLE=chr7_17709&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uauauuguacgacucucau</td>
+            <td>gagaacguacaguaagca</td>
+            <td>gagaacguacaguaagcacuugacgauguauauuguacgacucucau</td>
+<td>chr7:9582837..9582884:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr2_5810.pdf">chr2_5810</a></td>
+			<td nowrap="nowrap">-2.6</td>
+            <td>0.71 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>3</td>
+			<td>3</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-9446_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-9446_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cauaacgacauaggagaaauaacaugguuuuuuuuuucuuaugucgucauguc&JOB_TITLE=chr2_5810&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuuuuucuuaugucgucauguc</td>
+            <td>cauaacgacauaggagaaauaa</td>
+            <td>cauaacgacauaggagaaauaacaugguuuuuuuuuucuuaugucgucauguc</td>
+<td>chr2:13939547..13939600:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr1_1417.pdf">chr1_1417</a></td>
+			<td nowrap="nowrap">-2.7</td>
+            <td>0.71 &#177 0.05</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>3</td>
+			<td>3</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9427" target="_blank"> nve-miR-9427</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cgcaaccucacuucccuccucugucaggaagagaccagugagauugaagu&JOB_TITLE=chr1_1417&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>agagaccagugagauugaagu</td>
+            <td>cgcaaccucacuucccuccuc</td>
+            <td>cgcaaccucacuucccuccucugucaggaagagaccagugagauugaagu</td>
+<td>chr1:18761518..18761568:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_18629.pdf">chr7_18629</a></td>
+			<td nowrap="nowrap">-3.1</td>
+            <td>0.75 &#177 0.02</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9449" target="_blank"> nve-miR-9449</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uaucuccuuaaacauucaucgucuuguacacgaugguuguuuaaggagcugaa&JOB_TITLE=chr7_18629&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaucuccuuaaacauucaucgu</td>
+            <td>gaugguuguuuaaggagcugaa</td>
+            <td>uaucuccuuaaacauucaucgucuuguacacgaugguuguuuaaggagcugaa</td>
+<td>chr7:4455409..4455462:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_12601.pdf">chr5_12601</a></td>
+			<td nowrap="nowrap">-3.1</td>
+            <td>0.75 &#177 0.02</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>2</td>
+			<td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2025-5p" target="_blank"> nve-miR-2025-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=agcuuucgauggcuagaaaauccuuagugauuuuuuagcccgcggaaguugu&JOB_TITLE=chr5_12601&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuuuuuagcccgcggaaguugu</td>
+            <td>agcuuucgauggcuagaaaauc</td>
+            <td>agcuuucgauggcuagaaaauccuuagugauuuuuuagcccgcggaaguugu</td>
+<td>chr5:7578785..7578837:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr13_31289.pdf">chr13_31289</a></td>
+			<td nowrap="nowrap">-3.3</td>
+            <td>0.75 &#177 0.02</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>4</td>
+			<td>4</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2051-5p" target="_blank"> nve-miR-2051-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=agaaaagcuuccgguuuuuugacaucgcaauaccggagucuuuucugu&JOB_TITLE=chr13_31289&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uaccggagucuuuucugu</td>
+            <td>agaaaagcuuccgguuuu</td>
+            <td>agaaaagcuuccgguuuuuugacaucgcaauaccggagucuuuucugu</td>
+<td>chr13:9526785..9526833:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr6_16805.pdf">chr6_16805</a></td>
+			<td nowrap="nowrap">-3.4</td>
+            <td>0.75 &#177 0.02</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2024c-5p" target="_blank"> nve-miR-2024c-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=agaauauuggugcugggcaaaaggucacauuuugcacaauuccaauauucuga&JOB_TITLE=chr6_16805&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>agaauauuggugcugggcaaaa</td>
+            <td>uugcacaauuccaauauucuga</td>
+            <td>agaauauuggugcugggcaaaaggucacauuuugcacaauuccaauauucuga</td>
+<td>chr6:13423062..13423115:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr3_8094.pdf">chr3_8094</a></td>
+			<td nowrap="nowrap">-3.7</td>
+            <td>0.75 &#177 0.02</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2037-5p" target="_blank"> nve-miR-2037-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=gguaaaagccguccaagcacccucuuggcagugugauuggagacuuuuaccgu&JOB_TITLE=chr3_8094&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ugugauuggagacuuuuaccgu</td>
+            <td>gguaaaagccguccaagcacc</td>
+            <td>gguaaaagccguccaagcacccucuuggcagugugauuggagacuuuuaccgu</td>
+<td>chr3:69986..70039:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr5_13816.pdf">chr5_13816</a></td>
+			<td nowrap="nowrap">-4.1</td>
+            <td>0.32 &#177 0.03</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2034-5p" target="_blank"> nve-miR-2034-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cugauguuuuuagaauuagcccccuaaaugaagggcuaaugcaaaaaaugucagug&JOB_TITLE=chr5_13816&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>gcuaaugcaaaaaaugucagug</td>
+            <td>cugauguuuuuagaauuagccc</td>
+            <td>cugauguuuuuagaauuagcccccuaaaugaagggcuaaugcaaaaaaugucagug</td>
+<td>chr5:5879025..5879081:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr11_27223.pdf">chr11_27223</a></td>
+			<td nowrap="nowrap">-4.4</td>
+            <td>0.32 &#177 0.03</td>
+            <td></td>
+	    <td>STAR</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-2043_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-2043_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uauaucgccuuuugagguuauuuucuuaaugcccucaaaagacgguauuag&JOB_TITLE=chr11_27223&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ugcccucaaaagacgguauuag</td>
+            <td>uauaucgccuuuugagguuauu</td>
+            <td>uauaucgccuuuugagguuauuuucuuaaugcccucaaaagacgguauuag</td>
+<td>chr11:12548878..12548929:+</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr2_5809.pdf">chr2_5809</a></td>
+			<td nowrap="nowrap">-6.2</td>
+            <td>0.00 &#177 0.00</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>3</td>
+			<td>3</td>
+            <td>0</td>
+            <td>0</td>
+            <td>yes</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=miR-9446_Nematostella_vectensis_Moran_et_al._2014_NA" target="_blank"> miR-9446_Nematostella_vectensis_Moran_et_al._2014_NA</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=uuuuuucuuaugucgucaugucaauguuguuagauaaggacauaagggaaccag&JOB_TITLE=chr2_5809&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uuuuuucuuaugucgucaug</td>
+            <td>uaaggacauaagggaaccag</td>
+            <td>uuuuuucuuaugucgucaugucaauguuguuagauaaggacauaagggaaccag</td>
+<td>chr2:13939515..13939569:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_18622.pdf">chr7_18622</a></td>
+			<td nowrap="nowrap">-7.3</td>
+            <td>0.00 &#177 0.00</td>
+            <td></td>
+	    <td>TRUE</td>
+			<td>2</td>
+			<td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td>no</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-2040a-5p" target="_blank"> nve-miR-2040a-5p</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=cuacacuucugguucuuggacgugagggaggagaucgugaugccuacaaccuucgggucagcuacgacaugagcg&JOB_TITLE=chr7_18622&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>ucgggucagcuacgacaugagcg</td>
+            <td>cuacacuucugguucuuggacgugagg</td>
+            <td>cuacacuucugguucuuggacgugagggaggagaucgugaugccuacaaccuucgggucagcuacgacaugagcg</td>
+<td>chr7:4305445..4305520:-</td>
+</tr>		<tr><td><a href="pdfs_20_10_2025_t_20_29_09/chr7_18634.pdf">chr7_18634</a></td>
+			<td nowrap="nowrap">-2.0e+1
+</td>
+            <td>0.00 &#177 0.00</td>
+            <td></td>
+	    <td>NA</td>
+			<td>1</td>
+			<td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>no</td>
+			<td nowrap="nowrap"><a href="http://www.mirbase.org/cgi-bin/query.pl?terms=nve-miR-9452" target="_blank"> nve-miR-9452</a></td>
+			<td nowrap="nowrap"></td>
+            <td></td>
+            <td><a href=http://blast.ncbi.nlm.nih.gov/Blast.cgi?QUERY=aguuugcaacaaagcaaaaugcuauguucuuguuggaggugacuuc&JOB_TITLE=chr7_18634&db=nucleotide&QUERY_FROM=&QUERY_TO=&QUERYFILE=&GENETIC_CODE=1&SUBJECTS=&stype=nucleotide&SUBJECTS_FROM=&SUBJECTS_TO=&SUBJECTFILE=&DBTYPE=gc&DATABASE=nr&EQ_MENU=&NUM_ORG=1&EQ_TEXT=&BLAST_PROGRAMS=blastn&PHI_PATTERN=&MAX_NUM_SEQ=100&SHORT_QUERY_ADJUST=on&EXPECT=10&WORD_SIZE=7&MATRIX_NAME=PAM30&MATCH_SCORES=2,-3&GAPCOSTS=5+2&COMPOSITION_BASED_STATISTICS=0&FILTER=L&REPEATS=repeat_9606&FILTER=m&TEMPLATE_LENGTH=0&TEMPLATE_TYPE=0&PSSM=&I_THRESH=&SHOW_OVERVIEW=true&SHOW_LINKOUT=true&GET_SEQUENCE=auauauaauauauauauauuauaa&FORMAT_OBJECT=Alignment&FORMAT_TYPE=HTML&ALIGNMENT_VIEW=Pairwise&MASK_CHAR=2&MASK_COLOR=1&DESCRIPTIONS=100&ALIGNMENTS=100&NEW_VIEW=true&OLD_BLAST=false&NCBI_GI=false&SHOW_CDS_FEATURE=false&NUM_OVERVIEW=100&FORMAT_EQ_TEXT=&FORMAT_ORGANISM=&EXPECT_LOW=&EXPECT_HIGH=&QUERY_INDEX=&CLIENT=web&SERVICE=plain&CMD=request&PAGE=Nucleotides&PROGRAM=blastn&MEGABLAST=&RUN_PSIBLAST=&TWO_HITS=&DEFAULT_PROG=megaBlast&WWW_BLAST_TYPE=&DB_ABBR=&SAVED_PSSM=&SELECTED_PROG_TYPE=blastn&SAVED_SEARCH=true&BLAST_SPEC=&QUERY_BELIEVE_DEFLINE=&DB_DIR_PREFIX=&USER_DATABASE=&USER_WORD_SIZE=&USER_MATCH_SCORES=&USER_FORMAT_DEFAULTS=&NO_COMMON=&NUM_DIFFS=2&NUM_OPTS_DIFFS=1&UNIQ_DEFAULTS_NAME=A_SearchDefaults_1Mn7ZD_2Sq4_1Z58HQ5Jb_23tpbD_167y9p&PAGE_TYPE=BlastSearch&USER_DEFAULT_PROG_TYPE=blastn&USER_DEFAULT_MATCH_SCORES=3.  target="_blank">blast</a></td>
+            <td>uucuuguuggaggugacuuc</td>
+            <td>aguuugcaacaaagca</td>
+            <td>aguuugcaacaaagcaaaaugcuauguucuuguuggaggugacuuc</td>
+<td>chr7:4571138..4571184:-</td>
+</tr></table></font></table>
+</body>
+</html>
