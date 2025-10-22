@@ -11,7 +11,24 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-### mincov 0.1 w/ trimmed filess - apoc
+### raw default - apoc 
+
+Load data
+```{r}
+mirna <- read.table("../output/shortstack/apoc/raw_default/Results.txt", header = T)
+```
+
+Select specific cols. Calculate length of miRNA 
+```{r}
+mirna_blah <- mirna %>%
+ #dplyr::filter(MIRNA == "Y") %>%
+ filter(!(MIRNA == "N" & DicerCall == "N") & 
+          (MIRNA == "Y" | (!is.na(as.numeric(DicerCall)) & !is.na(known_miRNAs)))) %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
+```
+
+### mincov 0.1 w/ trimmed files - apoc
 
 Load data
 ```{r}
@@ -21,21 +38,21 @@ mirna <- read.table("../output/shortstack/apoc/mincov0.1/Results.txt", header = 
 Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
 ```{r}
 mirna_y <- mirna %>%
-  dplyr::filter(MIRNA == "Y") %>%
-  mutate(Length = End - Start) %>%
-  mutate(mature_length = nchar(MajorRNA))
+ dplyr::filter(MIRNA == "Y") %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
 ```
 
 Select mirnas 
 ```{r}
 mirna_known <- mirna %>%
-  dplyr::filter(!is.na(known_miRNAs)) %>%
-  mutate(mature_length = nchar(MajorRNA))
+ dplyr::filter(!is.na(known_miRNAs)) %>%
+ mutate(mature_length = nchar(MajorRNA))
 ```
 
 
 
-### miRNAs from trimmed reads but default mincov 
+### miRNAs from trimmed reads and default mincov - apoc
 
 Load data
 ```{r}
@@ -45,8 +62,44 @@ mirna_trim <- read.table("../output/shortstack/apoc/trimmed_default/Results.txt"
 Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
 ```{r}
 mirna_trim_y <- mirna_trim %>%
-  dplyr::filter(MIRNA == "Y") %>%
-  mutate(Length = End - Start) %>%
-  mutate(mature_length = nchar(MajorRNA))
+ #dplyr::filter(MIRNA == "Y") %>%
+ filter(!(MIRNA == "N" & DicerCall == "N") & 
+          (MIRNA == "Y" | (!is.na(as.numeric(DicerCall)) & !is.na(known_miRNAs)))) %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
+```
+
+### miRNAs from trimmed reads and default mincov - ahya
+
+Load data
+```{r}
+mirna_trim <- read.table("../output/shortstack/ahya/trimmed_default/Results.txt", header = T)
+```
+
+Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
+```{r}
+mirna_trim_y <- mirna_trim %>%
+ dplyr::filter(MIRNA == "Y") %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
+```
+
+Weird...for Ahya, mir-100 did not get classified as an miRNA. Filter so that I retain miRNAs with Y OR known miRNA. 
+```{r}
+mirna_filtered <- mirna_trim %>%
+ #filter(MIRNA == "Y" | DicerCall != "N") %>%
+ #filter(MIRNA == "Y" | !is.na(known_miRNAs)) %>%
+ filter(!(MIRNA == "N" & DicerCall == "N")) %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
+```
+
+What about keeping rows so that miRNA == Y OR DicerCall is numeric and known miRNAs is not NA. 
+```{r}
+mirna_filt <- mirna_trim %>%
+ filter(!(MIRNA == "N" & DicerCall == "N") & 
+          (MIRNA == "Y" | (!is.na(as.numeric(DicerCall)) & !is.na(known_miRNAs)))) %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
 ```
 
