@@ -1,0 +1,70 @@
+---
+title: "miRNA discovery - mirdeep2"
+author: "Jill Ashey"
+date: "2025-10-30"
+output: html_document
+---
+
+Is it an miRNA? 
+
+- mirdeep score >10 ?
+- sig randfold pvalue 
+- mature read count >10
+- no other ncRNAs
+- at least 2bp overhang on 3' strand 
+- Consistent 5' start bp 
+- at least 16 bp between strands 
+- at least 8 bp loop sequence
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## Apoc 
+
+### Apoc 2
+
+#### Novel 
+
+Read in data - novel 
+```{r}
+novel_apoc_2 <- read.csv("../output/mirdeep2/apoc/apoc_2/novel_apoc_2.csv", header = T)
+```
+
+Remove rows based on miRNA ID parameters
+```{r}
+novel_apoc_2_filt <- novel_apoc_2 %>%
+  filter(mature.read.count >= 10) %>%
+  filter(significant.randfold.p.value == "yes") %>%
+  #filter(miRDeep2.score >= 10) %>%
+  filter(Overhang.on.3..end >=2) %>%
+  filter(Complementarity.between.arms >= 16) %>%
+  filter(Loop.sequence.length >=8)
+```
+
+Look at unique sequences 
+```{r}
+length(unique(novel_apoc_2_filt$consensus.mature.sequence))
+```
+
+#### Known
+
+Read in data - known 
+```{r}
+known_apoc_2 <- read.csv("../output/mirdeep2/apoc/apoc_2/known_apoc_2.csv", header = T)
+```
+
+Remove rows based on miRNA ID parameters
+```{r}
+known_apoc_2_filt <- known_apoc_2 %>%
+  filter(mature.read.count >= 10) %>%
+  filter(significant.randfold.p.value == "yes") %>%
+  #filter(miRDeep2.score >= 10) %>%
+  filter(Overhang.on.3..end >=2) %>%
+  filter(Complementarity.between.arms >= 16) %>%
+  filter(Loop.sequence.length >=7)
+```
+
+May have to relax parameters based on known miRNAs since we see some hits to known Apoc miRNAs. But low read counts overall. 
