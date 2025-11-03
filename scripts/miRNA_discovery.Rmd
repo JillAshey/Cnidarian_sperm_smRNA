@@ -59,6 +59,23 @@ Load data
 mirna_trim <- read.table("../output/shortstack/apoc/trimmed_default/Results.txt", header = T)
 ```
 
+Select data with miRNA == Y or known miRNA
+```{r}
+mirna_filtered <- mirna_trim %>%
+  filter(MIRNA == "Y" | !is.na(known_miRNAs)) %>%
+ mutate(Length = End - Start) %>%
+ mutate(mature_length = nchar(MajorRNA))
+```
+
+Only keep seqs that have length between 20-26
+```{r}
+
+```
+
+
+
+
+
 Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
 ```{r}
 mirna_trim_y <- mirna_trim %>%
@@ -73,16 +90,17 @@ mirna_trim_y <- mirna_trim %>%
 
 Load data
 ```{r}
-mirna_trim <- read.table("../output/shortstack/ahya/trimmed_default/Results.txt", header = T)
+mirna_trim_ahya <- read.table("../output/shortstack/ahya/trimmed_default/Results.txt", header = T)
 ```
 
-Select only miRNAs with a Y in MIRNA column. Calculate length of miRNA 
+Select data with miRNA == Y or known miRNA
 ```{r}
-mirna_trim_y <- mirna_trim %>%
- dplyr::filter(MIRNA == "Y") %>%
+mirna_trim_filtered_ahya <- mirna_trim_ahya %>%
+  filter(MIRNA == "Y" | !is.na(known_miRNAs)) %>%
  mutate(Length = End - Start) %>%
  mutate(mature_length = nchar(MajorRNA))
 ```
+
 
 Weird...for Ahya, mir-100 did not get classified as an miRNA. Filter so that I retain miRNAs with Y OR known miRNA. 
 ```{r}

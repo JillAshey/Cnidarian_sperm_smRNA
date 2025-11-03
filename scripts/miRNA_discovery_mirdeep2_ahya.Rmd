@@ -1,0 +1,83 @@
+---
+title: "miRNA discovery - mirdeep2 for Ahya"
+author: "Jill Ashey"
+date: "2025-11-03"
+output: html_document
+---
+
+Is it an miRNA? 
+
+- mirdeep score >10 ?
+- sig randfold pvalue 
+- mature read count >10
+- no other ncRNAs
+- at least 2bp overhang on 3' strand 
+- Consistent 5' start bp 
+- at least 16 bp between strands 
+- at least 8 bp loop sequence
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## Apoc 
+
+First, I just want to see if I have any overlap in miRNAs in my data across the 3 replicates. 
+
+Read in novel data from all reps
+```{r}
+novel_ahya_1 <- read.csv("../output/mirdeep2/ahya/ahya_1/known_ahya_1.csv", header = T)
+novel_ahya_2 <- read.csv("../output/mirdeep2/ahya/ahya_2/known_ahya_2.csv", header = T)
+novel_ahya_3 <- read.csv("../output/mirdeep2/ahya/ahya_3/known_ahya_3.csv", header = T)
+novel_ahya_4 <- read.csv("../output/mirdeep2/ahya/ahya_4/known_ahya_4.csv", header = T)
+```
+
+Find common sequences 
+```{r}
+# Method 1: Based on consensus.mature.sequence (RECOMMENDED)
+# Find sequences present in all 4 replicates
+common_all_four <- Reduce(intersect, list(
+  novel_ahya_1$consensus.mature.sequence,
+  novel_ahya_2$consensus.mature.sequence,
+  novel_ahya_3$consensus.mature.sequence,
+  novel_ahya_4$consensus.mature.sequence
+))
+
+cat("Sequences in all 4 replicates:", length(common_all_three), "\n")
+print(common_all_four)
+
+# Find sequences present in at least 2 replicates
+common_2_or_3 <- unique(c(
+  intersect(novel_apoc_2$consensus.mature.sequence, novel_apoc_3$consensus.mature.sequence),
+  intersect(novel_apoc_2$consensus.mature.sequence, novel_apoc_4$consensus.mature.sequence),
+  intersect(novel_apoc_3$consensus.mature.sequence, novel_apoc_4$consensus.mature.sequence)
+))
+
+cat("\nSequences in at least 2 replicates:", length(common_2_or_3), "\n")
+
+# Create a summary showing which replicates each sequence appears in
+all_sequences <- unique(c(
+  novel_apoc_2$consensus.mature.sequence,
+  novel_apoc_3$consensus.mature.sequence,
+  novel_apoc_4$consensus.mature.sequence
+))
+
+presence_matrix <- data.frame(
+  sequence = all_sequences,
+  in_rep2 = all_sequences %in% novel_apoc_2$consensus.mature.sequence,
+  in_rep3 = all_sequences %in% novel_apoc_3$consensus.mature.sequence,
+  in_rep4 = all_sequences %in% novel_apoc_4$consensus.mature.sequence
+)
+
+presence_matrix$num_replicates <- rowSums(presence_matrix[, c("in_rep2", "in_rep3", "in_rep4")])
+
+# View summary
+table(presence_matrix$num_replicates)
+
+# View sequences found in all 3 replicates with their details
+shared_all <- presence_matrix[presence_matrix$num_replicates == 3, ]
+print(shared_all)
+```
+

@@ -24,6 +24,232 @@ library(tidyverse)
 
 ## Apoc 
 
+First, I just want to see if I have any overlap in miRNAs in my data across the 3 replicates. 
+
+Read in novel data from all reps
+```{r}
+novel_apoc_2 <- read.csv("../output/mirdeep2/apoc/apoc_2/novel_apoc_2.csv", header = T)
+novel_apoc_3 <- read.csv("../output/mirdeep2/apoc/apoc_3/novel_apoc_3.csv", header = T)
+novel_apoc_4 <- read.csv("../output/mirdeep2/apoc/apoc_4/novel_apoc_4.csv", header = T)
+```
+
+Find common sequences 
+```{r}
+# Method 1: Based on consensus.mature.sequence (RECOMMENDED)
+# Find sequences present in all 3 replicates
+common_all_three <- Reduce(intersect, list(
+  novel_apoc_2$consensus.mature.sequence,
+  novel_apoc_3$consensus.mature.sequence,
+  novel_apoc_4$consensus.mature.sequence
+))
+
+cat("Sequences in all 3 replicates:", length(common_all_three), "\n")
+print(common_all_three)
+
+# Find sequences present in at least 2 replicates
+common_2_or_3 <- unique(c(
+  intersect(novel_apoc_2$consensus.mature.sequence, novel_apoc_3$consensus.mature.sequence),
+  intersect(novel_apoc_2$consensus.mature.sequence, novel_apoc_4$consensus.mature.sequence),
+  intersect(novel_apoc_3$consensus.mature.sequence, novel_apoc_4$consensus.mature.sequence)
+))
+
+cat("\nSequences in at least 2 replicates:", length(common_2_or_3), "\n")
+
+# Create a summary showing which replicates each sequence appears in
+all_sequences <- unique(c(
+  novel_apoc_2$consensus.mature.sequence,
+  novel_apoc_3$consensus.mature.sequence,
+  novel_apoc_4$consensus.mature.sequence
+))
+
+presence_matrix <- data.frame(
+  sequence = all_sequences,
+  in_rep2 = all_sequences %in% novel_apoc_2$consensus.mature.sequence,
+  in_rep3 = all_sequences %in% novel_apoc_3$consensus.mature.sequence,
+  in_rep4 = all_sequences %in% novel_apoc_4$consensus.mature.sequence
+)
+
+presence_matrix$num_replicates <- rowSums(presence_matrix[, c("in_rep2", "in_rep3", "in_rep4")])
+
+# View summary
+table(presence_matrix$num_replicates)
+
+# View sequences found in all 3 replicates with their details
+shared_all <- presence_matrix[presence_matrix$num_replicates == 3, ]
+print(shared_all)
+```
+
+Find shared miRNAs based on some seq variation
+```{r}
+# Install if needed
+# install.packages("stringdist")
+library(stringdist)
+
+# Method 1: Hamming distance (substitutions only, same length sequences)
+# Find sequences that differ by at most 2 base pairs
+
+find_similar_mirnas <- function(df1, df2, max_diff = 2) {
+  matches <- data.frame()
+  
+  for(i in 1:nrow(df1)) {
+    seq1 <- df1$consensus.mature.sequence[i]
+    
+    for(j in 1:nrow(df2)) {
+      seq2 <- df2$consensus.mature.sequence[j]
+      
+      # Only compare sequences of similar length (within 2 bp)
+      if(abs(nchar(seq1) - nchar(seq2)) <= 2) {
+        # Calculate Levenshtein distance (allows insertions/deletions)
+        dist <- stringdist(seq1, seq2, method = "lv")
+        
+        if(dist <= max_diff) {
+          matches <- rbind(matches, data.frame(
+            seq1 = seq1,
+            id1 = df1$provisional.id[i],
+            rep1_reads = df1$total.read.count[i],
+            seq2 = seq2,
+            id2 = df2$provisional.id[j],
+            rep2_reads = df2$total.read.count[j],
+            distance = dist,
+            stringsAsFactors = FALSE
+          ))
+        }
+      }
+    }
+  }
+  return(matches)
+}
+
+# Compare all pairs of replicates
+cat("=== Comparing Replicate 2 vs 3 ===\n")
+matches_2v3 <- find_similar_mirnas(novel_apoc_2, novel_apoc_3, max_diff = 2)
+print(matches_2v3)
+
+cat("\n=== Comparing Replicate 2 vs 4 ===\n")
+matches_2v4 <- find_similar_mirnas(novel_apoc_2, novel_apoc_4, max_diff = 2)
+print(matches_2v4)
+
+cat("\n=== Comparing Replicate 3 vs 4 ===\n")
+matches_3v4 <- find_similar_mirnas(novel_apoc_3, novel_apoc_4, max_diff = 2)
+print(matches_3v4)
+
+
+# Method 2: Alignment-based approach for more sophisticated matching
+# This considers position-specific mismatches
+
+align_sequences <- function(seq1, seq2) {
+  # Simple alignment score
+  len <- min(nchar(seq1), nchar(seq2))
+  s1 <- substring(seq1, 1, len)
+  s2 <- substring(seq2, 1, len)
+  
+  mismatches <- sum(strsplit(s1, "")[[1]] != strsplit(s2, "")[[1]])
+  return(mismatches)
+}
+
+
+# Method 3: Find miRNAs with similar seed sequences (first 2-8 bases)
+# This is biologically relevant since seed sequence determines targets
+
+extract_seed <- function(sequence, seed_length = 7) {
+  substr(sequence, 1, min(seed_length, nchar(sequence)))
+}
+
+novel_apoc_2$seed <- sapply(novel_apoc_2$consensus.mature.sequence, extract_seed)
+novel_apoc_3$seed <- sapply(novel_apoc_3$consensus.mature.sequence, extract_seed)
+novel_apoc_4$seed <- sapply(novel_apoc_4$consensus.mature.sequence, extract_seed)
+
+# Find shared seed sequences
+common_seeds <- Reduce(intersect, list(
+  novel_apoc_2$seed,
+  novel_apoc_3$seed,
+  novel_apoc_4$seed
+))
+
+cat("\n=== miRNAs with identical seed sequences in all 3 replicates ===\n")
+cat("Number of shared seeds:", length(common_seeds), "\n\n")
+
+for(seed in common_seeds) {
+  cat("\nSeed sequence:", seed, "\n")
+  cat("Rep 2:\n")
+  print(novel_apoc_2[novel_apoc_2$seed == seed, 
+                     c("provisional.id", "consensus.mature.sequence", "total.read.count")])
+  cat("Rep 3:\n")
+  print(novel_apoc_3[novel_apoc_3$seed == seed, 
+                     c("provisional.id", "consensus.mature.sequence", "total.read.count")])
+  cat("Rep 4:\n")
+  print(novel_apoc_4[novel_apoc_4$seed == seed, 
+                     c("provisional.id", "consensus.mature.sequence", "total.read.count")])
+}
+
+
+# Method 4: Comprehensive pairwise comparison matrix
+# Shows which sequences are similar across all replicates
+
+create_similarity_network <- function(df_list, names, max_diff = 2) {
+  all_seqs <- unique(unlist(lapply(df_list, function(x) x$consensus.mature.sequence)))
+  
+  similarity_table <- data.frame(sequence = all_seqs)
+  
+  for(i in 1:length(df_list)) {
+    similarity_table[[names[i]]] <- FALSE
+    similarity_table[[paste0(names[i], "_exact")]] <- FALSE
+  }
+  
+  for(seq in all_seqs) {
+    for(i in 1:length(df_list)) {
+      df <- df_list[[i]]
+      
+      # Check for exact match
+      if(seq %in% df$consensus.mature.sequence) {
+        similarity_table[similarity_table$sequence == seq, paste0(names[i], "_exact")] <- TRUE
+        similarity_table[similarity_table$sequence == seq, names[i]] <- TRUE
+      } else {
+        # Check for close match
+        for(comp_seq in df$consensus.mature.sequence) {
+          if(abs(nchar(seq) - nchar(comp_seq)) <= 2) {
+            if(stringdist(seq, comp_seq, method = "lv") <= max_diff) {
+              similarity_table[similarity_table$sequence == seq, names[i]] <- TRUE
+              break
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  similarity_table$num_replicates <- rowSums(similarity_table[, names])
+  similarity_table$num_exact <- rowSums(similarity_table[, paste0(names, "_exact")])
+  
+  return(similarity_table)
+}
+
+df_list <- list(novel_apoc_2, novel_apoc_3, novel_apoc_4)
+rep_names <- c("rep2", "rep3", "rep4")
+
+similarity_network <- create_similarity_network(df_list, rep_names, max_diff = 2)
+
+cat("\n=== Summary of miRNA similarity across replicates ===\n")
+print(table(similarity_network$num_replicates))
+
+cat("\n=== miRNAs found in all 3 replicates (allowing 2bp differences) ===\n")
+shared_fuzzy <- similarity_network[similarity_network$num_replicates == 3, ]
+print(shared_fuzzy)
+
+cat("\n=== miRNAs with exact matches in all 3 replicates ===\n")
+shared_exact <- similarity_network[similarity_network$num_exact == 3, ]
+print(shared_exact)
+```
+
+Filter each df for shared seqs
+```{r}
+novel_apoc_2_shared <- novel_apoc_2[novel_apoc_2$consensus.mature.sequence %in% common_2_or_3, ]
+novel_apoc_3_shared <- novel_apoc_3[novel_apoc_3$consensus.mature.sequence %in% common_2_or_3, ]
+novel_apoc_4_shared <- novel_apoc_4[novel_apoc_4$consensus.mature.sequence %in% common_2_or_3, ]
+```
+
+
+
 ### Apoc 2
 
 #### Novel 
