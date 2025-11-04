@@ -1,0 +1,209 @@
+---
+title: "TE in piRNA clusters"
+author: "Jill Ashey"
+date: "2025-11-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(GenomicRanges)
+```
+
+
+### Ahya 
+
+Read in repeatmasker out file 
+```{r}
+out_file <- read.table("~/Desktop/GFFs/ahya/Ahyacinthus.chrsV1.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
+```
+
+Retain only chromosome, start, stop, TE name, Family Name and percent divergence
+```{r}
+bed_file <- out_file[,c(5:7,11,2)]
+
+#remove empty lines 
+bed_file <- bed_file %>%
+  drop_na(.)
+```
+
+Calculate the proportion of each repeat type 
+```{r}
+bed_file <- bed_file %>%
+  mutate(length = V7 - V6 + 1)  # Calculate length of each interval
+
+# Summarize total length per repeat type
+length_per_repeat <- bed_file %>%
+  group_by(V11) %>%
+  summarise(total_length = sum(length)) %>%
+  ungroup()
+
+# Calculate total length of all repeats
+total_length_all <- sum(length_per_repeat$total_length)
+
+# Calculate proportion of each repeat type
+length_per_repeat <- length_per_repeat %>%
+  mutate(proportion = total_length / total_length_all) %>%
+  mutate(proportion_precent = proportion*100)
+
+# Assume length_per_repeat contains columns: V11 (repeat type), proportion (calculated proportion)
+ggplot(length_per_repeat, aes(x = reorder(V11, -proportion_precent), y = proportion_precent, fill = V11)) +
+  geom_bar(stat = "identity") +                       # Bar heights represent proportions
+  #scale_y_continuous(labels = scales::percent) +     # Y-axis as percentages
+  labs(x = "Repeat Element Type", y = "Proportion of Genome (%)", 
+       title = "Proportion of Genomic Repeat Elements") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1))  # Tilt x labels for readability
+```
+
+Write out bed file
+```{r}
+write.table(bed_file, file = "~/Desktop/GFFs/ahya/Ahya_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
+```
+
+Read in bed overlap file
+```{r}
+cluster_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNA_cluster_TEs_intersect.txt")
+```
+
+#### piRNA clusters 
+
+Calculate number of unique piRNA clusters (unique genomic intervals in V1:V3)
+```{r}
+unique_clusters <- cluster_bed %>%
+  distinct(V1, V2, V3)
+
+num_unique_piRNA_clusters <- nrow(unique_clusters)
+```
+
+18 out of 29 piRNA clusters overlap with some TE. 
+
+Calculate how many unique piRNA clusters overlap each repeat type (V7)
+```{r}
+clusters_per_repeat <- cluster_bed %>%
+  distinct(V1, V2, V3, V7) %>%
+  group_by(V7) %>%
+  summarise(num_clusters = n()) %>%
+  ungroup() %>%
+  mutate(proportion = num_clusters / num_unique_piRNA_clusters)
+
+# Plot the proportions of piRNA clusters overlapping each repeat type
+ggplot(clusters_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Repeat type", y = "Proportion of piRNA clusters overlapping", title = "Proportion of piRNA clusters overlapping RepeatMasker elements - Ahya") +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Read in piRNA cluster-gene overlap 
+```{r}
+cluster_gene <- read.table("../output/piRNAs/ahya/Ahya_piRNA_cluster_genes_intersect.txt")
+```
+
+Calculate number of unique piRNA clusters overlapping genes (unique genomic intervals in V1:V3) and vice versa (unique genomic intervals in V4, V6, V7)
+```{r}
+## unique pirna
+unique_cluster_gene <- cluster_gene %>%
+  distinct(V1, V2, V3)
+
+num_unique_cluster_gene <- nrow(unique_cluster_gene)
+
+## unique gene
+unique_gene <- cluster_gene %>%
+  distinct(V4, V7, V8)
+
+num_unique_gene <- nrow(unique_gene)
+```
+
+#### piRNAs
+
+Read in piRNA TE overlap 
+```{r}
+pirna_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_TEs_intersect.txt")
+```
+
+Calculate number of unique piRNAs (unique genomic intervals in V1:V3)
+```{r}
+unique_pirna <- pirna_bed %>%
+  distinct(V1, V2, V3)
+
+num_unique_piRNAs <- nrow(unique_pirna)
+```
+
+Calculate how many unique piRNAs overlap each repeat type (V7)
+```{r}
+pirna_per_repeat <- pirna_bed %>%
+  distinct(V1, V2, V3, V7) %>%
+  group_by(V7) %>%
+  summarise(num_clusters = n()) %>%
+  ungroup() %>%
+  mutate(proportion = num_clusters / num_unique_piRNAs)
+
+# Plot the proportions of piRNA clusters overlapping each repeat type
+ggplot(pirna_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Repeat type", y = "Proportion of piRNAs overlapping", title = "Proportion of piRNAs overlapping RepeatMasker elements - Ahya") +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Read in piRNA-gene overlap 
+```{r}
+pirna_gene <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_genes_intersect.txt")
+```
+
+Calculate lengths
+```{r}
+pirna_gene <- pirna_gene %>%
+  mutate(pirna_length = V3 - V2) %>%
+  mutate(gene_length = V8 - V7)
+```
+
+Calculate number of unique piRNAs overlapping genes (unique genomic intervals in V1:V3) and vice versa (unique genomic intervals in V4, V6, V7)
+```{r}
+## unique pirna
+unique_pirna_gene <- pirna_gene %>%
+  distinct(V1, V2, V3)
+
+num_unique_piRNAs_gene <- nrow(unique_pirna_gene)
+
+## unique gene
+unique_gene <- pirna_gene %>%
+  distinct(V4, V6, V7)
+
+num_unique_gene <- nrow(unique_gene)
+```
+
+Is there overlap between the piRNAs overlapping genes v. TEs?
+```{r}
+# Create GRanges objects
+gr_gene <- GRanges(seqnames = unique_pirna_gene$V1,
+                   ranges = IRanges(start = unique_pirna_gene$V2, end = unique_pirna_gene$V3))
+
+gr_te <- GRanges(seqnames = unique_pirna$V1,
+                 ranges = IRanges(start = unique_pirna$V2, end = unique_pirna$V3))
+
+# Find overlaps
+overlaps <- findOverlaps(gr_gene, gr_te)
+
+# Get the overlapping intervals (from each data frame)
+overlapping_genes <- unique_pirna_gene[queryHits(overlaps), ]
+overlapping_tes <- unique_pirna[subjectHits(overlaps), ]
+
+# How many overlaps found?
+length(overlaps)
+```
+
+2727 piRNAs overlap with both TEs and genes. 
+
+To summarize: 
+- 364493 piRNAs in Ahya
+- 5613 piRNAs overlap with some TE
+- 116936 piRNAs overlap with genes
+- 2727 piRNAs overlap with both TE and genes 
+- 2727+116936+5613 = 125276 piRNAs overlapping TEs, genes or both 
+
+This equals about ~34% of the piRNAs. The rest are in intergenic space (could be in other elements but these are unannotated). This matches Figure 7 ovary piRNA targets in Nemastostella (Praher et al. 2017).

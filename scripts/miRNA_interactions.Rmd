@@ -1,0 +1,299 @@
+---
+title: "miRNA interactions"
+author: "Jill Ashey"
+date: "2025-11-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(topGO)
+library(rrvgo)
+```
+
+### Apoc
+
+#### Binding summary
+
+Read in miranda data 
+```{r}
+miranda_apoc <- read.delim("../output/miRNA_interactions/apoc/miranda_strict_mRNA_parsed_apoc.txt", header = F)
+colnames(miranda_apoc) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+
+# Format miranda df 
+miranda_apoc$miRNA <- sub("^>", "", miranda_apoc$miRNA)  # Remove leading ">"
+
+dim(miranda_apoc)
+length(unique(miranda_apoc$miRNA))
+length(unique(miranda_apoc$mRNA))
+```
+
+Remove Cluster_598 - it is the same as Cluster_595 and targets the same number of mRNAs. 
+```{r}
+miranda_apoc <- miranda_apoc %>%
+  filter(!miRNA == "Cluster_598")
+
+dim(miranda_apoc)
+length(unique(miranda_apoc$miRNA))
+length(unique(miranda_apoc$mRNA))
+```
+
+Make network plot 
+```{r}
+# Construct the edge list
+edges <- data.frame(
+  from = miranda_apoc$miRNA,
+  to = miranda_apoc$mRNA,
+  stringsAsFactors = FALSE
+)
+
+# Create the graph
+graph <- graph_from_data_frame(edges, directed = FALSE)
+
+# Convert to tbl_graph for ggraph compatibility
+tbl_graph <- as_tbl_graph(graph)
+
+# Plot network with ggraph
+ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
+  geom_edge_link(alpha = 0.6) +        # draw edges
+  geom_node_point(aes(filter = name %in% miranda_apoc$miRNA), 
+                  color = 'red', size = 5) + # highlight miRNAs as red nodes
+  geom_node_point(aes(filter = !(name %in% miranda_apoc$miRNA)), 
+                  color = 'blue', size = 3) + # mRNAs as blue smaller nodes
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
+  theme_void() +
+  labs(title = "miRNA-centered Network Plot with mRNA Connections - Apoc")
+
+```
+
+The miRNAs have the potential to bind to all of these mRNAs but the counts are quite low so unlikely that all bindings would happen. But can still do enrichment to determine the potential biological processes that might be involved. 
+
+Calculate number of unique mRNAs targeted by each miRNA
+```{r}
+miRNA_target_counts_apoc <- miranda_apoc %>%
+  group_by(miRNA) %>%
+  summarise(num_mRNAs_targeted = n_distinct(mRNA))
+```
+
+Perhaps collapse Cluster_595 and Cluster_598...they are the same sequence and are targeting the same number of mRNAs. 
+
+Count how many mRNAs are targeted by multiple miRNAs
+```{r}
+mRNA_targeted_counts_apoc <- miranda_apoc %>%
+  group_by(mRNA) %>%
+  summarise(num_miRNAs_targeting = n_distinct(miRNA))
+
+mRNAs_multiple_miRNAs_apoc <- mRNA_targeted_counts_apoc %>%
+  filter(num_miRNAs_targeting > 1) %>%
+  summarise(num_mRNAs = n())
+```
+
+Calculate number of bp shared in the interaction 
+```{r}
+miranda_apoc <- miranda_apoc %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
+
+Plot shared interaction bp distribution 
+```{r}
+ggplot(miranda_apoc, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq <- miranda_apoc %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq$interaction_length),
+                                  max(df_freq$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+#### Enrichment! 
+
+Read in annot information
+```{r}
+annot_apoc <- read.delim("../data/annotations/apoculata_GeneAnnotation_combined.txt")
+```
+
+Format tab file for TopGO
+```{r}
+go_apoc <- annot_apoc %>%
+  dplyr::select(Protein_ID, GO_Swiss.Prot, GO_Trembl) %>%
+  mutate(GeneOntologyIDs = paste(GO_Swiss.Prot, GO_Trembl, sep = ";")) %>%
+  dplyr::select(-c(GO_Swiss.Prot, GO_Trembl)) %>%
+  rename(gene_name = Protein_ID)
+
+# Save as tab file 
+write_tsv(go_apoc, file = "../data/annotations/Apoc_gene2go.tab")
+```
+
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+apoc_clust_genes <- as.character(unique(miranda_apoc$mRNA))
+
+# All genes 
+apoc_all_genes <- as.character(apoc_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
+names(apoc_GeneList) <- apoc_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_BP <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_BP_FE <- runTest(GO_APOC_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_BP_En$Fisher<-as.numeric(GO_APOC_BP_En$Fisher)
+GO_APOC_BP_En_sig<-GO_APOC_BP_En[GO_APOC_BP_En$Fisher<0.05,]
+```
+
+Reduce GO term set by calculating semantic similarity 
+```{r}
+simMatrix_apoc <- calculateSimMatrix(GO_APOC_BP_En_sig$GO.ID,
+                                orgdb="org.Ce.eg.db", #c. elegans database
+                                ont="BP",
+                                method="Rel")
+
+scores_apoc <- setNames(-log(as.numeric(GO_APOC_BP_En_sig$Fisher)), GO_APOC_BP_En_sig$GO.ID)
+reducedTerms_apoc <- reduceSimMatrix(simMatrix_apoc,
+                                scores_apoc,
+                                threshold=0.7,
+                                orgdb="org.Ce.eg.db")
+```
+
+Keep GO terms from reduced list 
+```{r}
+GO_APOC_BP_En_sig_reduced <- GO_APOC_BP_En_sig %>%
+  filter(GO.ID %in% reducedTerms_apoc$go)
+
+# Add parent terms to list of GO terms 
+GO_APOC_BP_En_sig_reduced$ParentTerm <- reducedTerms_apoc$parentTerm[match(GO_APOC_BP_En_sig_reduced$GO.ID, reducedTerms_apoc$go)]
+
+GO_APOC_BP_En_sig_reduced <- GO_APOC_BP_En_sig_reduced %>% group_by(ParentTerm) %>% mutate("N_in_Parent" = dplyr::n()) %>% ungroup()
+```
+
+Plot! 
+```{r}
+parent_enrich_BP_apoc <- ggplot(GO_APOC_BP_En_sig_reduced, aes(x=Fisher,y=reorder(Term,Fisher)))+
+  facet_grid(ParentTerm ~ ., scales="free", labeller = label_wrap_gen(width = 10, multi_line = TRUE))+
+  geom_point(size=2, color="black")+
+  geom_segment(aes(x=0, xend=Fisher, y=Term, yend=Term)) +
+  #geom_hline(yintercept = 0, linetype="solid", color = 'black', linewidth=0.5, show.legend = TRUE)+
+  #scale_y_continuous(limits=c(0,40))+
+   #scale_x_discrete(labels = label_wrap(30)) +
+  #scale_fill_gradientn(colours=c("white","#fddbc7","#f4a582","#d6604d","#b2182b"), na.value = "grey98",limits = c(0, 100)) +
+  #labs(title = "Enriched Biological Process Parent GO Terms, Brown Module", x="Parent Term", y="Number of Significant (p < 0.01) GO Terms in Module", colour="p-value") +
+  theme_classic() + 
+  theme(axis.text.y = element_text(size = 6), 
+              axis.title = element_text(size = 6), 
+              plot.title = element_text(hjust = 0.5, size = 6));parent_enrich_BP_apoc
+
+ggsave("../output/miRNA_interactions/apoc/parent_enrich_BP.pdf", plot = parent_enrich_BP_apoc, width = 8, height = 15, units = "in")
+ggsave("../output/miRNA_interactions/apoc/parent_enrich_BP.png", plot = parent_enrich_BP_apoc, width = 8, height = 15, units = "in")
+```
+
+Another way:
+```{r}
+# Prepare data (replace GO_APOC_BP_En_sig_reduced with your df name)
+df <- GO_APOC_BP_En_sig_reduced %>%
+  mutate(Term = fct_reorder(Term, -Significant))  # Order terms by number of significant genes
+
+# Dot plot: x = number significant, y = GO Term, size = Annotated genes, color = -log10(Fisher p-value)
+ggplot(df, aes(x = Significant, y = Term, size = Annotated, color = -log10(Fisher))) +
+  geom_point(alpha = 0.7) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Number of Significant Genes",
+       y = "GO Biological Process Term",
+       color = "-log10(Fisher p-value)",
+       size = "Annotated Genes") +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 10))
+
+blah<-ggplot(df, aes(x = Term, y = Fisher, size = Significant, fill = Fisher)) +
+  #expand_limits(y = 1.5) +
+  #ylim(1, 7.25) +
+  # Add horizontal lines with a single aesthetic value
+  #geom_hline(yintercept = -log10(0.01), linetype = "longdash", colour = "black", linewidth = .6) +
+  #geom_hline(yintercept = -log10(0.001), linetype = "solid", colour = "black", linewidth = .6) +
+  geom_point(shape = 21) + 
+  scale_size(range = c(2, 12)) + 
+  scale_fill_continuous(low = "#1AD3D1FF", high = "#4686FBFF") +
+  xlab('') + 
+  ylab('Enrichment score') +
+  #labs(caption = 'Cut-off lines at p=0.01 and p=0.001') +
+  theme_bw() +
+  #facet_grid(vars(ontology), scales = "free", space = "free_y") +
+  coord_flip(); blah
+```
+
+Think more about how to visualize the data...
+
