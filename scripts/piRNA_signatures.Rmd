@@ -1,0 +1,240 @@
+---
+title: "piRNA ping pong signatures"
+author: "Jill Ashey"
+date: "2025-11-11"
+output: html_document
+---
+
+piRNAs have specific signatures that can be examined to see if they were derived from ping-pong biogenesis: overlap on 10bp and presence of U in position 1. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+Set custom plot theme
+```{r}
+theme_custom <- theme_classic(base_size = 9) +
+  theme(
+    text = element_text(family = "sans"),
+    axis.text = element_text(color = "black", size = 12),
+    axis.title = element_text(size = 16, face = "bold"),
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "italic", size = 18, hjust = 0.5),
+    #panel.border = element_rect(color = "grey60", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    #panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(0.4, "cm"))
+    #plot.margin = margin(2,2,2,2))
+```
+
+## Nvec 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_nvec <- read.csv("../output/piRNAs/nvec/piRNA_pingpong_nvec.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_nvec <- pp_nvec %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_nvec <- summary_data_nvec %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_nvec <- mean(
+  5.42328080965236, # nvec 1
+  8.81178350311666, # nvec 2
+  13.099921789492, # nvec 3
+  10.001391045776 # nvec 4
+)
+print(zscore_nvec)
+```
+
+Plot
+```{r}
+overlap_plot_nvec <- ggplot(summary_data_filt_nvec, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Nematostella vectensis") +
+  geom_label(
+    aes(x = 14, y = 55, label = "Z-score = 5.423281"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 4) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 80, by = 10),
+        limits = c(0, 80)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+  theme_custom; overlap_plot_nvec
+
+ggsave("../output/piRNAs/nvec/ping_pong_10nt_overlap_nvec.pdf",
+       overlap_plot_nvec, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/nvec/ping_pong_10nt_overlap_nvec.png",
+       overlap_plot_nvec, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+
+## Apoc 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_apoc <- read.csv("../output/piRNAs/apoc/piRNA_pingpong_apoc.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_apoc <- pp_apoc %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_apoc <- summary_data_apoc %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_apoc <- mean(
+  11.8021967062251, # apoc 2
+  35.5967468197136, # apoc 3
+  8.86279373084146 # apoc 4
+)
+print(zscore_apoc)
+```
+
+Plot
+```{r}
+overlap_plot_apoc <- ggplot(summary_data_filt_nvec, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Astrangia poculata") +
+  geom_label(
+    aes(x = 14, y = 55, label = "Z-score = 11.8022"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 4) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 80, by = 10),
+        limits = c(0, 80)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+  theme_custom; overlap_plot_apoc
+
+ggsave("../output/piRNAs/apoc/ping_pong_10nt_overlap_apoc.pdf",
+       overlap_plot_apoc, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/apoc/ping_pong_10nt_overlap_apoc.png",
+       overlap_plot_apoc, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+
+## Ahya 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_ahya <- read.csv("../output/piRNAs/ahya/piRNA_pingpong_ahya.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_ahya <- pp_ahya %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_ahya <- summary_data_ahya %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_ahya <- mean(
+  8.31329382842131, # ahya 1
+  2.13223121260409, # ahya 2
+  30.923292527817, # ahya 3
+  7.64386102569554 # ahya 4
+)
+print(zscore_ahya)
+```
+
+Plot
+```{r}
+overlap_plot_ahya <- ggplot(summary_data_filt_ahya, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Acropora hyacinthus") +
+  geom_label(
+    aes(x = 14, y = 250000, label = "Z-score = 8.313294"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 4) +
+   scale_y_continuous(
+         expand = c(0, 0)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+  theme_custom; overlap_plot_ahya
+
+ggsave("../output/piRNAs/ahya/ping_pong_10nt_overlap_ahya.pdf",
+       overlap_plot_ahya, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/ahya/ping_pong_10nt_overlap_ahya.png",
+       overlap_plot_ahya, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+

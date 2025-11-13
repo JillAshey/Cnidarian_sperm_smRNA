@@ -1,0 +1,4 @@
+#species	perc_prot_assigned nb_prot_assigned
+Apoc_proteins.faa	71.6	29264
+Nvec_proteins.faa	102.9	22869
+Ahya_proteins.faa	80.0	20460

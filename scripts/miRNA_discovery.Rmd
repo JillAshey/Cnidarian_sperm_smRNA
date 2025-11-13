@@ -162,10 +162,13 @@ length(unique(mirna_filtered_ahya$MajorRNA))
 
 There are several duplicate miRNAs. 
 
-Remove `efu-miR-9341` -- it is mapping multiple times across the genome and corresponds to a bat miRNA.
+Remove `efu-miR-9341`, `bta-miR-2478`, and `mse-miR-2779;ipu-miR-7550;oni-miR-7550`-- they are mapping multiple times across the genome and corresponds to bat and mouse miRNAs.
 ```{r}
 mirna_filtered_ahya <- mirna_filtered_ahya %>%
-  filter(!known_miRNAs == "efu-miR-9341")
+  filter(!known_miRNAs == "efu-miR-9341") %>%
+  filter(!known_miRNAs == "bta-miR-2478") %>%
+  filter(!known_miRNAs == "mse-miR-2779;ipu-miR-7550;oni-miR-7550")
+
 length(unique(mirna_filtered_ahya$MajorRNA))
 ```
 
@@ -195,4 +198,14 @@ counts_mirna_filt_ahya <- counts_mirna_ahya %>%
   ) %>%
   ungroup() %>%
   filter(samples_expressed >= 3)
+
+mirna_list_counts_ahya <- counts_mirna_filt_ahya$Name
 ```
+
+We are left with 25 miRNAs expressed. 
+
+Filter Ahya miRNA info by the remaining expressed cluster names 
+```{r}
+mirna_filtered_ahya <- mirna_filtered_ahya[mirna_filtered_ahya$Name %in% mirna_list_counts_ahya, ]
+``` 
+

@@ -1,0 +1,4 @@
+#index	file_name	nb_initial	nb_final
+0	Apoc_proteins.faa	45867	40895
+1	Nvec_proteins.faa	32495	22223
+2	Ahya_proteins.faa	27110	25590

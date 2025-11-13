@@ -1,0 +1,192 @@
+---
+title: "Length distribution of smRNA reads"
+author: "Jill Ashey"
+date: "2025-11-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(dplyr)
+library(tidyr)
+```
+
+Nvec
+```{r}
+# Folder path containing all base_counts .txt files
+folder_path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/nvec"
+
+# List all txt files in the folder
+file_list <- list.files(path = folder_path, pattern = "\\.txt$", full.names = TRUE)
+
+# Read and combine all files into one data frame
+all_data <- do.call(rbind, lapply(file_list, function(file) {
+  read.table(file, header=FALSE, col.names = c("length", "A", "C", "G", "U"))
+}))
+
+# Sum nucleotide counts by read length across all files
+summary_counts <- all_data %>%
+  group_by(length) %>%
+  summarise(
+    A = sum(A),
+    C = sum(C),
+    G = sum(G),
+    U = sum(U)
+  ) %>% ungroup()
+
+# Filter out reads longer than 35bp
+summary_counts_filtered <- summary_counts %>%
+  filter(length <= 35)
+
+# Recalculate total reads after filtering
+total_reads_filtered <- sum(summary_counts_filtered$A + summary_counts_filtered$C + summary_counts_filtered$G + summary_counts_filtered$U)
+
+
+# Calculate total reads across all lengths and bases
+summary_long_filtered <- summary_counts_filtered %>%
+  pivot_longer(cols = c("A", "C", "G", "U"),
+               names_to = "base",
+               values_to = "count") %>%
+  mutate(percent_of_total = 100 * count / total_reads_filtered)
+
+ggplot(summary_long_filtered, aes(x = length, y = percent_of_total, fill = base)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("A" = "#669900", "C" = "#FFCC33", "G" = "#3366CC", "U" = "#CC3333")) +
+  labs(x = "Read length", y = "% of total reads", fill = "Nucleotide") +
+  theme_bw()
+```
+
+Apoc
+```{r}
+# Folder path containing all base_counts .txt files
+folder_path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/apoc"
+
+# List all txt files in the folder
+file_list <- list.files(path = folder_path, pattern = "\\.txt$", full.names = TRUE)
+
+# Read and combine all files into one data frame
+all_data <- do.call(rbind, lapply(file_list, function(file) {
+  read.table(file, header=FALSE, col.names = c("length", "A", "C", "G", "U"))
+}))
+
+# Sum nucleotide counts by read length across all files
+summary_counts <- all_data %>%
+  group_by(length) %>%
+  summarise(
+    A = sum(A),
+    C = sum(C),
+    G = sum(G),
+    U = sum(U)
+  ) %>% ungroup()
+
+# Filter out reads longer than 35bp
+summary_counts_filtered <- summary_counts %>%
+  filter(length <= 35)
+
+# Recalculate total reads after filtering
+total_reads_filtered <- sum(summary_counts_filtered$A + summary_counts_filtered$C + summary_counts_filtered$G + summary_counts_filtered$U)
+
+
+# Calculate total reads across all lengths and bases
+summary_long_filtered <- summary_counts_filtered %>%
+  pivot_longer(cols = c("A", "C", "G", "U"),
+               names_to = "base",
+               values_to = "count") %>%
+  mutate(percent_of_total = 100 * count / total_reads_filtered)
+
+ggplot(summary_long_filtered, aes(x = length, y = percent_of_total, fill = base)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("A" = "#669900", "C" = "#FFCC33", "G" = "#3366CC", "U" = "#CC3333")) +
+  labs(x = "Read length", y = "% of total reads", fill = "Nucleotide") +
+  theme_classic()
+
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Read tab-delimited file; adjust path as needed
+counts <- read.table("~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/nvec/nvec_first_base_counts.txt", col.names = c("length", "base", "count"))
+
+# Filter lengths if you want (e.g. <= 35 bp)
+counts <- counts %>% filter(length <= 35)
+
+# Get total number of reads (all bases and all lengths)
+total_reads <- sum(counts$count)
+
+# Calculate percent of total reads for each length/base
+counts <- counts %>%
+  mutate(percent_total = 100 * count / total_reads)
+
+ggplot(counts, aes(x = length, y = percent_total, fill = base)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("A" = "#669900", "C" = "#FFCC33", "G" = "#3366CC", "T" = "#CC3333", "U" = "#CC3333")) +
+  labs(x = "Read length", y = "% of total reads", fill = "5' Nucleotide") +
+  theme_bw()
+
+```
+
+Nvec length 
+```{r}
+# Read the list of lengths
+lengths <- scan("~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/nvec/nvec_combined_lengths.txt")
+
+# Optionally, filter out unwanted lengths (e.g., >35 bp)
+lengths <- lengths[lengths <= 35]
+
+# Create a data frame for counting
+length_df <- data.frame(length = lengths)
+
+# Plot distribution
+ggplot(length_df, aes(x = length)) +
+  geom_bar(width = 0.8, fill = "#338fe1") +
+  labs(x = "Read length", y = "Number of reads") +
+  theme_bw()
+
+# Tabulate proportions
+prop_df <- as.data.frame(table(length_df$length))
+colnames(prop_df) <- c("length", "count")
+prop_df$length <- as.numeric(as.character(prop_df$length))
+prop_df$percent <- 100 * prop_df$count / sum(prop_df$count)
+
+ggplot(prop_df, aes(x = length, y = percent)) +
+  geom_bar(stat = "identity", width = 0.8, fill = "#35a79c") +
+  labs(x = "Read length", y = "% of total reads") +
+  theme_bw()
+```
+
+Apoc length 
+```{r}
+# Read the list of lengths
+lengths <- scan("~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/apoc/apoc_combined_lengths.txt")
+
+# Optionally, filter out unwanted lengths (e.g., >35 bp)
+lengths <- lengths[lengths <= 35]
+
+# Create a data frame for counting
+length_df <- data.frame(length = lengths)
+
+# Plot distribution
+ggplot(length_df, aes(x = length)) +
+  geom_bar(width = 0.8, fill = "#338fe1") +
+  labs(x = "Read length", y = "Number of reads") +
+  theme_bw()
+
+# Tabulate proportions
+prop_df <- as.data.frame(table(length_df$length))
+colnames(prop_df) <- c("length", "count")
+prop_df$length <- as.numeric(as.character(prop_df$length))
+prop_df$percent <- 100 * prop_df$count / sum(prop_df$count)
+
+ggplot(prop_df, aes(x = length, y = percent)) +
+  geom_bar(stat = "identity", width = 0.8, fill = "#35a79c") +
+  labs(x = "Read length", y = "% of total reads") +
+  theme_bw()
+```

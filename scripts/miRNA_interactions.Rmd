@@ -18,7 +18,7 @@ library(rrvgo)
 
 ### Apoc
 
-#### Binding summary
+#### Binding summary - mRNA
 
 Read in miranda data 
 ```{r}
@@ -68,7 +68,6 @@ ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
   geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
   theme_void() +
   labs(title = "miRNA-centered Network Plot with mRNA Connections - Apoc")
-
 ```
 
 The miRNAs have the potential to bind to all of these mRNAs but the counts are quite low so unlikely that all bindings would happen. But can still do enrichment to determine the potential biological processes that might be involved. 
@@ -78,6 +77,11 @@ Calculate number of unique mRNAs targeted by each miRNA
 miRNA_target_counts_apoc <- miranda_apoc %>%
   group_by(miRNA) %>%
   summarise(num_mRNAs_targeted = n_distinct(mRNA))
+
+min(miRNA_target_counts_apoc$num_mRNAs_targeted)
+max(miRNA_target_counts_apoc$num_mRNAs_targeted)
+mean(miRNA_target_counts_apoc$num_mRNAs_targeted)
+median(miRNA_target_counts_apoc$num_mRNAs_targeted)
 ```
 
 Perhaps collapse Cluster_595 and Cluster_598...they are the same sequence and are targeting the same number of mRNAs. 
@@ -91,6 +95,7 @@ mRNA_targeted_counts_apoc <- miranda_apoc %>%
 mRNAs_multiple_miRNAs_apoc <- mRNA_targeted_counts_apoc %>%
   filter(num_miRNAs_targeting > 1) %>%
   summarise(num_mRNAs = n())
+mRNAs_multiple_miRNAs_apoc
 ```
 
 Calculate number of bp shared in the interaction 
@@ -141,7 +146,7 @@ ggplot(df_freq, aes(x = interaction_length, y = perc)) +
   )
 ```
 
-#### Enrichment! 
+#### Enrichment - mRNA
 
 Read in annot information
 ```{r}
@@ -159,7 +164,6 @@ go_apoc <- annot_apoc %>%
 # Save as tab file 
 write_tsv(go_apoc, file = "../data/annotations/Apoc_gene2go.tab")
 ```
-
 
 ##### Make list of genes for TopGO
 
@@ -206,7 +210,7 @@ GO_APOC_BP_FE <- runTest(GO_APOC_BP, algorithm="weight01", statistic="fisher")
 
 Generate results table 
 ```{r}
-GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51)
+GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 ```
 Only taking the top 100 GO terms 
 
@@ -295,5 +299,1282 @@ blah<-ggplot(df, aes(x = Term, y = Fisher, size = Significant, fill = Fisher)) +
   coord_flip(); blah
 ```
 
-Think more about how to visualize the data...
+##### Molecular functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_MF <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_MF_FE <- runTest(GO_APOC_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_MF_En <- GenTable(GO_APOC_MF, Fisher = GO_APOC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_MF_En$Fisher<-as.numeric(GO_APOC_MF_En$Fisher)
+GO_APOC_MF_En_sig<-GO_APOC_MF_En[GO_APOC_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for mRNA binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_APOC_BP_En_sig$ontology <- "Biological Processes"
+GO_APOC_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_APOC <- rbind(GO_APOC_BP_En_sig, GO_APOC_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_APOC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+#### Binding summary - 3UTRs
+
+Read in miranda data 
+```{r}
+miranda_3utr_apoc <- read.delim("../output/miRNA_interactions/apoc/miranda_strict_3UTR_parsed_apoc.txt", header = F)
+colnames(miranda_3utr_apoc) <- c("miRNA", "three_UTR", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+
+# Format miranda df 
+miranda_3utr_apoc$miRNA <- sub("^>", "", miranda_3utr_apoc$miRNA)  # Remove leading ">"
+
+dim(miranda_3utr_apoc)
+length(unique(miranda_3utr_apoc$miRNA))
+length(unique(miranda_3utr_apoc$three_UTR))
+```
+
+Remove Cluster_598 - it is the same as Cluster_595 and targets the same number of mRNAs. 
+```{r}
+miranda_3utr_apoc <- miranda_3utr_apoc %>%
+  filter(!miRNA == "Cluster_598")
+
+dim(miranda_3utr_apoc)
+length(unique(miranda_3utr_apoc$miRNA))
+length(unique(miranda_3utr_apoc$three_UTR))
+```
+
+In order to connect the 3UTRs with their associated gene names, I need to read in `apoc_3UTRs_closest.gff` and associate the gene names in the attribute column with the data from the three_UTR column in the `miranda_3utr_apoc` df. 
+
+Read in the gff
+```{r}
+apoc_3UTR_closest <- read.delim("~/Desktop/GFFs/apoc/apoc_3UTRs_closest.gff", header = F)
+```
+
+Make a new column that will match the three_UTR column in `miranda_3utr_apoc`
+```{r}
+# Subtract 1 to match miranda_3utr_apoc
+apoc_3UTR_closest$V4 <- apoc_3UTR_closest$V4 - 1
+
+# Make new col
+apoc_3UTR_closest$three_UTR <- with(apoc_3UTR_closest, 
+                                   paste0(V3, "::", V1, ":", V4, "-", V5, "(", V7, ")"))
+```
+
+Join the two dfs 
+```{r}
+merged_3UTR_apoc <- left_join(miranda_3utr_apoc, apoc_3UTR_closest, by = "three_UTR")
+```
+
+Extract gene names and remove other cols
+```{r}
+merged_3UTR_apoc <- merged_3UTR_apoc %>%
+  mutate(gene_name = str_extract(V9, "(?<=ID=)[^;]+")  ) %>%
+  dplyr::select(-starts_with("V"))
+
+# Select only unique rows
+merged_3UTR_apoc <- unique(merged_3UTR_apoc)
+```
+
+Remove any possible tRNAs - these still have ID= and start with amino acid letters. 
+```{r}
+merged_3UTR_apoc <- merged_3UTR_apoc[!grepl("ID=", merged_3UTR_apoc$gene_name), ]
+
+dim(merged_3UTR_apoc)
+length(unique(merged_3UTR_apoc$miRNA))
+length(unique(merged_3UTR_apoc$three_UTR))
+length(unique(merged_3UTR_apoc$gene_name))
+```
+
+Make network plot 
+```{r}
+# Construct the edge list
+edges <- data.frame(
+  from = merged_3UTR_apoc$miRNA,
+  to = merged_3UTR_apoc$three_UTR,
+  stringsAsFactors = FALSE
+)
+
+# Create the graph
+graph <- graph_from_data_frame(edges, directed = FALSE)
+
+# Convert to tbl_graph for ggraph compatibility
+tbl_graph <- as_tbl_graph(graph)
+
+# Plot network with ggraph
+ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
+  geom_edge_link(alpha = 0.6) +        # draw edges
+  geom_node_point(aes(filter = name %in% merged_3UTR_apoc$miRNA), 
+                  color = 'red', size = 5) + # highlight miRNAs as red nodes
+  geom_node_point(aes(filter = !(name %in% merged_3UTR_apoc$miRNA)), 
+                  color = 'blue', size = 3) + # mRNAs as blue smaller nodes
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
+  theme_void() +
+  labs(title = "miRNA-centered Network Plot with 3UTR Connections - Apoc")
+```
+
+Calculate number of unique 3UTR seqs targeted by each miRNA
+```{r}
+miRNA_target_counts_apoc <- merged_3UTR_apoc %>%
+  group_by(miRNA) %>%
+  summarise(num_mRNAs_targeted = n_distinct(three_UTR))
+
+min(miRNA_target_counts_apoc$num_mRNAs_targeted)
+max(miRNA_target_counts_apoc$num_mRNAs_targeted)
+mean(miRNA_target_counts_apoc$num_mRNAs_targeted)
+median(miRNA_target_counts_apoc$num_mRNAs_targeted)
+```
+
+Count how many 3UTRs are targeted by multiple miRNAs
+```{r}
+three_UTR_targeted_counts_apoc <- merged_3UTR_apoc %>%
+  group_by(three_UTR) %>%
+  summarise(num_miRNAs_targeting = n_distinct(miRNA))
+
+three_UTR_multiple_miRNAs_apoc <- three_UTR_targeted_counts_apoc %>%
+  filter(num_miRNAs_targeting > 1) %>%
+  summarise(num_3UTR = n())
+three_UTR_multiple_miRNAs_apoc
+```
+
+Calculate number of bp shared in the interaction 
+```{r}
+merged_3UTR_apoc <- merged_3UTR_apoc %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
+
+Plot shared interaction bp distribution 
+```{r}
+ggplot(merged_3UTR_apoc, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_3UTR_apoc <- merged_3UTR_apoc %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_3UTR_apoc, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq$interaction_length),
+                                  max(df_freq$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+#### Enrichment - 3UTR
+
+I already made the Apoc tab GO file above. 
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
+```
+
+Change TU to model in gene name in merged df 
+```{r}
+merged_3UTR_apoc$gene_name <- gsub("TU", "model", merged_3UTR_apoc$gene_name)
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+apoc_clust_genes <- as.character(unique(merged_3UTR_apoc$gene_name))
+
+# All genes 
+apoc_all_genes <- as.character(apoc_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
+names(apoc_GeneList) <- apoc_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_3UTR_BP <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_3UTR_BP_FE <- runTest(GO_APOC_3UTR_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_3UTR_BP_En <- GenTable(GO_APOC_3UTR_BP, Fisher = GO_APOC_3UTR_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_3UTR_BP_En$Fisher<-as.numeric(GO_APOC_3UTR_BP_En$Fisher)
+GO_APOC_3UTR_BP_En_sig<-GO_APOC_3UTR_BP_En[GO_APOC_3UTR_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_3UTR_MF <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_3UTR_MF_FE <- runTest(GO_APOC_3UTR_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_3UTR_MF_En <- GenTable(GO_APOC_3UTR_MF, Fisher = GO_APOC_3UTR_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_3UTR_MF_En$Fisher<-as.numeric(GO_APOC_3UTR_MF_En$Fisher)
+GO_APOC_3UTR_MF_En_sig<-GO_APOC_3UTR_MF_En[GO_APOC_3UTR_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for mRNA binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_APOC_3UTR_BP_En_sig$ontology <- "Biological Processes"
+GO_APOC_3UTR_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_3UTR_APOC <- rbind(GO_APOC_3UTR_BP_En_sig, GO_APOC_3UTR_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_3UTR_APOC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+#### mRNA and 3UTR binding comparisons 
+
+Any overlap in BP GO terms from mRNA v. 3UTR binding?
+```{r}
+apoc_mrna_terms <- unique(BP_MF_APOC$Term)
+apoc_3utr_terms <- unique(BP_MF_3UTR_APOC$Term)
+
+# shared 
+shared_terms_apoc <- intersect(apoc_mrna_terms, apoc_3utr_terms)
+```
+
+50 enrichment terms shared between the two binding mechanisms. 
+
+Any overlap in genes from mRNA v. 3UTR binding?
+```{r}
+apoc_mrna_genes <- unique(miranda_apoc$mRNA)
+apoc_3utr_genes <- unique(merged_3UTR_apoc$gene_name)
+
+# shared 
+shared_genes_apoc <- intersect(apoc_mrna_genes, apoc_3utr_genes)
+```
+
+50 genes are targeted by miRNAs in both their mRNA and 3'UTR sequence. 
+
+Are the 50 genes targeted by miRNAs in both sequences targeted by the same miRNA in both sequences?
+```{r}
+miranda_apoc_filt <- miranda_apoc %>%
+  filter(mRNA %in% shared_genes_apoc)
+
+merged_3UTR_apoc_filt <- merged_3UTR_apoc %>%
+  filter(gene_name %in% shared_genes_apoc)
+
+shared_targets_apoc <- full_join(miranda_apoc_filt, merged_3UTR_apoc_filt, by = c("mRNA" = "gene_name"))
+shared_targets_apoc$same_miRNA <- shared_targets_apoc$miRNA.x == shared_targets_apoc$miRNA.y
+```
+
+19 genes have the same miRNA targeting their 3' UTR and mRNA sequence. 
+
+### Nvec
+
+#### Binding summary - mRNA
+
+Read in miranda data 
+```{r}
+miranda_nvec <- read.delim("../output/miRNA_interactions/nvec/miranda_strict_mRNA_parsed_nvec.txt", header = F)
+colnames(miranda_nvec) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+
+# Format miranda df 
+miranda_nvec$miRNA <- sub("^>", "", miranda_nvec$miRNA)  # Remove leading ">"
+
+dim(miranda_nvec)
+length(unique(miranda_nvec$miRNA))
+length(unique(miranda_nvec$mRNA))
+```
+
+Remove Cluster_1959 and Cluster_1961- they are the same as Cluster_1954 and targets the same number of mRNAs. They also were all classified as nve-miR-9415. 
+```{r}
+miranda_nvec <- miranda_nvec %>%
+  filter(!miRNA == "Cluster_1959") %>%
+  filter(!miRNA == "Cluster_1961") 
+
+dim(miranda_nvec)
+length(unique(miranda_nvec$miRNA))
+length(unique(miranda_nvec$mRNA))
+```
+
+Make network plot 
+```{r}
+# Construct the edge list
+edges <- data.frame(
+  from = miranda_nvec$miRNA,
+  to = miranda_nvec$mRNA,
+  stringsAsFactors = FALSE
+)
+
+# Create the graph
+graph <- graph_from_data_frame(edges, directed = FALSE)
+
+# Convert to tbl_graph for ggraph compatibility
+tbl_graph <- as_tbl_graph(graph)
+
+# Plot network with ggraph
+ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
+  geom_edge_link(alpha = 0.6) +        # draw edges
+  geom_node_point(aes(filter = name %in% miranda_nvec$miRNA), 
+                  color = 'red', size = 5) + # highlight miRNAs as red nodes
+  geom_node_point(aes(filter = !(name %in% miranda_nvec$miRNA)), 
+                  color = 'blue', size = 3) + # mRNAs as blue smaller nodes
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
+  theme_void() +
+  labs(title = "miRNA-centered Network Plot with mRNA Connections - Nvec")
+```
+
+Calculate number of unique mRNAs targeted by each miRNA
+```{r}
+miRNA_target_counts_nvec <- miranda_nvec %>%
+  group_by(miRNA) %>%
+  summarise(num_mRNAs_targeted = n_distinct(mRNA))
+
+min(miRNA_target_counts_nvec$num_mRNAs_targeted)
+max(miRNA_target_counts_nvec$num_mRNAs_targeted)
+mean(miRNA_target_counts_nvec$num_mRNAs_targeted)
+median(miRNA_target_counts_nvec$num_mRNAs_targeted)
+```
+
+Count how many mRNAs are targeted by multiple miRNAs
+```{r}
+mRNA_targeted_counts_nvec <- miranda_nvec %>%
+  group_by(mRNA) %>%
+  summarise(num_miRNAs_targeting = n_distinct(miRNA))
+
+mRNAs_multiple_miRNAs_nvec <- mRNA_targeted_counts_nvec %>%
+  filter(num_miRNAs_targeting > 1) %>%
+  summarise(num_mRNAs = n())
+mRNAs_multiple_miRNAs_nvec
+```
+
+Calculate number of bp shared in the interaction 
+```{r}
+miranda_nvec <- miranda_nvec %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
+
+Plot shared interaction bp distribution 
+```{r}
+ggplot(miranda_nvec, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_nvec <- miranda_nvec %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_nvec, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_nvec$interaction_length),
+                                  max(df_freq_nvec$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_nvec$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+#### Enrichment - mRNA
+
+Read in annot information
+```{r}
+annot_nvec <- read.delim("../data/annotations/NV2g.20240221.GO.tsv", header = F)
+colnames(annot_nvec) <- c("gene_name", "ontology", "GeneOntologyIDs", "GO_description", "Extended_description", "Db")
+```
+
+Format tab file for TopGO
+```{r}
+go_nvec <- annot_nvec %>%
+  dplyr::select(gene_name, GeneOntologyIDs) %>%
+  group_by(gene_name) %>%
+  summarise(GeneOntologyIDs = paste(unique(GeneOntologyIDs), collapse = ";")) %>%
+  ungroup()
+
+# Save as tab file 
+write_tsv(go_nvec, file = "../data/annotations/Nvec_gene2go.tab")
+```
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+nvec_clust_genes <- as.character(unique(miranda_nvec$mRNA))
+
+# All genes 
+nvec_all_genes <- as.character(nvec_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
+names(nvec_GeneList) <- nvec_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_BP <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_BP_FE <- runTest(GO_NVEC_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_BP_En <- GenTable(GO_NVEC_BP, Fisher = GO_NVEC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_BP_En$Fisher<-as.numeric(GO_NVEC_BP_En$Fisher)
+GO_NVEC_BP_En_sig<-GO_NVEC_BP_En[GO_NVEC_BP_En$Fisher<0.05,]
+```
+
+Reduce GO term set by calculating semantic similarity 
+```{r}
+simMatrix_nvec <- calculateSimMatrix(GO_NVEC_BP_En_sig$GO.ID,
+                                orgdb="org.Ce.eg.db", #c. elegans database
+                                ont="BP",
+                                method="Rel")
+
+scores_nvec <- setNames(-log(as.numeric(GO_NVEC_BP_En_sig$Fisher)), GO_NVEC_BP_En_sig$GO.ID)
+reducedTerms_nvec <- reduceSimMatrix(simMatrix_nvec,
+                                scores_nvec,
+                                threshold=0.7,
+                                orgdb="org.Ce.eg.db")
+```
+
+Keep GO terms from reduced list 
+```{r}
+GO_NVEC_BP_En_sig_reduced <- GO_NVEC_BP_En_sig %>%
+  filter(GO.ID %in% reducedTerms_nvec$go)
+
+# Add parent terms to list of GO terms 
+GO_NVEC_BP_En_sig_reduced$ParentTerm <- reducedTerms_nvec$parentTerm[match(GO_NVEC_BP_En_sig_reduced$GO.ID, reducedTerms_nvec$go)]
+
+GO_NVEC_BP_En_sig_reduced <- GO_NVEC_BP_En_sig_reduced %>% group_by(ParentTerm) %>% mutate("N_in_Parent" = dplyr::n()) %>% ungroup()
+```
+
+Plot! 
+```{r}
+parent_enrich_BP_nvec <- ggplot(GO_NVEC_BP_En_sig_reduced, aes(x=Fisher,y=reorder(Term,Fisher)))+
+  facet_grid(ParentTerm ~ ., scales="free", labeller = label_wrap_gen(width = 10, multi_line = TRUE))+
+  geom_point(size=2, color="black")+
+  geom_segment(aes(x=0, xend=Fisher, y=Term, yend=Term)) +
+  #geom_hline(yintercept = 0, linetype="solid", color = 'black', linewidth=0.5, show.legend = TRUE)+
+  #scale_y_continuous(limits=c(0,40))+
+   #scale_x_discrete(labels = label_wrap(30)) +
+  #scale_fill_gradientn(colours=c("white","#fddbc7","#f4a582","#d6604d","#b2182b"), na.value = "grey98",limits = c(0, 100)) +
+  #labs(title = "Enriched Biological Process Parent GO Terms, Brown Module", x="Parent Term", y="Number of Significant (p < 0.01) GO Terms in Module", colour="p-value") +
+  theme_classic() + 
+  theme(axis.text.y = element_text(size = 8), 
+              axis.title = element_text(size = 8), 
+              plot.title = element_text(hjust = 0.5, size = 8));parent_enrich_BP_nvec
+
+ggsave("../output/miRNA_interactions/nvec/parent_enrich_mRNA_BP.pdf", plot = parent_enrich_BP_nvec, width = 8, height = 20, units = "in")
+ggsave("../output/miRNA_interactions/nvec/parent_enrich_mRNA_BP.png", plot = parent_enrich_BP_nvec, width = 8, height = 20, units = "in")
+```
+
+##### Molecular functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_MF <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_MF_FE <- runTest(GO_NVEC_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_MF_En <- GenTable(GO_NVEC_MF, Fisher = GO_NVEC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_MF_En$Fisher<-as.numeric(GO_NVEC_MF_En$Fisher)
+GO_NVEC_MF_En_sig<-GO_NVEC_MF_En[GO_NVEC_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for mRNA binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_NVEC_BP_En_sig$ontology <- "Biological Processes"
+GO_NVEC_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_NVEC <- rbind(GO_NVEC_BP_En_sig, GO_NVEC_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_NVEC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+#### Binding summary - 3UTRs
+
+Read in miranda data 
+```{r}
+miranda_3utr_nvec <- read.delim("../output/miRNA_interactions/nvec/miranda_strict_3UTR_parsed_nvec.txt", header = F)
+colnames(miranda_3utr_nvec) <- c("miRNA", "three_UTR", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+
+# Format miranda df 
+miranda_3utr_nvec$miRNA <- sub("^>", "", miranda_3utr_nvec$miRNA)  # Remove leading ">"
+
+dim(miranda_3utr_nvec)
+length(unique(miranda_3utr_nvec$miRNA))
+length(unique(miranda_3utr_nvec$three_UTR))
+```
+
+Remove Cluster_1959 and Cluster_1961- they are the same as Cluster_1954 and targets the same number of mRNAs. They also were all classified as nve-miR-9415. 
+```{r}
+miranda_3utr_nvec <- miranda_3utr_nvec %>%
+  filter(!miRNA == "Cluster_1959") %>%
+  filter(!miRNA == "Cluster_1961") 
+
+dim(miranda_3utr_nvec)
+length(unique(miranda_3utr_nvec$miRNA))
+length(unique(miranda_3utr_nvec$three_UTR))
+```
+
+In order to connect the 3UTRs with their associated gene names, I need to read in `nvec.GFFannotation.3UTR_1kb_corrected.gff` and associate the gene names in the attribute column with the data from the three_UTR column in the `miranda_3utr_nvec` df. 
+
+Read in the gff
+```{r}
+nvec_3UTR <- read.delim("~/Desktop/GFFs/nvec/nvec.GFFannotation.3UTR_1kb_corrected.gff", header = F)
+```
+
+Make a new column that will match the three_UTR column in `miranda_3utr_apoc`
+```{r}
+# Subtract 1 to match miranda_3utr_apoc
+nvec_3UTR$V4 <- nvec_3UTR$V4 - 1
+
+# Make new col
+nvec_3UTR$three_UTR <- with(nvec_3UTR, 
+                                   paste0(V3, "::", V1, ":", V4, "-", V5, "(", V7, ")"))
+```
+
+Join the two dfs 
+```{r}
+merged_3UTR_nvec <- left_join(miranda_3utr_nvec, nvec_3UTR, by = "three_UTR")
+```
+
+Extract gene names and remove other cols
+```{r}
+merged_3UTR_nvec <- merged_3UTR_nvec %>%
+  mutate(gene_name = str_extract(V9, "(?<=ID=)[^;]+")  ) %>%
+  dplyr::select(-starts_with("V"))
+
+# Select only unique rows
+merged_3UTR_nvec <- unique(merged_3UTR_nvec)
+
+dim(merged_3UTR_nvec)
+length(unique(merged_3UTR_nvec$miRNA))
+length(unique(merged_3UTR_nvec$three_UTR))
+```
+
+Make network plot 
+```{r}
+# Construct the edge list
+edges <- data.frame(
+  from = merged_3UTR_nvec$miRNA,
+  to = merged_3UTR_nvec$three_UTR,
+  stringsAsFactors = FALSE
+)
+
+# Create the graph
+graph <- graph_from_data_frame(edges, directed = FALSE)
+
+# Convert to tbl_graph for ggraph compatibility
+tbl_graph <- as_tbl_graph(graph)
+
+# Plot network with ggraph
+ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
+  geom_edge_link(alpha = 0.6) +        # draw edges
+  geom_node_point(aes(filter = name %in% merged_3UTR_nvec$miRNA), 
+                  color = 'red', size = 5) + # highlight miRNAs as red nodes
+  geom_node_point(aes(filter = !(name %in% merged_3UTR_nvec$miRNA)), 
+                  color = 'blue', size = 3) + # mRNAs as blue smaller nodes
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
+  theme_void() +
+  labs(title = "miRNA-centered Network Plot with 3UTR Connections - Nvec")
+```
+
+Calculate number of unique 3UTR seqs targeted by each miRNA
+```{r}
+miRNA_target_counts_nvec <- merged_3UTR_nvec %>%
+  group_by(miRNA) %>%
+  summarise(num_mRNAs_targeted = n_distinct(three_UTR))
+
+min(miRNA_target_counts_nvec$num_mRNAs_targeted)
+max(miRNA_target_counts_nvec$num_mRNAs_targeted)
+mean(miRNA_target_counts_nvec$num_mRNAs_targeted)
+median(miRNA_target_counts_nvec$num_mRNAs_targeted)
+```
+
+Count how many 3UTRs are targeted by multiple miRNAs
+```{r}
+three_UTR_targeted_counts_nvec <- merged_3UTR_nvec %>%
+  group_by(three_UTR) %>%
+  summarise(num_miRNAs_targeting = n_distinct(miRNA))
+
+three_UTR_multiple_miRNAs_nvec <- three_UTR_targeted_counts_nvec %>%
+  filter(num_miRNAs_targeting > 1) %>%
+  summarise(num_3UTR = n())
+three_UTR_multiple_miRNAs_nvec
+```
+
+Calculate number of bp shared in the interaction 
+```{r}
+merged_3UTR_nvec <- merged_3UTR_nvec %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
+
+Plot shared interaction bp distribution 
+```{r}
+ggplot(merged_3UTR_nvec, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_3UTR_nvec <- merged_3UTR_nvec %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_3UTR_nvec, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_3UTR_nvec$interaction_length),
+                                  max(df_freq_3UTR_nvec$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_nvec$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+#### Enrichment - 3UTR
+
+I already made the Nvec tab GO file above. 
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+nvec_clust_genes <- as.character(unique(merged_3UTR_nvec$gene_name))
+
+# All genes 
+nvec_all_genes <- as.character(nvec_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
+names(nvec_GeneList) <- nvec_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_3UTR_BP <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_3UTR_BP_FE <- runTest(GO_NVEC_3UTR_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_3UTR_BP_En <- GenTable(GO_NVEC_3UTR_BP, Fisher = GO_NVEC_3UTR_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_3UTR_BP_En$Fisher<-as.numeric(GO_NVEC_3UTR_BP_En$Fisher)
+GO_NVEC_3UTR_BP_En_sig<-GO_NVEC_3UTR_BP_En[GO_NVEC_3UTR_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_3UTR_MF <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_3UTR_MF_FE <- runTest(GO_NVEC_3UTR_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_3UTR_MF_En <- GenTable(GO_NVEC_3UTR_MF, Fisher = GO_NVEC_3UTR_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_3UTR_MF_En$Fisher<-as.numeric(GO_NVEC_3UTR_MF_En$Fisher)
+GO_NVEC_3UTR_MF_En_sig<-GO_NVEC_3UTR_MF_En[GO_NVEC_3UTR_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for 3' UTR binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_NVEC_3UTR_BP_En$ontology <- "Biological Processes"
+GO_NVEC_3UTR_MF_En$ontology <- "Molecular Functions"
+BP_MF_3UTR_NVEC <- rbind(GO_NVEC_3UTR_BP_En, GO_NVEC_3UTR_MF_En)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_3UTR_NVEC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+#### mRNA and 3UTR binding comparisons 
+
+Any overlap in GO terms from mRNA v. 3UTR binding?
+```{r}
+nvec_mrna_terms <- unique(BP_MF_NVEC$Term)
+nvec_3utr_terms <- unique(BP_MF_3UTR_NVEC$Term)
+
+# shared 
+shared_terms_nvec <- intersect(nvec_mrna_terms, nvec_3utr_terms)
+```
+
+50 enrichment terms shared between the two binding mechanisms. 
+
+Any overlap in genes from mRNA v. 3UTR binding?
+```{r}
+nvec_mrna_genes <- unique(miranda_nvec$mRNA)
+nvec_3utr_genes <- unique(merged_3UTR_nvec$gene_name)
+
+# shared 
+shared_genes_nvec <- intersect(nvec_mrna_genes, nvec_3utr_genes)
+```
+
+134 genes are targeted by miRNAs in both their mRNA and 3'UTR sequence. 
+
+Are the 134 genes targeted by miRNAs in both sequences targeted by the same miRNA in both sequences?
+```{r}
+miranda_nvec_filt <- miranda_nvec %>%
+  filter(mRNA %in% shared_genes_nvec)
+
+merged_3UTR_nvec_filt <- merged_3UTR_nvec %>%
+  filter(gene_name %in% shared_genes_nvec)
+
+shared_targets_nvec <- full_join(miranda_nvec_filt, merged_3UTR_nvec_filt, by = c("mRNA" = "gene_name"))
+shared_targets_nvec$same_miRNA <- shared_targets_nvec$miRNA.x == shared_targets_nvec$miRNA.y
+```
+
+28 genes have the same miRNA targeting their 3' UTR and mRNA sequence. 
+
+## Ahya
+
+#### Binding summary - mRNA
+
+Read in miranda data 
+```{r}
+miranda_ahya <- read.delim("../output/miRNA_interactions/ahya/miranda_strict_mRNA_parsed_ahya.txt", header = F)
+colnames(miranda_ahya) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+
+# Format miranda df 
+miranda_ahya$miRNA <- sub("^>", "", miranda_ahya$miRNA)  # Remove leading ">"
+miranda_ahya$mRNA <- sub("-RA", "", miranda_ahya$mRNA)
+
+dim(miranda_ahya)
+length(unique(miranda_ahya$miRNA))
+length(unique(miranda_ahya$mRNA))
+```
+
+Make network plot 
+```{r}
+# Construct the edge list
+edges <- data.frame(
+  from = miranda_ahya$miRNA,
+  to = miranda_ahya$mRNA,
+  stringsAsFactors = FALSE
+)
+
+# Create the graph
+graph <- graph_from_data_frame(edges, directed = FALSE)
+
+# Convert to tbl_graph for ggraph compatibility
+tbl_graph <- as_tbl_graph(graph)
+
+# Plot network with ggraph
+ggraph(tbl_graph, layout = 'kk') + # Use stress layout for better spread
+  geom_edge_link(alpha = 0.6) +        # draw edges
+  geom_node_point(aes(filter = name %in% miranda_ahya$miRNA), 
+                  color = 'red', size = 5) + # highlight miRNAs as red nodes
+  geom_node_point(aes(filter = !(name %in% miranda_ahya$miRNA)), 
+                  color = 'blue', size = 3) + # mRNAs as blue smaller nodes
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) + # label nodes
+  theme_void() +
+  labs(title = "miRNA-centered Network Plot with mRNA Connections - Ahya")
+```
+
+Calculate number of unique mRNAs targeted by each miRNA
+```{r}
+miRNA_target_counts_ahya <- miranda_ahya %>%
+  group_by(miRNA) %>%
+  summarise(num_mRNAs_targeted = n_distinct(mRNA))
+
+min(miRNA_target_counts_ahya$num_mRNAs_targeted)
+max(miRNA_target_counts_ahya$num_mRNAs_targeted)
+mean(miRNA_target_counts_ahya$num_mRNAs_targeted)
+median(miRNA_target_counts_ahya$num_mRNAs_targeted)
+```
+
+Count how many mRNAs are targeted by multiple miRNAs
+```{r}
+mRNA_targeted_counts_ahya <- miranda_ahya %>%
+  group_by(mRNA) %>%
+  summarise(num_miRNAs_targeting = n_distinct(miRNA))
+
+mRNA_targeted_counts_ahya <- mRNA_targeted_counts_ahya %>%
+  filter(num_miRNAs_targeting > 1) %>%
+  summarise(num_mRNAs = n())
+mRNA_targeted_counts_ahya
+```
+
+Calculate number of bp shared in the interaction 
+```{r}
+miranda_ahya <- miranda_ahya %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
+
+Plot shared interaction bp distribution 
+```{r}
+ggplot(miranda_ahya, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_ahya <- miranda_ahya %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_ahya, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_ahya$interaction_length),
+                                  max(df_freq_ahya$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_ahya$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+#### Enrichment - mRNA
+
+Read in annot information
+```{r}
+annot_ahya <- read.delim("~/Desktop/GFFs/ahya/Acropora_hyacinthus.annotations.txt")[,1:17]
+```
+
+Format tab file for TopGO
+```{r}
+go_ahya <- data.frame(
+  gene_name = annot_ahya$GeneID,
+  GO_terms = sapply(annot_ahya$GO.Terms, function(x) {
+    go_ids <- str_extract_all(x, "GO:\\d{7}")[[1]]
+    paste(go_ids, collapse = ";")}), stringsAsFactors = FALSE)
+
+colnames(go_ahya) <- c("gene_name", "GeneOntologyIDs")
+
+# Save as tab file 
+write_tsv(go_ahya, file = "../data/annotations/Ahya_gene2go.tab")
+```
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+ahya_clust_genes <- as.character(unique(miranda_ahya$mRNA))
+
+# All genes 
+ahya_all_genes <- as.character(ahya_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+ahya_GeneList <- factor(as.integer(ahya_all_genes %in% ahya_clust_genes))
+names(ahya_GeneList) <- ahya_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+ahya_gene2go_topgo<-readMappings("../data/annotations/Ahya_gene2go.tab", IDsep=";", sep="\t")
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_BP <-new("topGOdata", ontology="BP", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_BP_FE <- runTest(GO_AHYA_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_BP_En <- GenTable(GO_AHYA_BP, Fisher = GO_AHYA_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_BP_En$Fisher<-as.numeric(GO_AHYA_BP_En$Fisher)
+GO_AHYA_BP_En_sig<-GO_AHYA_BP_En[GO_AHYA_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_MF <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_MF_FE <- runTest(GO_AHYA_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_MF_En <- GenTable(GO_AHYA_MF, Fisher = GO_AHYA_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_MF_En$Fisher<-as.numeric(GO_AHYA_MF_En$Fisher)
+GO_AHYA_MF_En_sig<-GO_AHYA_MF_En[GO_AHYA_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for mRNA binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_AHYA_BP_En_sig$ontology <- "Biological Processes"
+GO_AHYA_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_AHYA <- rbind(GO_AHYA_BP_En_sig, GO_AHYA_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_AHYA %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Species comparisons 
+
+Plot binding percentages across mRNA, 3' UTR or both. 
+```{r}
+# Data frame with counts
+percent <- data.frame(
+  Species = rep(c("Apoc", "Nvec"), each = 3),
+  Binding = rep(c("mRNA only", "3' UTR only", "Both"), times = 2),
+  Count = c(2420, 859, 50, 5806, 446, 134)
+)
+
+# Calculate percentages within each species
+percent <- percent %>%
+  group_by(Species) %>%
+  mutate(Percent = Count / sum(Count) * 100) %>%
+  ungroup()
+
+# Calculate total counts per species for labels
+totals <- percent %>%
+  group_by(Species) %>%
+  summarize(Total = sum(Count))
+
+# Plot stacked bar plot with total counts on top of each bar
+ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
+  geom_col() +
+  geom_text(
+    data = totals,
+    aes(x = Species, y = 105, label = Total),
+    inherit.aes = FALSE,    # Important to avoid looking for Binding in totals
+    size = 4
+  ) +
+  ylab("Percentage (%)") +
+  ggtitle("Proportions of Binding Options per Species") +
+  theme_classic()
+```
+
+- Apoc: 2420 genes for mRNA binding (2470-50), 859 genes for 3' UTR binding (909-50), 50 genes for both binding. 
+- Nvec: 5806 genes for mRNA binding (5940-134), 446 genes for 3' UTR binding (580-134), and 134 genes for both binding. 
+
+
+
 
