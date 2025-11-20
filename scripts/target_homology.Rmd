@@ -421,6 +421,245 @@ annotated_upset_targets <- get_annotations(upset_targets, annot_apoc, annot_nvec
 head(annotated_upset_targets)
 ```
 
+## piRNAs overlapping with genes 
 
+Read in data for all spp
+```{r}
+## Ahya
+pirna_gene_ahya <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_genes_intersect.txt")
 
+## Apoc 
+pirna_gene_apoc <- read.table("../output/piRNAs/apoc/Apoc_piRNAs_genes_intersect.txt")
+
+## Nvec
+pirna_gene_nvec <- read.table("../output/piRNAs/nvec/nvec_piRNAs_genes_intersect.txt", sep = "\t")
+```
+
+Isolate gene names 
+```{r}
+## Ahya 
+pirna_gene_ahya <- pirna_gene_ahya %>%
+  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
+pirna_gene_ahya$gene_name <- paste0(pirna_gene_ahya$gene_name, "-RA")
+
+## Apoc 
+pirna_gene_apoc <- pirna_gene_apoc %>%
+  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
+pirna_gene_apoc$gene_name <- gsub("TU", "model", pirna_gene_apoc$gene_name)
+
+## Nvec 
+pirna_gene_nvec <- pirna_gene_nvec %>%
+  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
+```
+
+Subset mRNA/gene names 
+```{r}
+mRNA_overlap_ahya <- unique(pirna_gene_ahya$gene_name)
+mRNA_overlap_apoc <- unique(pirna_gene_apoc$gene_name)
+mRNA_overlap_nvec <- unique(pirna_gene_nvec$gene_name)
+```
+
+Read in broccoli results 
+```{r}
+broc_groups <- data.table::fread("../output/broccoli/dir_step3/table_OGs_protein_names.txt", header = T)
+```
+
+Identify targets in broccoli data 
+```{r}
+# Function to extract gene IDs from protein IDs
+extract_gene_id <- function(protein_ids, species) {
+  if (species == "nvec") {
+    # Remove "protein|" prefix if present, keep the base ID
+    gsub("protein\\|", "", protein_ids)
+  } else if (species == "ahya") {
+    # Keep as is
+    protein_ids
+  } else if (species == "apoc") {
+    # Remove "protein|" prefix if present
+    gsub("protein\\|", "", protein_ids)
+  }
+}
+
+# Extract gene IDs from the broc_groups columns
+broc_groups[, Apoc_genes := lapply(strsplit(Apoc_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "apoc"))]
+broc_groups[, Nvec_genes := lapply(strsplit(Nvec_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "nvec"))]
+broc_groups[, Ahya_genes := lapply(strsplit(Ahya_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "ahya"))]
+
+# Find which OGs contain targets from each species
+broc_groups[, has_nvec_target := sapply(Nvec_genes, function(genes) 
+  any(mRNA_overlap_nvec %in% genes))]
+broc_groups[, has_ahya_target := sapply(Ahya_genes, function(genes) 
+  any(mRNA_overlap_ahya %in% genes))]
+broc_groups[, has_apoc_target := sapply(Apoc_genes, function(genes) 
+  any(mRNA_overlap_apoc %in% genes))]
+
+# Find OGs with targets from all three species (homologous targets)
+homologous_targets <- broc_groups[has_nvec_target == TRUE & 
+                                   has_ahya_target == TRUE & 
+                                   has_apoc_target == TRUE]
+
+# Find OGs with targets from any two species
+two_species <- broc_groups[(has_nvec_target + has_ahya_target + has_apoc_target) == 2]
+
+# Find OGs with targets from only one species
+one_species <- broc_groups[(has_nvec_target + has_ahya_target + has_apoc_target) == 1]
+
+# Summary statistics
+cat("Summary of mRNA target representation in BROCCOLI groups:\n")
+cat("=========================================================\n")
+cat("Total OGs with homologous targets (all 3 species):", nrow(homologous_targets), "\n")
+cat("Total OGs with targets from 2 species:", nrow(two_species), "\n")
+cat("Total OGs with targets from 1 species:", nrow(one_species), "\n\n")
+
+cat("Targets found per species:\n")
+cat("Nvec targets in OGs:", sum(broc_groups$has_nvec_target), "/", length(mRNA_overlap_nvec), "\n")
+cat("Ahya targets in OGs:", sum(broc_groups$has_ahya_target), "/", length(mRNA_overlap_ahya), "\n")
+cat("Apoc targets in OGs:", sum(broc_groups$has_apoc_target), "/", length(mRNA_overlap_apoc), "\n")
+
+# View the homologous targets
+print(homologous_targets[, .(`#OG_name`, Apoc_proteins.faa, Nvec_proteins.faa, Ahya_proteins.faa)])
+
+# Get specific target IDs in homologous groups
+homologous_targets[, nvec_target_ids := sapply(Nvec_genes, function(genes) 
+  paste(genes[genes %in% mRNA_overlap_nvec], collapse = ", "))]
+homologous_targets[, ahya_target_ids := sapply(Ahya_genes, function(genes) 
+  paste(genes[genes %in% mRNA_overlap_ahya], collapse = ", "))]
+homologous_targets[, apoc_target_ids := sapply(Apoc_genes, function(genes) 
+  paste(genes[genes %in% mRNA_overlap_apoc], collapse = ", "))]
+```
+
+Make upset plot with homologous genes overlapping with piRNAs 
+```{r}
+# For each target, identify which species have homologs in the same OG
+
+# Initialize a list to store target information
+target_membership <- list()
+
+# Process Nvec targets
+for (target in mRNA_overlap_nvec) {
+  # Find which OGs contain this target
+  ogs <- broc_groups[sapply(Nvec_genes, function(genes) target %in% genes), `#OG_name`]
+  
+  if (length(ogs) > 0) {
+    # For each OG this target is in, check which other species have targets
+    for (og in ogs) {
+      has_ahya <- broc_groups[`#OG_name` == og, has_ahya_target]
+      has_apoc <- broc_groups[`#OG_name` == og, has_apoc_target]
+      
+      target_membership[[target]] <- list(
+        target = target,
+        species = "Nvec",
+        OG = og,
+        Nvec = 1,
+        Ahya = as.integer(has_ahya),
+        Apoc = as.integer(has_apoc)
+      )
+    }
+  }
+}
+
+# Process Ahya targets
+for (target in mRNA_overlap_ahya) {
+  ogs <- broc_groups[sapply(Ahya_genes, function(genes) target %in% genes), `#OG_name`]
+  
+  if (length(ogs) > 0) {
+    for (og in ogs) {
+      has_nvec <- broc_groups[`#OG_name` == og, has_nvec_target]
+      has_apoc <- broc_groups[`#OG_name` == og, has_apoc_target]
+      
+      target_membership[[target]] <- list(
+        target = target,
+        species = "Ahya",
+        OG = og,
+        Nvec = as.integer(has_nvec),
+        Ahya = 1,
+        Apoc = as.integer(has_apoc)
+      )
+    }
+  }
+}
+
+# Process Apoc targets
+for (target in mRNA_overlap_apoc) {
+  ogs <- broc_groups[sapply(Apoc_genes, function(genes) target %in% genes), `#OG_name`]
+  
+  if (length(ogs) > 0) {
+    for (og in ogs) {
+      has_nvec <- broc_groups[`#OG_name` == og, has_nvec_target]
+      has_ahya <- broc_groups[`#OG_name` == og, has_ahya_target]
+      
+      target_membership[[target]] <- list(
+        target = target,
+        species = "Apoc",
+        OG = og,
+        Nvec = as.integer(has_nvec),
+        Ahya = as.integer(has_ahya),
+        Apoc = 1
+      )
+    }
+  }
+}
+
+# Convert to data frame
+upset_targets <- do.call(rbind, lapply(target_membership, as.data.frame))
+
+# Remove duplicates (targets might be in multiple OGs)
+upset_targets <- upset_targets[!duplicated(upset_targets$target), ]
+
+# Create the UpSet plot with target counts
+upset(upset_targets, 
+      sets = c("Nvec", "Ahya", "Apoc"),
+      order.by = "freq",
+      main.bar.color = "steelblue",
+      sets.bar.color = c("coral", "lightblue", "lightgreen"),
+      text.scale = c(1.5, 1.3, 1.2, 1, 1.5, 1.2),
+      point.size = 3.5,
+      line.size = 1,
+      mainbar.y.label = "Number of gene overlaps",
+      sets.x.label = "Total gene overlaps per species")
+
+# Print detailed statistics
+cat("\nTarget-Level UpSet Summary:\n")
+cat("============================\n")
+cat("Total unique targets in OGs:", nrow(upset_targets), "\n\n")
+
+cat("Targets with homologs in all 3 species:", 
+    sum(upset_targets$Nvec == 1 & upset_targets$Ahya == 1 & upset_targets$Apoc == 1), "\n")
+
+cat("Targets with homologs in Nvec + Ahya only:", 
+    sum(upset_targets$Nvec == 1 & upset_targets$Ahya == 1 & upset_targets$Apoc == 0), "\n")
+
+cat("Targets with homologs in Nvec + Apoc only:", 
+    sum(upset_targets$Nvec == 1 & upset_targets$Ahya == 0 & upset_targets$Apoc == 1), "\n")
+
+cat("Targets with homologs in Ahya + Apoc only:", 
+    sum(upset_targets$Nvec == 0 & upset_targets$Ahya == 1 & upset_targets$Apoc == 1), "\n")
+
+cat("\nSpecies-specific targets (no homologs in other species):\n")
+cat("Nvec only:", sum(upset_targets$Nvec == 1 & upset_targets$Ahya == 0 & upset_targets$Apoc == 0), "\n")
+cat("Ahya only:", sum(upset_targets$Nvec == 0 & upset_targets$Ahya == 1 & upset_targets$Apoc == 0), "\n")
+cat("Apoc only:", sum(upset_targets$Nvec == 0 & upset_targets$Ahya == 0 & upset_targets$Apoc == 1), "\n")
+
+# Show breakdown by species
+cat("\n\nBreakdown by species:\n")
+cat("Nvec targets with homologs:", sum(upset_targets$species == "Nvec"), 
+    "out of", length(mRNA_overlap_nvec), 
+    sprintf("(%.1f%%)\n", 100 * sum(upset_targets$species == "Nvec") / length(mRNA_overlap_nvec)))
+
+cat("Ahya targets with homologs:", sum(upset_targets$species == "Ahya"), 
+    "out of", length(mRNA_overlap_ahya),
+    sprintf("(%.1f%%)\n", 100 * sum(upset_targets$species == "Ahya") / length(mRNA_overlap_ahya)))
+
+cat("Apoc targets with homologs:", sum(upset_targets$species == "Apoc"), 
+    "out of", length(mRNA_overlap_apoc),
+    sprintf("(%.1f%%)\n", 100 * sum(upset_targets$species == "Apoc") / length(mRNA_overlap_apoc)))
+
+# Optional: Save the target membership data for further analysis
+#write.csv(upset_targets, "target_homology_membership.csv", row.names = FALSE)
+```
+
+## Functional enrichment of shared genes overlapping with piRNAs ?
 
