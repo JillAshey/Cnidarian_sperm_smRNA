@@ -670,6 +670,112 @@ shared_targets_apoc$same_miRNA <- shared_targets_apoc$miRNA.x == shared_targets_
 
 19 genes have the same miRNA targeting their 3' UTR and mRNA sequence. 
 
+#### Enrichment - mRNA and 3'UTR
+
+Read in gene to go information (generated above)
+```{r}
+apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
+```
+
+Make list of genes with binding targets in mRNA and 3'UTR regions. 
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+apoc_clust_genes <- as.character(unique(c(miranda_apoc$mRNA, merged_3UTR_apoc$gene_name)))
+
+# All genes 
+apoc_all_genes <- as.character(apoc_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
+names(apoc_GeneList) <- apoc_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_BOTH_BP <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_BOTH_BP_FE <- runTest(GO_APOC_BOTH_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_BOTH_BP_En <- GenTable(GO_APOC_BOTH_BP, Fisher = GO_APOC_BOTH_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_BOTH_BP_En$Fisher<-as.numeric(GO_APOC_BOTH_BP_En$Fisher)
+GO_APOC_BOTH_BP_En_sig<-GO_APOC_BOTH_BP_En[GO_APOC_BOTH_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_BOTH_MF <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_BOTH_MF_FE <- runTest(GO_APOC_BOTH_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_BOTH_MF_En <- GenTable(GO_APOC_BOTH_MF, Fisher = GO_APOC_BOTH_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_BOTH_MF_En$Fisher<-as.numeric(GO_APOC_BOTH_MF_En$Fisher)
+GO_APOC_BOTH_MF_En_sig<-GO_APOC_BOTH_MF_En[GO_APOC_BOTH_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for both bindings
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_APOC_BOTH_BP_En_sig$ontology <- "Biological Processes"
+GO_APOC_BOTH_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_BOTH_APOC <- rbind(GO_APOC_BOTH_BP_En_sig, GO_APOC_BOTH_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_BOTH_APOC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
 ### Nvec
 
 #### Binding summary - mRNA
