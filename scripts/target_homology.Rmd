@@ -958,7 +958,7 @@ ggplot(go_shared, aes(x = species, y = Term, color = Fisher)) +
   #facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("Species") +
   ylab("GO Term") +
-  theme_classic() +
+  theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
         strip.text = element_text(size = 12, face = "bold"))
 ```
