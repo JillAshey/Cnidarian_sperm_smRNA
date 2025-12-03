@@ -18,6 +18,7 @@ library(UpSetR)
 library(ggupset)
 library(data.table)
 library(patchwork)
+library(topGO)
 ```
 
 ## miRNA targets 
@@ -791,6 +792,38 @@ Filter by significant results
 ```{r}
 GO_APOC_BP_all_spp_En$Fisher<-as.numeric(GO_APOC_BP_all_spp_En$Fisher)
 GO_APOC_BP_all_spp_En_sig<-GO_APOC_BP_all_spp_En[GO_APOC_BP_all_spp_En$Fisher<0.05,]
+GO_APOC_BP_all_spp_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_MF_all_spp <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_MF_all_spp_FE <- runTest(GO_APOC_MF_all_spp, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_MF_all_spp_En$Fisher<-as.numeric(GO_APOC_MF_all_spp_En$Fisher)
+GO_APOC_MF_all_spp_En_sig<-GO_APOC_MF_all_spp_En[GO_APOC_MF_all_spp_En$Fisher<0.05,]
+GO_APOC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Apoc ontologies 
+
+```{r}
+GO_APOC_all_spp_En_sig <- rbind(GO_APOC_MF_all_spp_En_sig, GO_APOC_BP_all_spp_En_sig)
 ```
 
 ### Nvec - shared between all three spp 
@@ -852,6 +885,38 @@ Filter by significant results
 ```{r}
 GO_NVEC_BP_all_spp_En$Fisher<-as.numeric(GO_NVEC_BP_all_spp_En$Fisher)
 GO_NVEC_BP_all_spp_En_sig<-GO_NVEC_BP_all_spp_En[GO_NVEC_BP_all_spp_En$Fisher<0.05,]
+GO_NVEC_BP_all_spp_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_MF_all_spp <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_MF_all_spp_FE <- runTest(GO_NVEC_MF_all_spp, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_MF_all_spp_En$Fisher<-as.numeric(GO_NVEC_MF_all_spp_En$Fisher)
+GO_NVEC_MF_all_spp_En_sig<-GO_NVEC_MF_all_spp_En[GO_NVEC_MF_all_spp_En$Fisher<0.05,]
+GO_NVEC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Nvec ontologies 
+
+```{r}
+GO_NVEC_all_spp_En_sig <- rbind(GO_NVEC_MF_all_spp_En_sig, GO_NVEC_BP_all_spp_En_sig)
 ```
 
 ### Ahya - shared between all three spp 
@@ -915,6 +980,38 @@ Filter by significant results
 ```{r}
 GO_AHYA_BP_all_spp_En$Fisher<-as.numeric(GO_AHYA_BP_all_spp_En$Fisher)
 GO_AHYA_BP_all_spp_En_sig<-GO_AHYA_BP_all_spp_En[GO_AHYA_BP_all_spp_En$Fisher<0.05,]
+GO_AHYA_BP_all_spp_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_MF_all_spp <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_MF_all_spp_FE <- runTest(GO_AHYA_MF_all_spp, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_MF_all_spp_En$Fisher<-as.numeric(GO_AHYA_MF_all_spp_En$Fisher)
+GO_AHYA_MF_all_spp_En_sig<-GO_AHYA_MF_all_spp_En[GO_AHYA_MF_all_spp_En$Fisher<0.05,]
+GO_AHYA_MF_all_spp_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Ahya ontologies 
+
+```{r}
+GO_AHYA_all_spp_En_sig <- rbind(GO_AHYA_MF_all_spp_En_sig, GO_AHYA_BP_all_spp_En_sig)
 ```
 
 ### Enriched terms for piRNA overlap for all 3 spp 
@@ -922,17 +1019,17 @@ GO_AHYA_BP_all_spp_En_sig<-GO_AHYA_BP_all_spp_En[GO_AHYA_BP_all_spp_En$Fisher<0.
 Find shared enriched terms 
 ```{r}
 # Add species labels and keep only needed columns
-ahya <- GO_AHYA_BP_all_spp_En_sig %>%
+ahya <- GO_AHYA_all_spp_En_sig %>%
   mutate(species = "Ahya") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
 
-apoc <- GO_APOC_BP_all_spp_En_sig %>%
+apoc <- GO_APOC_all_spp_En_sig %>%
   mutate(species = "Apoc") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
 
-nvec <- GO_NVEC_BP_all_spp_En_sig %>%
+nvec <- GO_NVEC_all_spp_En_sig %>%
   mutate(species = "Nvec") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
 
 # Shared GO IDs across all three
 shared_ids <- purrr::reduce(
@@ -952,14 +1049,25 @@ go_shared <- go_all %>%
 
 Plot! 
 ```{r}
-ggplot(go_shared, aes(x = species, y = Term, color = Fisher)) +
-  geom_point(size = 10) +
-  scale_fill_viridis_c(option = "D", name = expression('-log'[10]*'(Fisher p-value)')) +
-  #facet_wrap(~ontology, scales = "free_y", ncol = 1) +
-  xlab("Species") +
-  ylab("GO Term") +
+ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
+  geom_point(size = 5) +
+  scale_fill_manual(values = c("ahya" = "#E69F00", "apoc" = "#56B4E9", "nvec" = "#009E73")) +
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("log(Enrichment score)") +
+  coord_flip() +
+  theme_bw() 
+
+ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
+  geom_point(size = 5, shape = 21, color = "black") +  # shape=21 enables fill; black border
+  scale_fill_manual(values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")) +
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("log(Enrichment score)") +
+  coord_flip() +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
-        strip.text = element_text(size = 12, face = "bold"))
+  theme(
+    axis.text = element_text(color = "black"),
+    strip.text = element_text(face = "bold"))
 ```
 
