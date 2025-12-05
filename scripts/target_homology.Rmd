@@ -21,28 +21,31 @@ library(patchwork)
 library(topGO)
 ```
 
-## miRNA targets 
+## miRNA targets (3UTR and mRNA)
 
 Read in data for all spp - mRNA only here
 ```{r}
 ## Ahya
 miranda_ahya <- read.delim("../output/miRNA_interactions/ahya/miranda_strict_mRNA_parsed_ahya.txt", header = F)
 colnames(miranda_ahya) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+miranda_3utr_ahya <- read.csv("../output/miRNA_interactions/ahya/miranda_strict_3UTR_parsed_genename_ahya.csv", header = T)
 
 ## Apoc 
 miranda_apoc <- read.delim("../output/miRNA_interactions/apoc/miranda_strict_mRNA_parsed_apoc.txt", header = F)
 colnames(miranda_apoc) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+miranda_3utr_apoc <- read.csv("../output/miRNA_interactions/apoc/miranda_strict_3UTR_parsed_genename_apoc.csv", header = T)
 
 ## Nvec 
 miranda_nvec <- read.delim("../output/miRNA_interactions/nvec/miranda_strict_mRNA_parsed_nvec.txt", header = F)
 colnames(miranda_nvec) <- c("miRNA", "mRNA", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
+miranda_3utr_nvec <- read.csv("../output/miRNA_interactions/nvec/miranda_strict_3UTR_parsed_genename_nvec.csv", header = T)
 ```
 
 Subset mRNA names
 ```{r}
-mRNA_targets_ahya <- unique(miranda_ahya$mRNA)
-mRNA_targets_apoc <- unique(miranda_apoc$mRNA)
-mRNA_targets_nvec <- unique(miranda_nvec$mRNA)
+mRNA_targets_ahya <- unique(c(miranda_ahya$mRNA, miranda_3utr_ahya$gene_name))
+mRNA_targets_apoc <- unique(c(miranda_apoc$mRNA, miranda_3utr_apoc$gene_name))
+mRNA_targets_nvec <- unique(c(miranda_nvec$mRNA, miranda_3utr_nvec$gene_name))
 ```
 
 Read in broccoli results 
@@ -291,7 +294,7 @@ upset(upset_targets,
       text.scale = c(1.5, 1.3, 1.2, 1, 1.5, 1.2),
       point.size = 3.5,
       line.size = 1,
-      mainbar.y.label = "Number of mRNA Targets",
+      mainbar.y.label = "Number of Targets",
       sets.x.label = "Total Targets per Species")
 
 # Print detailed statistics
@@ -329,99 +332,12 @@ cat("Ahya targets with homologs:", sum(upset_targets$species == "Ahya"),
 cat("Apoc targets with homologs:", sum(upset_targets$species == "Apoc"), 
     "out of", length(mRNA_targets_apoc),
     sprintf("(%.1f%%)\n", 100 * sum(upset_targets$species == "Apoc") / length(mRNA_targets_apoc)))
-
-# Optional: Save the target membership data for further analysis
-write.csv(upset_targets, "target_homology_membership.csv", row.names = FALSE)
-
-# Alternative visualization using ggupset
-library(ggplot2)
-library(ggupset)
-library(tidyr)
-
-upset_for_gg <- upset_targets %>%
-  mutate(Species_set = pmap(list(Nvec, Ahya, Apoc), function(n, a, p) {
-    spp <- c()
-    if (n == 1) spp <- c(spp, "Nvec")
-    if (a == 1) spp <- c(spp, "Ahya")
-    if (p == 1) spp <- c(spp, "Apoc")
-    return(list(spp))
-  })) %>%
-  unnest(Species_set)
-
-ggplot(upset_for_gg, aes(x = Species_set)) +
-  geom_bar(fill = "steelblue", alpha = 0.8) +
-  scale_x_upset(n_intersections = 20) +
-  theme_minimal() +
-  labs(title = "mRNA Target Homology Across Species",
-       subtitle = "Number of individual targets with homologs in each species combination",
-       y = "Number of mRNA Targets") +
-  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
-        plot.subtitle = element_text(hjust = 0.5, size = 10))
 ```
 
-### Annotation of shared/divergent targets 
 
-Read in annotation files 
-```{r}
-## Apoc
-annot_apoc <- read.delim("../data/annotations/apoculata_GeneAnnotation_combined.txt")
 
-## Nvec 
-annot_nvec <- read.delim("../data/annotations/NV2g.20240221.GO.tsv", header = F)
-colnames(annot_nvec) <- c("gene_name", "ontology", "GeneOntologyIDs", "GO_description", "Extended_description", "Db")
 
-## Ahya
-annot_ahya <- read.delim("~/Desktop/GFFs/ahya/Acropora_hyacinthus.annotations.txt")[,1:22]
-```
 
-Merge annotation and homology info
-```{r}
-# Convert annotation tables to data.tables if not already
-setDT(upset_targets)
-upset_targets$target <- gsub("-RA", "", upset_targets$target)
-setDT(annot_apoc)
-setDT(annot_nvec)
-setDT(annot_ahya)
-
-# Function to merge upset_targets by species and retrieve annotations
-get_annotations <- function(upset_targets, annot_apoc, annot_nvec, annot_ahya) {
-  # Merge for Apoc
-  apoc_annots <- merge(
-    upset_targets[species == "Apoc"], 
-    annot_apoc, 
-    by.x = "target", 
-    by.y = "Protein_ID", 
-    all.x = TRUE
-  )
-  
-  # Merge for Nvec
-  nvec_annots <- merge(
-    upset_targets[species == "Nvec"], 
-    annot_nvec, 
-    by.x = "target", 
-    by.y = "gene_name", 
-    all.x = TRUE
-  )
-  
-  # Merge for Ahya
-  ahya_annots <- merge(
-    upset_targets[species == "Ahya"], 
-    annot_ahya, 
-    by.x = "target", 
-    by.y = "GeneID", 
-    all.x = TRUE
-  )
-  
-  # Combine all results
-  rbindlist(list(apoc_annots, nvec_annots, ahya_annots), fill = TRUE)
-}
-
-# Get a combined table of upset targets and their annotations
-annotated_upset_targets <- get_annotations(upset_targets, annot_apoc, annot_nvec, annot_ahya)
-
-# View results
-head(annotated_upset_targets)
-```
 
 ## piRNAs overlapping with genes 
 
@@ -1061,6 +977,355 @@ ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = specie
 ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
   geom_point(size = 5, shape = 21, color = "black") +  # shape=21 enables fill; black border
   scale_fill_manual(values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")) +
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("log(Enrichment score)") +
+  coord_flip() +
+  theme_bw() +
+  theme(
+    axis.text = element_text(color = "black"),
+    strip.text = element_text(face = "bold"))
+```
+
+## Functional enrichment of genes overlapping with piRNAs that are species-specific 
+
+### Apoc ONLY
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
+```
+
+Filter by shared orthogroups and species
+```{r}
+upset_targets_apoc_only <- upset_targets %>%
+  filter(
+    species == "Apoc",
+    Nvec == 0,
+    Ahya == 0,
+    Apoc == 1)
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+apoc_clust_genes <- as.character(unique(upset_targets_apoc_only$target))
+
+# All genes 
+apoc_all_genes <- as.character(apoc_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
+names(apoc_GeneList) <- apoc_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_BP_only <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_BP_only_FE <- runTest(GO_APOC_BP_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_BP_only_En <- GenTable(GO_APOC_BP_only, Fisher = GO_APOC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_BP_only_En$Fisher<-as.numeric(GO_APOC_BP_only_En$Fisher)
+GO_APOC_BP_only_En_sig<-GO_APOC_BP_only_En[GO_APOC_BP_only_En$Fisher<0.05,]
+GO_APOC_BP_only_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_MF_only <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_MF_only_FE <- runTest(GO_APOC_MF_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_MF_only_En <- GenTable(GO_APOC_MF_only, Fisher = GO_APOC_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_MF_only_En$Fisher<-as.numeric(GO_APOC_MF_only_En$Fisher)
+GO_APOC_MF_only_En_sig<-GO_APOC_MF_only_En[GO_APOC_MF_only_En$Fisher<0.05,]
+GO_APOC_MF_only_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Apoc ontologies and plot
+
+```{r}
+GO_APOC_only_En_sig <- rbind(GO_APOC_BP_only_En_sig, GO_APOC_MF_only_En_sig)
+```
+
+Plot! 
+```{r}
+## Select top 10 terms for each ontology 
+top10_apoc_only <- GO_APOC_only_En_sig %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+
+ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher))) +
+  geom_point(size = 5, shape = 21, color = "black", fill = "black") +   
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("log(Enrichment score)") +
+  coord_flip() +
+  theme_bw() +
+  theme(
+    axis.text = element_text(color = "black"),
+    strip.text = element_text(face = "bold"))
+```
+
+### Nvec ONLY
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
+```
+
+Filter by shared orthogroups and species
+```{r}
+upset_targets_nvec_only <- upset_targets %>%
+  filter(
+    species == "Nvec",
+    Nvec == 1,
+    Ahya == 0,
+    Apoc == 0)
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+nvec_clust_genes <- as.character(unique(upset_targets_nvec_only$target))
+
+# All genes 
+nvec_all_genes <- as.character(nvec_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
+names(nvec_GeneList) <- nvec_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_BP_only <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_BP_only_FE <- runTest(GO_NVEC_BP_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_BP_only_En <- GenTable(GO_NVEC_BP_only, Fisher = GO_NVEC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_BP_only_En$Fisher<-as.numeric(GO_NVEC_BP_only_En$Fisher)
+GO_NVEC_BP_only_En_sig<-GO_NVEC_BP_only_En[GO_NVEC_BP_only_En$Fisher<0.05,]
+GO_NVEC_BP_only_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_MF_only <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_MF_only_FE <- runTest(GO_NVEC_MF_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_MF_only_En <- GenTable(GO_NVEC_MF_only, Fisher = GO_NVEC_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_MF_only_En$Fisher<-as.numeric(GO_NVEC_MF_only_En$Fisher)
+GO_NVEC_MF_only_En_sig<-GO_NVEC_MF_only_En[GO_NVEC_MF_only_En$Fisher<0.05,]
+GO_NVEC_MF_only_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Nvec ontologies and plot
+
+```{r}
+GO_NVEC_only_En_sig <- rbind(GO_NVEC_BP_only_En_sig, GO_NVEC_MF_only_En_sig)
+```
+
+Plot! 
+```{r}
+## Select top 10 terms for each ontology 
+top10_nvec_only <- GO_NVEC_only_En_sig %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+
+ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), size = Significant)) +
+  geom_point(shape = 21, color = "black", fill = "black") +   
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("log(Enrichment score)") +
+  coord_flip() +
+  theme_bw() +
+  theme(
+    axis.text = element_text(color = "black"),
+    strip.text = element_text(face = "bold"))
+```
+
+### Ahya ONLY
+
+##### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
+```
+
+Filter by shared orthogroups and species
+```{r}
+upset_targets_ahya_only <- upset_targets %>%
+  filter(
+    species == "Ahya",
+    Nvec == 0,
+    Ahya == 1,
+    Apoc == 0)
+
+upset_targets_ahya_only$target <- gsub("-RA", "", upset_targets_ahya_only$target)
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+ahya_clust_genes <- as.character(unique(upset_targets_ahya_only$target))
+
+# All genes 
+ahya_all_genes <- as.character(ahya_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+ahya_GeneList <- factor(as.integer(ahya_all_genes %in% ahya_clust_genes))
+names(ahya_GeneList) <- ahya_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+ahya_gene2go_topgo<-readMappings("../data/annotations/Ahya_gene2go.tab", IDsep=";", sep="\t")
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_BP_only <-new("topGOdata", ontology="BP", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_BP_only_FE <- runTest(GO_AHYA_BP_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_BP_only_En$Fisher<-as.numeric(GO_AHYA_BP_only_En$Fisher)
+GO_AHYA_BP_only_En_sig<-GO_AHYA_BP_only_En[GO_AHYA_BP_only_En$Fisher<0.05,]
+GO_AHYA_BP_only_En_sig$ontology <- "Biological Processes"
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_MF_only <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_MF_only_FE <- runTest(GO_AHYA_MF_only, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_MF_only_En$Fisher<-as.numeric(GO_AHYA_MF_only_En$Fisher)
+GO_AHYA_MF_only_En_sig<-GO_AHYA_MF_only_En[GO_AHYA_MF_only_En$Fisher<0.05,]
+GO_AHYA_MF_only_En_sig$ontology <- "Molecular Functions"
+```
+
+##### Join Ahya ontologies and plot
+
+```{r}
+GO_AHYA_only_En_sig <- rbind(GO_AHYA_BP_only_En_sig, GO_AHYA_MF_only_En_sig)
+```
+
+Plot! 
+```{r}
+## Select top 10 terms for each ontology 
+top10_ahya_only <- GO_AHYA_only_En_sig %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+
+ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher))) +
+  geom_point(size = 5, shape = 21, color = "black", fill = "black") +   
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
   ylab("log(Enrichment score)") +

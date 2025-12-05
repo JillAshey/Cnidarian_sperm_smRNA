@@ -418,6 +418,11 @@ length(unique(merged_3UTR_apoc$three_UTR))
 length(unique(merged_3UTR_apoc$gene_name))
 ```
 
+Write out new csv with gene names associated with the 3UTRs.
+```{r}
+write.csv(merged_3UTR_apoc, "../output/miRNA_interactions/apoc/miranda_strict_3UTR_parsed_genename_apoc.csv")
+```
+
 Make network plot 
 ```{r}
 # Construct the edge list
@@ -1137,6 +1142,11 @@ length(unique(merged_3UTR_nvec$miRNA))
 length(unique(merged_3UTR_nvec$three_UTR))
 ```
 
+Write out new csv with gene names associated with the 3UTRs.
+```{r}
+write.csv(merged_3UTR_nvec, "../output/miRNA_interactions/nvec/miranda_strict_3UTR_parsed_genename_nvec.csv")
+```
+
 Make network plot 
 ```{r}
 # Construct the edge list
@@ -1623,14 +1633,62 @@ ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, 
   theme_bw()
 ```
 
+#### Binding summary - 3UTRs
 
+Read in miranda data 
+```{r}
+miranda_3utr_ahya <- read.delim("../output/miRNA_interactions/ahya/miranda_strict_3UTR_parsed_ahya.txt", header = F)
+colnames(miranda_3utr_ahya) <- c("miRNA", "three_UTR", "score", "energy", "query_start_end", "subject_start_end", "total_bp_shared", "query_similar", "subject_similar")
 
+# Format miranda df 
+miranda_3utr_ahya$miRNA <- sub("^>", "", miranda_3utr_ahya$miRNA)  # Remove leading ">"
 
+dim(miranda_3utr_ahya)
+length(unique(miranda_3utr_ahya$miRNA))
+length(unique(miranda_3utr_ahya$three_UTR))
+```
 
+In order to connect the 3UTRs with their associated gene names, I need to read in `ahya.GFFannotation.3UTR_1kb_corrected.gff` and associate the gene names in the attribute column with the data from the three_UTR column in the `miranda_3utr_ahya` df. 
 
+Read in the gff
+```{r}
+ahya_3UTR <- read.delim("~/Desktop/GFFs/ahya/ahya.GFFannotation.3UTR_1kb_corrected.gff", header = F)
+```
 
+Make a new column that will match the three_UTR column in `miranda_3utr_apoc`
+```{r}
+# Subtract 1 to match miranda_3utr_apoc
+ahya_3UTR$V4 <- ahya_3UTR$V4 - 1
 
+# Make new col
+ahya_3UTR$three_UTR <- with(ahya_3UTR, 
+                                   paste0(V3, "::", V1, ":", V4, "-", V5, "(", V7, ")"))
+```
 
+Join the two dfs 
+```{r}
+merged_3UTR_ahya <- left_join(miranda_3utr_ahya, ahya_3UTR, by = "three_UTR")
+```
+
+Extract gene names and remove other cols
+```{r}
+merged_3UTR_ahya <- merged_3UTR_ahya %>%
+  mutate(gene_name = str_extract(V9, "(?<=ID=)[^;]+")  ) %>%
+  dplyr::select(-starts_with("V"))
+
+# Select only unique rows and remove -RA
+merged_3UTR_ahya <- unique(merged_3UTR_ahya)
+merged_3UTR_ahya$gene_name <- gsub("-RA", "", merged_3UTR_ahya$gene_name)
+
+dim(merged_3UTR_ahya)
+length(unique(merged_3UTR_ahya$miRNA))
+length(unique(merged_3UTR_ahya$three_UTR))
+```
+
+Write out new csv with gene names associated with the 3UTRs.
+```{r}
+write.csv(merged_3UTR_ahya, "../output/miRNA_interactions/ahya/miranda_strict_3UTR_parsed_genename_ahya.csv")
+```
 
 
 
