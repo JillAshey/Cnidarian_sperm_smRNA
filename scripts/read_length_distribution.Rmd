@@ -18,7 +18,7 @@ library(tidyverse)
 Read in data 
 ```{r}
 # Set directory and read all ahya files at once
-path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/ahya/"
+path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/ahya/trimmomatic/"
 file_list <- list.files(path, pattern = "*length_start.txt", full.names = TRUE)
 
 # Read and combine all files, adding sample identifier
@@ -60,26 +60,13 @@ ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total, fill = star
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-Plot read count
-```{r}
-ggplot(summary_data_ahya, aes(x = factor(length), y = n, fill = start_nt)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Read length", y = "Read Count", 
-       title = "Ahya: Read counts by 5' nucleotide") +
-  scale_fill_manual(values = c("A" = "#FF9999", "C" = "#66B2FF", 
-                               "G" = "#99FF99", "U" = "#FFCC99")) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-```
-
-
 ### Nvec 
 
 Read in data 
 ```{r}
 # Set directory and read all ahya files at once
-path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/nvec/"
-file_list <- list.files(path, pattern = "*length_start_trimmomatic.txt", full.names = TRUE)
+path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/nvec/trimmomatic/"
+file_list <- list.files(path, pattern = "*length_start.txt", full.names = TRUE)
 
 # Read and combine all files, adding sample identifier
 all_data_nvec<- file_list %>%
@@ -124,7 +111,7 @@ ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total, fill = star
 Read in data 
 ```{r}
 # Set directory and read all ahya files at once
-path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/apoc/"
+path <- "~/Desktop/BarottLab/Cnidarian_sperm_smRNA/length_distribution/apoc/trimmomatic/"
 file_list <- list.files(path, pattern = "*length_start.txt", full.names = TRUE)
 
 # Read and combine all files, adding sample identifier
