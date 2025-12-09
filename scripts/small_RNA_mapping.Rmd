@@ -1,0 +1,257 @@
+---
+title: "Small RNA mapping"
+author: "Jill Ashey"
+date: "2025-12-08"
+output: html_document
+---
+
+This script will plot miRNA, piRNA, rRNA, and tRNA by mapping percentages. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+Read in data. 
+```{r}
+mapping <- read.csv("../data/small_RNA_mapping.csv")
+```
+
+Summarize counts by replicate
+```{r}
+summary_by_rep <- mapping %>%
+  group_by(Replicate, Feature, Species) %>%
+  summarise(Count = sum(Count), .groups = 'drop') %>%
+  # Calculate percentages within each replicate
+  group_by(Replicate) %>%
+  mutate(Percent = Count / sum(Count) * 100) %>%
+  ungroup()
+```
+
+Calculate average percentages across replicates
+```{r}
+avg_percentages <- summary_by_rep %>%
+  group_by(Feature, Species) %>%
+  summarise(
+    Avg_Count = mean(Count),
+    Avg_Percent = mean(Percent),
+    SD_Percent = sd(Percent),
+    .groups = 'drop'
+  ) %>%
+  arrange(desc(Avg_Percent))
+```
+
+Plot stacked bar chart
+```{r}
+# Ensure Feature is ordered by abundance (largest to smallest)
+avg_percentages$Feature <- factor(avg_percentages$Feature, 
+                                  levels = avg_percentages$Feature[order(avg_percentages$Avg_Percent, decreasing = TRUE)])
+
+# Create stacked bar chart (single bar for average across replicates)
+ggplot(avg_percentages, aes(x = Species, y = Avg_Percent, fill = Feature)) +
+  geom_col(color = "white", size = 0.5, width = 0.7) +
+  geom_text(aes(label = paste0(round(Avg_Percent, 1), "%")), 
+            position = position_stack(vjust = 0.5), 
+            size = 5, fontface = "bold", color = "white") +
+  scale_fill_manual(values = c("piRNA" = "#F0E442", 
+                              "rRNA" = "#009E73", 
+                              "tRNA" = "#E69F00", 
+                              "miRNA" = "#56B4E9")) +
+  labs(title = "Acropora hyacinthus Sperm Small RNA Composition",
+       subtitle = "Average percentages across biological replicates",
+       x = "", y = "Percentage (%)") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(size = 14, face = "bold"),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(size = 14, hjust = 0.5),
+        legend.position = "right",
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()) +
+  guides(fill = guide_legend(title = "Small RNA Class"))
+```
+
+```{r}
+# Order features by abundance (largest first)
+avg_percentages$Feature <- factor(avg_percentages$Feature, 
+                                  levels = avg_percentages$Feature[order(avg_percentages$Avg_Percent, decreasing = TRUE)])
+
+# Make miRNA stand out with brighter color + annotation
+ggplot(avg_percentages, aes(x = Species, y = Avg_Percent, fill = Feature)) +
+  geom_bar(stat = "identity", width = 0.8, color = "black", 
+           position = position_stack(reverse = FALSE)) +
+  scale_fill_manual(values = c("piRNA" = "#F0E442",      # Yellow - dominant
+                              "rRNA" = "#009E73",       # Green
+                              "tRNA" = "#E69F00",       # Orange
+                              "miRNA" = "#D55E00"),     # Bright red - makes miRNA POP!
+                   guide = guide_legend(reverse = FALSE)) +
+  scale_y_continuous(expand = c(0, 0), breaks = seq(0, 100, by = 10), limits = c(0, 105)) +
+  ylab("Percentage (%)") +
+  xlab("") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  theme_classic() + 
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.title = element_text(size = 16, face = "bold"),
+        axis.text.x = element_text(face = "italic", size = 12),
+        legend.title = element_text(size = 12, face = "bold"),
+        legend.text = element_text(size = 11),
+        legend.key.size = unit(0.8, "cm"),
+        plot.title = element_text(size = 16, face = "bold", hjust = 0.5)) +
+  coord_cartesian(clip = "off") +
+  guides(fill = guide_legend(reverse = FALSE))
+
+```
+
+```{r}
+library(ggplot2)
+library(patchwork)   # install.packages("patchwork") if needed
+
+# Order factors
+avg_percentages$Feature <- factor(
+  avg_percentages$Feature,
+  levels = avg_percentages$Feature[order(avg_percentages$Avg_Percent, decreasing = TRUE)]
+)
+
+# Main stacked bar (0–100%)
+p_main <- ggplot(avg_percentages,
+                 aes(x = "Acropora\nhyacinthus", y = Avg_Percent, fill = Feature)) +
+  geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = T)) +
+  scale_fill_manual(values = c("piRNA" = "#F0E442",
+                               "rRNA" = "#009E73",
+                               "tRNA" = "#E69F00",
+                               "miRNA" = "#D55E00")) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100),
+                     breaks = seq(0, 100, 10)) +
+  ylab("Mapping percentage (%)") + xlab("") +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 12),
+        axis.text.x = element_text(face = "italic"),
+        axis.title = element_text(size = 16, face = "bold"),
+        legend.title = element_text(size = 10, face = "bold"),
+        legend.text = element_text(size = 10),
+        legend.key.size = unit(0.6, "cm")); p_main
+
+# Inset: zoom into 0–10% so miRNA is visible
+p_inset <- ggplot(avg_percentages,
+                  aes(x = "Acropora\nhyacinthus", y = Avg_Percent, fill = Feature)) +
+  geom_bar(stat = "identity", width = 0.8, color = "black") +
+  scale_fill_manual(values = c("piRNA" = "#F0E442",
+                               "rRNA" = "#009E73",
+                               "tRNA" = "#E69F00",
+                               "miRNA" = "#D55E00"),
+                    guide = "none") +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 18),
+                     breaks = seq(0, 18, 2)) +
+  ylab("") + xlab("") +
+  theme_classic(base_size = 9) +
+  theme(axis.text.x = element_blank(),
+        axis.title = element_blank(),
+        plot.background = element_rect(color = "black", size = 0.5, fill = "white"))
+
+# Combine with inset in top-right corner
+p_combined <- p_main +
+  inset_element(
+    p_inset,
+    left   = 0.30,  # narrower, centered
+    right  = 0.70,
+    bottom = 0.80,  # push inset to top
+    top    = 1.10,
+    align_to = "panel"
+  );p_combined
+```
+
+Some other plot options: 
+
+Log scale bar plot
+```{r}
+ggplot(avg_percentages,
+       aes(x = Species, y = Avg_Count, fill = Feature)) +
+  geom_col(position = position_dodge(width = 0.8),
+           width = 0.7, color = "black") +
+  scale_fill_manual(values = c(piRNA = "#F0E442",
+                               rRNA  = "#009E73",
+                               tRNA  = "#E69F00",
+                               miRNA = "#D55E00")) +
+  ylab("Average read count (log10 scale)") +
+  xlab("") +
+    coord_cartesian(clip = "off") +
+  scale_y_log10() +
+  theme_classic()
+
+```
+
+Separate bar for miRNA
+```{r}
+library(dplyr)
+library(ggplot2)
+
+collapsed <- avg_percentages %>%
+  mutate(Group = ifelse(Feature == "miRNA", "miRNA", "Other small RNAs")) %>%
+  group_by(Group) %>%
+  summarise(Avg_Percent = sum(Avg_Percent), .groups = "drop")
+
+ggplot(collapsed, aes(x = "", y = Avg_Percent, fill = Group)) +
+  geom_col(color = "black", width = 0.6) +
+  geom_text(aes(label = paste0(round(Avg_Percent, 1), "%")),
+            position = position_stack(vjust = 0.5), size = 5) +
+  coord_flip() +
+  ylab("Percentage (%)") + xlab("") +
+  theme_classic()
+
+```
+
+Points of percentages
+```{r}
+ggplot(avg_percentages, aes(x = Feature, y = Avg_Percent, color = Feature)) +
+  geom_point(size = 4) +
+  geom_text(aes(label = paste0(round(Avg_Percent, 1), "%")),
+            vjust = -0.7, size = 3.5) +
+  scale_color_manual(values = c(piRNA="#F0E442", rRNA="#009E73",
+                                tRNA="#E69F00", miRNA="#D55E00")) +
+  ylab("Average percentage (%)") + xlab("") +
+  theme_classic()
+
+```
+
+Two panel fig
+```{r}
+small <- avg_percentages %>% filter(Avg_Percent < 10)
+
+ggplot(small, aes(x = Feature, y = Avg_Percent, fill = Feature)) +
+  geom_col(color = "black", width = 0.7) +
+  geom_text(aes(label = paste0(round(Avg_Percent, 2), "%")),
+            vjust = -0.4, size = 3.5) +
+  scale_fill_manual(values = c(piRNA="#F0E442", rRNA="#009E73",
+                               tRNA="#E69F00", miRNA="#D55E00")) +
+  ylim(0, 10) +
+  ylab("Average percentage (%)") + xlab("") +
+  theme_classic()
+
+```
+
+RPM calculations 
+```{r}
+rpm <- mapping %>%
+  group_by(Replicate) %>%
+  mutate(
+    Total_reads = sum(Count),                 # total mapped small RNAs per replicate
+    RPM        = Count / (Total_reads / 1e6)  # Reads per million
+  ) %>%
+  ungroup()
+avg_rpm <- rpm %>%
+  group_by(Feature) %>%
+  summarise(
+    Avg_RPM = mean(RPM),
+    SD_RPM  = sd(RPM),
+    .groups = "drop"
+  )
+
+ggplot(avg_rpm, aes(x = Feature, y = Avg_RPM, fill = Feature)) +
+  geom_col(color = "black", width = 0.7) +
+  scale_y_log10() +
+  scale_fill_manual(values = c(piRNA="#F0E442", rRNA="#009E73",
+                               tRNA="#E69F00", miRNA="#D55E00")) +
+  ylab("Average RPM (log10)") + xlab("") +
+  theme_classic()
+```
+

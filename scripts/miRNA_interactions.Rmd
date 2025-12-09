@@ -37,6 +37,11 @@ Remove Cluster_598 - it is the same as Cluster_595 and targets the same number o
 ```{r}
 miranda_apoc <- miranda_apoc %>%
   filter(!miRNA == "Cluster_598")
+```
+
+Remove any possible tRNAs - anything that does not have evm at the start. 
+```{r}
+miranda_apoc <- miranda_apoc[grepl("evm", miranda_apoc$mRNA), ]
 
 dim(miranda_apoc)
 length(unique(miranda_apoc$miRNA))
@@ -151,6 +156,9 @@ ggplot(df_freq, aes(x = interaction_length, y = perc)) +
 Read in annot information
 ```{r}
 annot_apoc <- read.delim("../data/annotations/apoculata_GeneAnnotation_combined.txt")
+
+# Count number of annotations with GO terms
+sum((!is.na(annot_apoc$GO_Swiss.Prot) & annot_apoc$GO_Swiss.Prot != "") | (!is.na(annot_apoc$GO_Trembl)     & annot_apoc$GO_Trembl!= ""))
 ```
 
 Format tab file for TopGO
@@ -408,9 +416,10 @@ merged_3UTR_apoc <- merged_3UTR_apoc %>%
 merged_3UTR_apoc <- unique(merged_3UTR_apoc)
 ```
 
-Remove any possible tRNAs - these still have ID= and start with amino acid letters. 
+Remove any possible tRNAs - anything that does not have evm at the start. 
 ```{r}
-merged_3UTR_apoc <- merged_3UTR_apoc[!grepl("ID=", merged_3UTR_apoc$gene_name), ]
+merged_3UTR_apoc <- merged_3UTR_apoc[grepl("evm", merged_3UTR_apoc$gene_name), ]
+merged_3UTR_apoc$gene_name <- sub("TU", "model", merged_3UTR_apoc$gene_name)
 
 dim(merged_3UTR_apoc)
 length(unique(merged_3UTR_apoc$miRNA))
@@ -659,9 +668,9 @@ apoc_3utr_genes <- unique(merged_3UTR_apoc$gene_name)
 shared_genes_apoc <- intersect(apoc_mrna_genes, apoc_3utr_genes)
 ```
 
-50 genes are targeted by miRNAs in both their mRNA and 3'UTR sequence. 
+49 genes are targeted by miRNAs in both their mRNA and 3'UTR sequence. 
 
-Are the 50 genes targeted by miRNAs in both sequences targeted by the same miRNA in both sequences?
+Are the 49 genes targeted by miRNAs in both sequences targeted by the same miRNA in both sequences?
 ```{r}
 miranda_apoc_filt <- miranda_apoc %>%
   filter(mRNA %in% shared_genes_apoc)
@@ -674,6 +683,61 @@ shared_targets_apoc$same_miRNA <- shared_targets_apoc$miRNA.x == shared_targets_
 ```
 
 19 genes have the same miRNA targeting their 3' UTR and mRNA sequence. 
+
+Join dfs for plotting number of binding bp for both regions. 
+```{r}
+miranda_apoc_interaction <- miranda_apoc %>%
+  dplyr::select(miRNA, mRNA, interaction_length) %>%
+  mutate(Binding = "CDS")
+
+merged_3UTR_apoc_interaction <- merged_3UTR_apoc %>%
+  dplyr::select(miRNA, gene_name, interaction_length) %>%
+  mutate(Binding = "3' UTR") %>%
+  dplyr::rename("mRNA" = "gene_name")
+
+join_interaction <- rbind(miranda_apoc_interaction, merged_3UTR_apoc_interaction)
+```
+
+Plot number of binding bp. 
+```{r}
+ggplot(join_interaction, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_3UTR_apoc <- join_interaction %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_3UTR_apoc, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_3UTR_apoc$interaction_length),
+                                  max(df_freq_3UTR_apoc$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_apoc$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
 
 #### Enrichment - mRNA and 3'UTR
 
@@ -914,6 +978,10 @@ Read in annot information
 ```{r}
 annot_nvec <- read.delim("../data/annotations/NV2g.20240221.GO.tsv", header = F)
 colnames(annot_nvec) <- c("gene_name", "ontology", "GeneOntologyIDs", "GO_description", "Extended_description", "Db")
+
+annot_nvec |>
+  dplyr::filter(!is.na(GeneOntologyIDs) & GeneOntologyIDs != "") |>
+  dplyr::distinct(gene_name)
 ```
 
 Format tab file for TopGO
@@ -1395,6 +1463,170 @@ shared_targets_nvec$same_miRNA <- shared_targets_nvec$miRNA.x == shared_targets_
 
 28 genes have the same miRNA targeting their 3' UTR and mRNA sequence. 
 
+Join dfs for plotting number of binding bp for both regions. 
+```{r}
+miranda_nvec_interaction <- miranda_nvec %>%
+  dplyr::select(miRNA, mRNA, interaction_length) %>%
+  mutate(Binding = "CDS")
+
+merged_3UTR_nvec_interaction <- merged_3UTR_nvec %>%
+  dplyr::select(miRNA, gene_name, interaction_length) %>%
+  mutate(Binding = "3' UTR") %>%
+  dplyr::rename("mRNA" = "gene_name")
+
+join_interaction <- rbind(miranda_nvec_interaction, merged_3UTR_nvec_interaction)
+```
+
+Plot number of binding bp. 
+```{r}
+ggplot(join_interaction, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_3UTR_nvec <- join_interaction %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_3UTR_nvec, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_3UTR_nvec$interaction_length),
+                                  max(df_freq_3UTR_nvec$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_nvec$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
+
+
+
+#### Enrichment - mRNA and 3'UTR
+
+Read in gene to go information (generated above)
+```{r}
+nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
+```
+
+Make list of genes with binding targets in mRNA and 3'UTR regions. 
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+nvec_clust_genes <- as.character(unique(c(miranda_nvec$mRNA, merged_3UTR_nvec$gene_name)))
+
+# All genes 
+nvec_all_genes <- as.character(nvec_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
+names(nvec_GeneList) <- nvec_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_BOTH_BP <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_BOTH_BP_FE <- runTest(GO_NVEC_BOTH_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_BOTH_BP_En <- GenTable(GO_NVEC_BOTH_BP, Fisher = GO_NVEC_BOTH_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_BOTH_BP_En$Fisher<-as.numeric(GO_NVEC_BOTH_BP_En$Fisher)
+GO_NVEC_BOTH_BP_En_sig<-GO_NVEC_BOTH_BP_En[GO_NVEC_BOTH_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Functions
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_BOTH_MF <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_BOTH_MF_FE <- runTest(GO_NVEC_BOTH_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_BOTH_MF_En <- GenTable(GO_NVEC_BOTH_MF, Fisher = GO_NVEC_BOTH_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_BOTH_MF_En$Fisher<-as.numeric(GO_NVEC_BOTH_MF_En$Fisher)
+GO_NVEC_BOTH_MF_En_sig<-GO_NVEC_BOTH_MF_En[GO_NVEC_BOTH_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for both bindings
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_NVEC_BOTH_BP_En_sig$ontology <- "Biological Processes"
+GO_NVEC_BOTH_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_BOTH_NVEC <- rbind(GO_NVEC_BOTH_BP_En_sig, GO_NVEC_BOTH_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_BOTH_NVEC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
 ## Ahya
 
 #### Binding summary - mRNA
@@ -1517,6 +1749,9 @@ ggplot(df_freq_ahya, aes(x = interaction_length, y = perc)) +
 Read in annot information
 ```{r}
 annot_ahya <- read.delim("~/Desktop/GFFs/ahya/Acropora_hyacinthus.annotations.txt")[,1:17]
+
+# Count number of annotations with GO terms
+sum(!is.na(annot_ahya$GO.Terms) & annot_ahya$GO.Terms != "")
 ```
 
 Format tab file for TopGO
@@ -1690,14 +1925,202 @@ Write out new csv with gene names associated with the 3UTRs.
 write.csv(merged_3UTR_ahya, "../output/miRNA_interactions/ahya/miranda_strict_3UTR_parsed_genename_ahya.csv")
 ```
 
+DO BINDING AND ENRICHMENT METRICS 
+
+Calculate number of bp shared in the interaction 
+```{r}
+merged_3UTR_ahya <- merged_3UTR_ahya %>%
+  separate(query_start_end, into = c("start", "end"), sep = " ", convert = TRUE) %>%
+  mutate(interaction_length = end - start)
+```
 
 
+#### mRNA and 3UTR binding comparisons 
+
+Any overlap in genes from mRNA v. 3UTR binding?
+```{r}
+ahya_mrna_genes <- unique(miranda_ahya$mRNA)
+ahya_3utr_genes <- unique(merged_3UTR_ahya$gene_name)
+
+# shared 
+shared_genes_ahya <- intersect(ahya_mrna_genes, ahya_3utr_genes)
+```
+
+359 genes are targeted by miRNAs in both their mRNA and 3'UTR sequence. 
+
+Are the 359 genes targeted by miRNAs in both sequences targeted by the same miRNA in both sequences?
+```{r}
+miranda_ahya_filt <- miranda_ahya %>%
+  filter(mRNA %in% shared_genes_ahya)
+
+merged_3UTR_ahya_filt <- merged_3UTR_ahya %>%
+  filter(gene_name %in% shared_genes_ahya)
+
+shared_targets_ahya <- full_join(miranda_ahya_filt, merged_3UTR_ahya_filt, by = c("mRNA" = "gene_name"))
+shared_targets_ahya$same_miRNA <- shared_targets_ahya$miRNA.x == shared_targets_ahya$miRNA.y
+```
+
+Join dfs for plotting number of binding bp for both regions. 
+```{r}
+miranda_ahya_interaction <- miranda_ahya %>%
+  dplyr::select(miRNA, mRNA, interaction_length) %>%
+  mutate(Binding = "CDS")
+
+merged_3UTR_ahya_interaction <- merged_3UTR_ahya %>%
+  dplyr::select(miRNA, gene_name, interaction_length) %>%
+  mutate(Binding = "3' UTR") %>%
+  dplyr::rename("mRNA" = "gene_name")
+
+join_interaction <- rbind(miranda_ahya_interaction, merged_3UTR_ahya_interaction)
+```
+
+Plot number of binding bp. 
+```{r}
+ggplot(join_interaction, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_3UTR_ahya <- join_interaction %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_3UTR_ahya, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_3UTR_ahya$interaction_length),
+                                  max(df_freq_3UTR_ahya$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_ahya$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
 
 
+#### Enrichment - mRNA and 3'UTR
 
+Read in gene to go information (generated above)
+```{r}
+ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
+```
 
+Make list of genes with binding targets in mRNA and 3'UTR regions. 
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+ahya_clust_genes <- as.character(unique(c(miranda_ahya$mRNA, merged_3UTR_ahya$gene_name)))
 
+# All genes 
+ahya_all_genes <- as.character(ahya_gene2go$gene_name)
 
+# Apply 1 or 0 if gene is gene of interest 
+ahya_GeneList <- factor(as.integer(ahya_all_genes %in% ahya_clust_genes))
+names(ahya_GeneList) <- ahya_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+##### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_BOTH_BP <-new("topGOdata", ontology="BP", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_BOTH_BP_FE <- runTest(GO_AHYA_BOTH_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_BOTH_BP_En <- GenTable(GO_AHYA_BOTH_BP, Fisher = GO_AHYA_BOTH_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_BOTH_BP_En$Fisher<-as.numeric(GO_AHYA_BOTH_BP_En$Fisher)
+GO_AHYA_BOTH_BP_En_sig<-GO_AHYA_BOTH_BP_En[GO_AHYA_BOTH_BP_En$Fisher<0.05,]
+```
+
+##### Molecular Function
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_BOTH_MF <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_BOTH_MF_FE <- runTest(GO_AHYA_BOTH_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_BOTH_MF_En <- GenTable(GO_AHYA_BOTH_MF, Fisher = GO_AHYA_BOTH_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_BOTH_MF_En$Fisher<-as.numeric(GO_AHYA_BOTH_MF_En$Fisher)
+GO_AHYA_BOTH_MF_En_sig<-GO_AHYA_BOTH_MF_En[GO_AHYA_BOTH_MF_En$Fisher<0.05,]
+```
+
+##### Plotting BP + MF terms for both bindings
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_AHYA_BOTH_BP_En_sig$ontology <- "Biological Processes"
+GO_AHYA_BOTH_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_BOTH_AHYA <- rbind(GO_AHYA_BOTH_BP_En_sig, GO_AHYA_BOTH_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology <- BP_MF_BOTH_AHYA %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
 
 
 ## Species comparisons 
@@ -1706,10 +2129,11 @@ Plot binding percentages across mRNA, 3' UTR or both.
 ```{r}
 # Data frame with counts
 percent <- data.frame(
-  Species = rep(c("Apoc", "Nvec"), each = 3),
-  Binding = rep(c("mRNA only", "3' UTR only", "Both"), times = 2),
-  Count = c(2420, 859, 50, 5806, 446, 134)
-)
+  Species = rep(c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis"), each = 3),
+  Binding = rep(c("CDS only", "3' UTR only", "Both"), times = 3),
+  Count = c(3852, 1991, 359,
+            2419, 826, 49,
+            5806, 446, 134))
 
 # Calculate percentages within each species
 percent <- percent %>%
@@ -1724,19 +2148,34 @@ totals <- percent %>%
 
 # Plot stacked bar plot with total counts on top of each bar
 ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
-  geom_col() +
+  geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = F)) +
+  scale_fill_brewer(palette = "Blues", direction = 1) +
   geom_text(
     data = totals,
     aes(x = Species, y = 105, label = Total),
     inherit.aes = FALSE,    # Important to avoid looking for Binding in totals
-    size = 4
-  ) +
+    size = 4) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 100, by = 10),
+        limits = c(0, 105)) +
   ylab("Percentage (%)") +
-  ggtitle("Proportions of Binding Options per Species") +
-  theme_classic()
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  coord_cartesian(clip = "off") +
+  ylab("Percentage (%)") +
+  xlab("") +
+  theme_classic() + 
+  theme(axis.text = element_text(color = "black", size = 12),
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text.x = element_text(face = "italic"),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(0.6, "cm")) +
+  guides(fill = guide_legend(reverse = F))
 ```
 
-- Apoc: 2420 genes for mRNA binding (2470-50), 859 genes for 3' UTR binding (909-50), 50 genes for both binding. 
+- Ahya: 3852 genes for mRNA binding (4211-359), 1991 genes for 3' UTR binding (2350-359), 359 genes for both binding. 
+- Apoc: 2419 genes for mRNA binding (2468-49), 826 genes for 3' UTR binding (875-49), 49 genes for both binding. 
 - Nvec: 5806 genes for mRNA binding (5940-134), 446 genes for 3' UTR binding (580-134), and 134 genes for both binding. 
 
 
