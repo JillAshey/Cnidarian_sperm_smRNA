@@ -51,7 +51,8 @@ Plot!
 ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
+       y = "% of total reads", 
+       title = "Acropora hyacinthus") +
   scale_fill_manual(values = c("A" = "green3",
                                "C" = "goldenrod1",
                                "G" = "dodgerblue",
@@ -98,7 +99,8 @@ Plot!
 ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
+       y = "% of total reads",
+       title = "Nematostella vectensis") +
   scale_fill_manual(values = c("A" = "green3",
                                "C" = "goldenrod1",
                                "G" = "dodgerblue",
@@ -144,7 +146,8 @@ Plot!
 ggplot(summary_data_apoc, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
+       y = "% of total reads",
+       title = "Astrangia poculata") +
   scale_fill_manual(values = c("A" = "green3",
                                "C" = "goldenrod1",
                                "G" = "dodgerblue",
