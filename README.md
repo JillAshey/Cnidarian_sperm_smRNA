@@ -1,1 +1,2 @@
-# Cnidarian_sperm_smRNA
+## Repository for cnidarian sperm smRNA manuscript 
+

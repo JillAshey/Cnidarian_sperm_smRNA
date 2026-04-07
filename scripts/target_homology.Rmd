@@ -19,6 +19,8 @@ library(ggupset)
 library(data.table)
 library(patchwork)
 library(topGO)
+library(eulerr)
+library(rrvgo)
 ```
 
 ## miRNA targets (3UTR and mRNA)
@@ -202,7 +204,7 @@ ggplot(upset_tidy, aes(x = Species)) +
   geom_bar(fill = "steelblue") +
   scale_x_upset() +
   theme_minimal() +
-  labs(title = "Homologous mRNA Targets Across Species",
+  labs(title = "Orthogroups Across Species",
        y = "Number of Orthology Groups") +
   theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
 ```
@@ -332,6 +334,37 @@ cat("Ahya targets with homologs:", sum(upset_targets$species == "Ahya"),
 cat("Apoc targets with homologs:", sum(upset_targets$species == "Apoc"), 
     "out of", length(mRNA_targets_apoc),
     sprintf("(%.1f%%)\n", 100 * sum(upset_targets$species == "Apoc") / length(mRNA_targets_apoc)))
+```
+
+Other ways to visualize
+```{r}
+## Proportional venn diagram
+nvec_og <- which(upset_data$Nvec == 1)
+ahya_og <- which(upset_data$Ahya == 1)
+apoc_og <- which(upset_data$Apoc == 1)
+
+fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
+prop_venn <- plot(fit_og, quantities = TRUE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
+     labels = list(fontsize = 12, fontface = "bold")); prop_venn
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_proportional_venn_OGs.pdf", plot = prop_venn, width = 5, height = 6, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_proportional_venn_OGs.png", plot = prop_venn, width = 5, height = 6, dpi = 300)
+```
+
+Identify shared OGs
+```{r}
+# Identify the OGs shared by all three
+shared_OGs <- upset_data$OG[upset_data$Nvec == 1 & 
+                            upset_data$Ahya == 1 & 
+                            upset_data$Apoc == 1]
+
+# These are your "Core Sperm Orthogroups"
+length(shared_OGs) # This should equal 1946
+```
+
+Save target file 
+```{r}
+write.csv(upset_targets, "../output/miRNA_interactions/shared/miRNA_target_orthologs.csv")
 ```
 
 ## Functional enrichment of shared miRNA targets 
@@ -658,17 +691,29 @@ go_shared <- go_all %>%
 
 Plot! 
 ```{r}
-ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
-  geom_point(size = 5, shape = 21, color = "black") +  # shape=21 enables fill; black border
-  scale_fill_manual(values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")) +
+shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 8, shape = 21, color = "black") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
+    labels = c("Ahya" = "Astrangia hyacinthus", 
+               "Apoc" = "Astrangia poculata", 
+               "Nvec" = "Nematostella vectensis")
+  ) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 12),
+    axis.title = element_text(size = 13),
+    strip.text = element_text(face = "bold", size = 14),
+    legend.text = element_text(face = "italic"),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 10, height = 6, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 10, height = 6, dpi = 300)
 ```
 
 ## Functional enrichment of miRNA targets that are species-specific 
@@ -781,16 +826,53 @@ top10_apoc_only <- GO_APOC_only_En_sig %>%
   ungroup()
 
 ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher))) +
-  geom_point(size = 5, shape = 21, color = "black", fill = "black") +   
+  geom_point(size = 8, shape = 21, color = "black") + 
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 12),
+    axis.title = element_text(size = 13),
+    strip.text = element_text(face = "bold", size = 14),
+    axis.text.y = element_text(size = 10),
+    legend.text = element_text(face = "italic"),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10))
 ```
+
+Use rrvgo to summarize terms for Apoc genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_APOC_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_APOC_only_En_sig$Fisher)
+names(score_vector) <- GO_APOC_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
+
+ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.pdf", plot = last_plot(), width = 10, height = 6, dpi = 300)
+ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.png", plot = last_plot(), width = 10, height = 6, dpi = 300)
+```
+
+How do I save treemapPlot??
 
 ### Nvec ONLY
 
@@ -904,6 +986,35 @@ ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher))) +
     axis.text = element_text(color = "black"),
     strip.text = element_text(face = "bold"))
 ```
+
+Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_NVEC_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_NVEC_only_En_sig$Fisher)
+names(score_vector) <- GO_NVEC_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
+```
+
 
 ### Ahya ONLY
 
@@ -1020,6 +1131,34 @@ ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher))) +
     strip.text = element_text(face = "bold"))
 ```
 
+Use rrvgo to summarize terms for Ahya genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_AHYA_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_AHYA_only_En_sig$Fisher)
+names(score_vector) <- GO_AHYA_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
+```
+
 ### Enriched terms for species-specific homologs 
 
 Find shared enriched terms in homologs that are species-specific 
@@ -1044,18 +1183,7 @@ shared_ids <- purrr::reduce(
 shared_ids
 ```
 
-Filter by shared GO terms 
-```{r}
-# Bind all three, then filter to shared GO terms
-go_all <- bind_rows(ahya, apoc, nvec)
-
-go_shared <- go_all %>%
-  filter(GO.ID %in% shared_ids)
-```
-
-Only ATP binding is significant. 
-
-
+No shared terms for genes in species-specific unique orthogroups. 
 
 ## piRNAs overlapping with genes 
 
@@ -1297,67 +1425,37 @@ cat("Apoc targets with homologs:", sum(upset_targets$species == "Apoc"),
 #write.csv(upset_targets, "target_homology_membership.csv", row.names = FALSE)
 ```
 
-Calculate and plot the percentage of each species in the shared orthogroups. 
+Other ways to visualize
 ```{r}
-# Create intersection labels (binary patterns as strings for matching UpSet ordering)
-upset_targets <- upset_targets %>%
-  mutate(intersection = paste(Nvec, Ahya, Apoc, sep = "_"))
+## Proportional venn diagram
+nvec_og <- which(upset_targets$Nvec == 1)
+ahya_og <- which(upset_targets$Ahya == 1)
+apoc_og <- which(upset_targets$Apoc == 1)
 
-# Summarize counts by intersection and species
-intersection_summary <- upset_targets %>%
-  group_by(intersection, species) %>%
-  summarise(
-    count = n(),
-    total = sum(Nvec + Ahya + Apoc),  # Optional: verify set membership
-    .groups = "drop"
-  ) %>%
-  group_by(intersection) %>%
-  mutate(
-    pct = count / sum(count) * 100  # Percent within each intersection
-  ) %>%
-  ungroup()
+fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
+prop_venn <- plot(fit_og, quantities = TRUE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
+     labels = list(fontsize = 12, fontface = "bold")); prop_venn
 
-# Create your UpSet plot (assign to object to access internals if needed)
-up <- upset(
-  upset_targets, 
-  sets = c("Nvec", "Ahya", "Apoc"),
-  #order.by = "freq",
-  main.bar.color = "steelblue",
-  text.scale = c(1.5, 1.3, 1.2, 1, 1.5, 1.2),
-  point.size = 3.5,
-  line.size = 1,
-  mainbar.y.label = "Intersection Size",
-  sets.x.label = "Set Size"); up
-
-# Extract ordered intersection labels (binary patterns from UpSet matrix)
-# UpSetR stores this internally; access via fromExpression or manual calculation
-ordered_intersections <- upset_targets %>%
-  group_by(intersection) %>%
-  summarise(n = n(), .groups = "drop") %>%
-  arrange(desc(n)) %>%  # Matches "freq" order
-  pull(intersection)
-
-# Filter summary to only shown intersections (if UpSet limits them)
-intersection_summary_ordered <- intersection_summary %>%
-  filter(intersection %in% ordered_intersections) %>%
-  mutate(intersection = factor(intersection, levels = ordered_intersections))
-
-species_stacked <- ggplot(intersection_summary_ordered, aes(x = intersection, y = pct, fill = species)) +
-  geom_col(width = 0.8, color = "white", linewidth = 0.2) +
-  scale_fill_manual(values = c("Apoc" = "seagreen3", "Ahya" = "dodgerblue", "Nvec" = "tomato")) +  # Match your colors
-  labs(
-    x = "Intersections (ordered by size)",
-    y = "Species % within Intersection",
-    fill = "Species",
-    title = "Species Composition by Intersection"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid.major.x = element_blank()
-  ) +
-  coord_flip(); species_stacked
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.pdf", plot = prop_venn, width = 5, height = 6, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.png", plot = prop_venn, width = 5, height = 6, dpi = 300)
 ```
+
+Identify shared OGs
+```{r}
+# Identify the OGs shared by all three
+shared_OGs <- upset_targets$OG[upset_targets$Nvec == 1 & 
+                            upset_targets$Ahya == 1 & 
+                            upset_targets$Apoc == 1]
+
+# These are your "Core Sperm Orthogroups"
+length(shared_OGs) # This should equal 1946
+```
+
+Save target file 
+```{r}
+write.csv(upset_targets, "../output/piRNAs/cross-species/piRNA_overlap_orthologs.csv")
+```
+
 
 ## Functional enrichment of shared genes overlapping with piRNAs 
 
@@ -1683,26 +1781,29 @@ go_shared <- go_all %>%
 
 Plot! 
 ```{r}
-ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
-  geom_point(size = 5) +
-  scale_fill_manual(values = c("ahya" = "#E69F00", "apoc" = "#56B4E9", "nvec" = "#009E73")) +
+shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 8, shape = 21, color = "black") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
+    labels = c("Ahya" = "Astrangia hyacinthus", 
+               "Apoc" = "Astrangia poculata", 
+               "Nvec" = "Nematostella vectensis")
+  ) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
-  coord_flip() +
-  theme_bw() 
-
-ggplot(go_shared, aes(x = Term, y = -log(Fisher), shape = species, fill = species)) +
-  geom_point(size = 5, shape = 21, color = "black") +  # shape=21 enables fill; black border
-  scale_fill_manual(values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")) +
-  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
-  xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 12),
+    axis.title = element_text(size = 13),
+    strip.text = element_text(face = "bold", size = 14),
+    legend.text = element_text(face = "italic"),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 10, height = 6, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 10, height = 6, dpi = 300)
 ```
 
 ## Functional enrichment of genes overlapping with piRNAs that are species-specific 
@@ -1826,6 +1927,34 @@ ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher))) +
     strip.text = element_text(face = "bold"))
 ```
 
+Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_APOC_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_APOC_only_En_sig$Fisher)
+names(score_vector) <- GO_APOC_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
+```
+
 ### Nvec ONLY
 
 ##### Make list of genes for TopGO
@@ -1937,6 +2066,34 @@ ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), size = Significant)) +
   theme(
     axis.text = element_text(color = "black"),
     strip.text = element_text(face = "bold"))
+```
+
+Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_NVEC_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_NVEC_only_En_sig$Fisher)
+names(score_vector) <- GO_NVEC_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
 ```
 
 ### Ahya ONLY
@@ -2052,5 +2209,33 @@ ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher))) +
   theme(
     axis.text = element_text(color = "black"),
     strip.text = element_text(face = "bold"))
+```
+
+Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- GO_AHYA_only_En_sig$GO.ID
+score_vector <- as.numeric(GO_AHYA_only_En_sig$Fisher)
+names(score_vector) <- GO_AHYA_only_En_sig$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
 ```
 

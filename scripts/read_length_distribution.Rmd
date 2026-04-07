@@ -36,7 +36,7 @@ all_data_ahya <- file_list %>%
 Calculate % of total reads 
 ```{r}
 summary_data_ahya <- all_data_ahya %>%
-  filter(length <= 35) %>%
+  filter(length <= 40) %>%
   count(length, start_nt) %>%
   mutate(percent_total = n / sum(n) * 100)
 ```
@@ -51,10 +51,9 @@ Plot!
 ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads", 
-       title = "Acropora hyacinthus") +
-  scale_fill_manual(values = c("A" = "green3",
-                               "C" = "goldenrod1",
+       y = "% of total reads") +
+  scale_fill_manual(values = c("A" = "goldenrod1",
+                               "C" = "green3",
                                "G" = "dodgerblue",
                                "U" = "red2")) +
   theme_classic() +
@@ -99,12 +98,11 @@ Plot!
 ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads",
-       title = "Nematostella vectensis") +
-  scale_fill_manual(values = c("A" = "green3",
-                               "C" = "goldenrod1",
+       y = "% of total reads") +
+  scale_fill_manual(values = c("A" = "red2",
+                               "C" = "green3",
                                "G" = "dodgerblue",
-                               "U" = "red2")) +
+                               "U" = "goldenrod1")) +
   theme_classic()
 ```
 
@@ -146,12 +144,11 @@ Plot!
 ggplot(summary_data_apoc, aes(x = factor(length), y = percent_total, fill = start_nt)) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads",
-       title = "Astrangia poculata") +
-  scale_fill_manual(values = c("A" = "green3",
-                               "C" = "goldenrod1",
+       y = "% of total reads") +
+  scale_fill_manual(values = c("A" = "red2",
+                               "C" = "green3",
                                "G" = "dodgerblue",
-                               "U" = "red2")) +
+                               "U" = "goldenrod1")) +
   theme_classic()
 ```
 
