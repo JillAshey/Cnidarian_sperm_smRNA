@@ -868,8 +868,8 @@ reducedTerms <- reduceSimMatrix(simMatrix,
 #scatterPlot(simMatrix, reducedTerms)
 treemapPlot(reducedTerms)
 
-ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.pdf", plot = last_plot(), width = 10, height = 6, dpi = 300)
-ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.png", plot = last_plot(), width = 10, height = 6, dpi = 300)
+#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.pdf", plot = last_plot(), width = 10, height = 6, dpi = 300)
+#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.png", plot = last_plot(), width = 10, height = 6, dpi = 300)
 ```
 
 How do I save treemapPlot??

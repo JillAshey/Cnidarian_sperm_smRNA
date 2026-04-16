@@ -695,12 +695,12 @@ merged_3UTR_apoc_interaction <- merged_3UTR_apoc %>%
   mutate(Binding = "3' UTR") %>%
   dplyr::rename("mRNA" = "gene_name")
 
-join_interaction <- rbind(miranda_apoc_interaction, merged_3UTR_apoc_interaction)
+apoc_join_interaction <- rbind(miranda_apoc_interaction, merged_3UTR_apoc_interaction)
 ```
 
 Plot number of binding bp. 
 ```{r}
-ggplot(join_interaction, aes(x = interaction_length)) +
+ggplot(apoc_join_interaction, aes(x = interaction_length)) +
   geom_histogram(
     aes(y = after_stat(count / sum(count))),
     binwidth = 1, fill = "steelblue", color = "black"
@@ -710,11 +710,11 @@ ggplot(join_interaction, aes(x = interaction_length)) +
     y = "Frequency")
 
 # calculate percentages per bin
-df_freq_3UTR_apoc <- join_interaction %>%
+df_freq_apoc <- apoc_join_interaction %>%
   count(interaction_length) %>%
   mutate(perc = n / sum(n) * 100)
 
-ggplot(df_freq_3UTR_apoc, aes(x = interaction_length, y = perc)) +
+ggplot(df_freq_apoc, aes(x = interaction_length, y = perc)) +
   # filled frequency curve
   geom_area(fill = "steelblue", alpha = 0.6) +
   geom_line(color = "steelblue", size = 1.2) +
@@ -1474,12 +1474,12 @@ merged_3UTR_nvec_interaction <- merged_3UTR_nvec %>%
   mutate(Binding = "3' UTR") %>%
   dplyr::rename("mRNA" = "gene_name")
 
-join_interaction <- rbind(miranda_nvec_interaction, merged_3UTR_nvec_interaction)
+join_interaction_nvec <- rbind(miranda_nvec_interaction, merged_3UTR_nvec_interaction)
 ```
 
 Plot number of binding bp. 
 ```{r}
-ggplot(join_interaction, aes(x = interaction_length)) +
+ggplot(join_interaction_nvec, aes(x = interaction_length)) +
   geom_histogram(
     aes(y = after_stat(count / sum(count))),
     binwidth = 1, fill = "steelblue", color = "black"
@@ -1489,11 +1489,11 @@ ggplot(join_interaction, aes(x = interaction_length)) +
     y = "Frequency")
 
 # calculate percentages per bin
-df_freq_3UTR_nvec <- join_interaction %>%
+df_freq_nvec <- join_interaction_nvec %>%
   count(interaction_length) %>%
   mutate(perc = n / sum(n) * 100)
 
-ggplot(df_freq_3UTR_nvec, aes(x = interaction_length, y = perc)) +
+ggplot(df_freq_nvec, aes(x = interaction_length, y = perc)) +
   # filled frequency curve
   geom_area(fill = "steelblue", alpha = 0.6) +
   geom_line(color = "steelblue", size = 1.2) +
@@ -1505,8 +1505,8 @@ ggplot(df_freq_3UTR_nvec, aes(x = interaction_length, y = perc)) +
   ) +
   
   # axis breaks
-  scale_x_continuous(breaks = seq(min(df_freq_3UTR_nvec$interaction_length),
-                                  max(df_freq_3UTR_nvec$interaction_length), by = 2)) +
+  scale_x_continuous(breaks = seq(min(df_freq_nvec$interaction_length),
+                                  max(df_freq_nvec$interaction_length), by = 2)) +
   scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_nvec$perc), by = 5)) +
   
   # clean minimal theme
@@ -1934,6 +1934,47 @@ merged_3UTR_ahya <- merged_3UTR_ahya %>%
   mutate(interaction_length = end - start)
 ```
 
+Plot shared interaction bp distribution 
+```{r}
+ggplot(merged_3UTR_ahya, aes(x = interaction_length)) +
+  geom_histogram(
+    aes(y = after_stat(count / sum(count))),
+    binwidth = 1, fill = "steelblue", color = "black"
+  ) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency")
+
+# calculate percentages per bin
+df_freq_ahya <- merged_3UTR_ahya %>%
+  count(interaction_length) %>%
+  mutate(perc = n / sum(n) * 100)
+
+ggplot(df_freq_ahya, aes(x = interaction_length, y = perc)) +
+  # filled frequency curve
+  geom_area(fill = "steelblue", alpha = 0.6) +
+  geom_line(color = "steelblue", size = 1.2) +
+  
+  # axis labels & title
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)"
+  ) +
+  
+  # axis breaks
+  scale_x_continuous(breaks = seq(min(df_freq_ahya$interaction_length),
+                                  max(df_freq_ahya$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_ahya$perc), by = 5)) +
+  
+  # clean minimal theme
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+```
+
 
 #### mRNA and 3UTR binding comparisons 
 
@@ -1971,12 +2012,12 @@ merged_3UTR_ahya_interaction <- merged_3UTR_ahya %>%
   mutate(Binding = "3' UTR") %>%
   dplyr::rename("mRNA" = "gene_name")
 
-join_interaction <- rbind(miranda_ahya_interaction, merged_3UTR_ahya_interaction)
+join_interaction_ahya <- rbind(miranda_ahya_interaction, merged_3UTR_ahya_interaction)
 ```
 
 Plot number of binding bp. 
 ```{r}
-ggplot(join_interaction, aes(x = interaction_length)) +
+ggplot(join_interaction_ahya, aes(x = interaction_length)) +
   geom_histogram(
     aes(y = after_stat(count / sum(count))),
     binwidth = 1, fill = "steelblue", color = "black"
@@ -1986,11 +2027,11 @@ ggplot(join_interaction, aes(x = interaction_length)) +
     y = "Frequency")
 
 # calculate percentages per bin
-df_freq_3UTR_ahya <- join_interaction %>%
+df_freq_ahya <- join_interaction_ahya %>%
   count(interaction_length) %>%
   mutate(perc = n / sum(n) * 100)
 
-ggplot(df_freq_3UTR_ahya, aes(x = interaction_length, y = perc)) +
+ggplot(df_freq_ahya, aes(x = interaction_length, y = perc)) +
   # filled frequency curve
   geom_area(fill = "steelblue", alpha = 0.6) +
   geom_line(color = "steelblue", size = 1.2) +
@@ -2002,9 +2043,9 @@ ggplot(df_freq_3UTR_ahya, aes(x = interaction_length, y = perc)) +
   ) +
   
   # axis breaks
-  scale_x_continuous(breaks = seq(min(df_freq_3UTR_ahya$interaction_length),
-                                  max(df_freq_3UTR_ahya$interaction_length), by = 2)) +
-  scale_y_continuous(breaks = seq(0, max(df_freq_3UTR_ahya$perc), by = 5)) +
+  scale_x_continuous(breaks = seq(min(df_freq_ahya$interaction_length),
+                                  max(df_freq_ahya$interaction_length), by = 2)) +
+  scale_y_continuous(breaks = seq(0, max(df_freq_ahya$perc), by = 5)) +
   
   # clean minimal theme
   theme_classic(base_size = 14) +
@@ -2177,6 +2218,46 @@ ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
 - Ahya: 3852 genes for mRNA binding (4211-359), 1991 genes for 3' UTR binding (2350-359), 359 genes for both binding. 
 - Apoc: 2419 genes for mRNA binding (2468-49), 826 genes for 3' UTR binding (875-49), 49 genes for both binding. 
 - Nvec: 5806 genes for mRNA binding (5940-134), 446 genes for 3' UTR binding (580-134), and 134 genes for both binding. 
+
+Compare number of binding bp 
+```{r}
+df_freq_ahya$Species <- "Acropora hyacinthus"
+df_freq_apoc$Species <- "Astrangia poculata"
+df_freq_nvec$Species <- "Nematostella vectensis"
+
+df_freq_all <- rbind(df_freq_ahya, df_freq_apoc, df_freq_nvec)
+
+# Plot
+bp_plot <- ggplot(df_freq_all, aes(x = interaction_length, y = perc, fill = Species, color = Species)) +
+  geom_area(alpha = 0.4, position = "identity") +
+  geom_line(size = 1.1) +
+  scale_fill_manual(values = c(
+    "Acropora hyacinthus" = "#E69F00", 
+    "Astrangia poculata"  = "#56B4E9", 
+    "Nematostella vectensis" = "#009E73")) +
+  scale_color_manual(values = c(
+    "Acropora hyacinthus" = "#E69F00", 
+    "Astrangia poculata"  = "#56B4E9", 
+    "Nematostella vectensis" = "#009E73")) +
+  labs(
+    x = "Total bp shared",
+    y = "Frequency (%)") +
+  scale_y_continuous(breaks = seq(0, max(df_freq_all$perc) + 5, by = 5), 
+                     expand = expansion(mult = c(0, 0.05))) +
+  scale_x_continuous(breaks = seq(7, 21, by = 2)) +
+  
+  theme_classic(base_size = 14) +
+  theme(
+    axis.title = element_text(size = 16, face = "bold"),
+    axis.text = element_text(size = 13, color = "black"),
+    legend.position = "none",
+    legend.text = element_text(face = "italic"), # Keeps the names italicized
+    plot.margin = margin(10, 10, 10, 10)
+  ); bp_plot
+
+ggsave("../output/miRNA_interactions/shared/bp_target_binding.pdf", plot = bp_plot, width = 10, height = 6, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/bp_target_binding.png", plot = bp_plot, width = 10, height = 6, dpi = 300)
+```
 
 
 
