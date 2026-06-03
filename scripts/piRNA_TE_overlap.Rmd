@@ -930,12 +930,12 @@ percent$Element <- factor(percent$Element,
 pirna_overlap_spp <- ggplot(percent, aes(x = Species, y = Percent, fill = Element)) +
   geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = T)) +
   scale_fill_brewer(palette = "Greens", direction = -1) +
-  geom_text(
-    data = totals,
-    aes(x = Species, y = 103, label = Total),
-    inherit.aes = FALSE,    
-    size = 3,
-    color = "black") +
+  # geom_text(
+  #   data = totals,
+  #   aes(x = Species, y = 103, label = Total),
+  #   inherit.aes = FALSE,    
+  #   size = 3,
+  #   color = "black") +
   scale_y_continuous(
         expand = c(0, 0),
         breaks = seq(0, 100, by = 10),
@@ -945,18 +945,18 @@ pirna_overlap_spp <- ggplot(percent, aes(x = Species, y = Percent, fill = Elemen
   ylab("Percentage (%)") +
   xlab("") +
   theme_classic() + 
-  theme(axis.text = element_text(color = "black", size = 12),
-    axis.title = element_text(size = 16, face = "bold"),
+  theme(axis.text = element_text(color = "black", size = 20),
+    axis.title = element_text(size = 22, face = "bold"),
     axis.text.x = element_text(face = "italic"),
-    legend.title = element_text(size = 10, face = "bold"),
-    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 15, face = "bold"),
+    legend.text = element_text(size = 15),
     legend.key.size = unit(0.6, "cm")) +
   guides(fill = guide_legend(reverse = TRUE)); pirna_overlap_spp
 
 ggsave("../output/piRNAs/cross-species/piRNA_overlaps.pdf",
-       pirna_overlap_spp, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+       pirna_overlap_spp, width = 10, height = 6, units = "in", dpi = 600, bg = "white")
 ggsave("../output/piRNAs/cross-species/piRNA_overlaps.png",
-       pirna_overlap_spp, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+       pirna_overlap_spp, width = 10, height = 6, units = "in", dpi = 600, bg = "white")
 ```
 
 ### Functional comparisons 
