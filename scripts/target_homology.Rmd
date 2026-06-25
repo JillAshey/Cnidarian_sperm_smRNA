@@ -55,6 +55,55 @@ Read in broccoli results
 broc_groups <- data.table::fread("../output/broccoli/dir_step3/table_OGs_protein_names.txt", header = T)
 ```
 
+Identify targets in Broccoli data 
+```{r}
+# Function to extract gene IDs from protein IDs
+extract_gene_id <- function(protein_ids, species) {
+  if (species == "nvec") {
+    # Remove "protein|" prefix if present, keep the base ID
+    gsub("protein\\|", "", protein_ids)
+  } else if (species == "ahya") {
+    # Keep as is
+    protein_ids
+  } else if (species == "apoc") {
+    # Remove "protein|" prefix if present
+    gsub("protein\\|", "", protein_ids)
+  }
+}
+
+# Extract gene IDs from the broc_groups columns
+broc_groups[, Apoc_genes := lapply(strsplit(Apoc_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "apoc"))]
+broc_groups[, Nvec_genes := lapply(strsplit(Nvec_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "nvec"))]
+broc_groups[, Ahya_genes := lapply(strsplit(Ahya_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "ahya"))]
+```
+
+Subset genes that are targeted by miR-100
+```{r}
+targets_ahya <- unique(mir100_binding_ahya$mRNA)
+targets_apoc <- unique(mir100_binding_apoc$mRNA)
+targets_nvec <- unique(mir100_binding_nvec$mRNA)
+
+filtered_broc <- broc_groups[
+  mapply(function(apoc, nvec, ahya) {
+    any(apoc %in% targets_apoc) | 
+    any(nvec %in% targets_nvec) | 
+    any(ahya %in% targets_ahya)
+  }, Apoc_genes, Nvec_genes, Ahya_genes)
+]
+```
+
+
+
+
+
+
+
+
+
+
 Identify targets in broccoli data 
 ```{r}
 # Function to extract gene IDs from protein IDs

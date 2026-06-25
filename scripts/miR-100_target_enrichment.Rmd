@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
 ```
 
 Read in miranda data 
@@ -201,26 +203,12 @@ filtered_broc[, present_nvec := sapply(Nvec_genes, function(x) length(x) > 0 && 
 filtered_broc[, present_ahya := sapply(Ahya_genes, function(x) length(x) > 0 && !all(x == "" | is.na(x)))]
 ```
 
-Make a proportional venn diagram
+Filter for rows where all spp have a miR-100 target in that orthogroup 
 ```{r}
-# 1. Identify which Orthologous Groups belong to each species
-nvec_og <- which(filtered_broc$present_nvec == TRUE)
-ahya_og <- which(filtered_broc$present_ahya == TRUE)
-apoc_og <- which(filtered_broc$present_apoc == TRUE)
-
-# 2. Fit the Euler diagram using your exact list structure
-fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
-
-# 3. Plot using your custom color scheme
-prop_venn <- plot(
-  fit_og, 
-  quantities = list(fontsize = 10), # Makes the count numbers clear
-  fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
-  labels = list(fontsize = 12, fontface = "bold")
-); prop_venn
+filtered_broc <- filtered_broc[present_apoc == TRUE & 
+                                present_nvec == TRUE & 
+                                present_ahya == TRUE]
 ```
-
-
 
 ## Apoc miR-100 target enrichment 
 
@@ -231,10 +219,19 @@ Read in gene to go information (generated above)
 apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
 ```
 
+Make list of genes that are present in the orthogroups in all 3 spp AND are a miR-100 target
+```{r}
+# Unlist the Apoc genes from these specific conserved orthogroups
+apoc_genes_for_enrichment <- unique(unlist(filtered_broc$Apoc_genes))
+
+# CRITICAL: Keep only the ones that are actually miR-100 targets
+apoc_final_query <- apoc_genes_for_enrichment[apoc_genes_for_enrichment %in% targets_apoc]
+```
+
 Make list of genes for input to TopGO
 ```{r}
 # Genes of interest - ie those targeted by miRNAs 
-apoc_clust_genes <- as.character(unique(mir100_binding_apoc$mRNA))
+apoc_clust_genes <- as.character(unique(apoc_final_query))
 
 # All genes 
 apoc_all_genes <- as.character(apoc_gene2go$gene_name)
@@ -271,7 +268,6 @@ Generate results table
 ```{r}
 GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
-Only taking the top 100 GO terms 
 
 Filter by significant results
 ```{r}
@@ -339,10 +335,20 @@ Read in gene to go information (generated above)
 ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
 ```
 
+Make list of genes that are present in the orthogroups in all 3 spp AND are a miR-100 target
+```{r}
+# Unlist the Apoc genes from these specific conserved orthogroups
+ahya_genes_for_enrichment <- unique(unlist(filtered_broc$Ahya_genes))
+
+# CRITICAL: Keep only the ones that are actually miR-100 targets
+ahya_final_query <- ahya_genes_for_enrichment[ahya_genes_for_enrichment %in% targets_ahya]
+ahya_final_query
+```
+
 Make list of genes for input to TopGO
 ```{r}
 # Genes of interest - ie those targeted by miRNAs 
-ahya_clust_genes <- as.character(unique(mir100_binding_ahya$mRNA))
+ahya_clust_genes <- as.character(unique(ahya_final_query))
 
 # All genes 
 ahya_all_genes <- as.character(ahya_gene2go$gene_name)
