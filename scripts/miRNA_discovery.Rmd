@@ -75,6 +75,11 @@ Filter apoc miRNA info by the remaining expressed cluster names
 mirna_filtered_apoc <- mirna_filtered_apoc[mirna_filtered_apoc$Name %in% mirna_list_counts_apoc, ]
 ``` 
 
+Save identified miRNAs. 
+```{r}
+write.csv(mirna_filtered_apoc, "../output/shortstack/apoc/trimmed_default/apoc_miRNAs.csv")
+```
+
 ### Nvec
 
 Load data
@@ -136,6 +141,11 @@ Filter nvec miRNA info by the remaining expressed cluster names
 ```{r}
 mirna_filtered_nvec <- mirna_filtered_nvec[mirna_filtered_nvec$Name %in% mirna_list_counts_nvec, ]
 ``` 
+
+Save identified miRNAs. 
+```{r}
+write.csv(mirna_filtered_nvec, "../output/shortstack/nvec/trimmed_default/nvec_miRNAs.csv")
+```
 
 ### Ahya
 
@@ -208,4 +218,9 @@ Filter Ahya miRNA info by the remaining expressed cluster names
 ```{r}
 mirna_filtered_ahya <- mirna_filtered_ahya[mirna_filtered_ahya$Name %in% mirna_list_counts_ahya, ]
 ``` 
+
+Save identified miRNAs. 
+```{r}
+write.csv(mirna_filtered_ahya, "../output/shortstack/ahya/trimmed_default/ahya_miRNAs.csv")
+```
 

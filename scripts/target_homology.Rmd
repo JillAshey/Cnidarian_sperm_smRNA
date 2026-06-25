@@ -359,7 +359,7 @@ shared_OGs <- upset_data$OG[upset_data$Nvec == 1 &
                             upset_data$Apoc == 1]
 
 # These are your "Core Sperm Orthogroups"
-length(shared_OGs) # This should equal 1946
+length(shared_OGs)
 ```
 
 Save target file 
@@ -426,7 +426,7 @@ GO_APOC_BP_all_spp_FE <- runTest(GO_APOC_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
 Only taking the top 100 GO terms 
 
@@ -451,7 +451,7 @@ GO_APOC_MF_all_spp_FE <- runTest(GO_APOC_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
 Only taking the top 100 GO terms 
 
@@ -519,7 +519,7 @@ GO_NVEC_BP_all_spp_FE <- runTest(GO_NVEC_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
 Only taking the top 100 GO terms 
 
@@ -544,7 +544,7 @@ GO_NVEC_MF_all_spp_FE <- runTest(GO_NVEC_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
 Only taking the top 100 GO terms 
 
@@ -639,7 +639,7 @@ GO_AHYA_MF_all_spp_FE <- runTest(GO_AHYA_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
 ```
 Only taking the top 100 GO terms 
 
@@ -696,7 +696,7 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
   scale_fill_manual(
     name = "Species",
     values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
-    labels = c("Ahya" = "Astrangia hyacinthus", 
+    labels = c("Ahya" = "Acropora hyacinthus", 
                "Apoc" = "Astrangia poculata", 
                "Nvec" = "Nematostella vectensis")
   ) +
@@ -707,9 +707,10 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
   theme_bw() +
   theme(
     axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 22),
+    axis.title = element_text(size = 22, face = "bold"),
     strip.text = element_text(face = "bold", size = 23),
-    legend.text = element_text(face = "italic", size = 10),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
 
 ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 8, dpi = 300)

@@ -2188,14 +2188,14 @@ totals <- percent %>%
   summarize(Total = sum(Count))
 
 # Plot stacked bar plot with total counts on top of each bar
-ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
+feature_plot <- ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
   geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = F)) +
   scale_fill_brewer(palette = "Blues", direction = 1) +
-  geom_text(
-    data = totals,
-    aes(x = Species, y = 105, label = Total),
-    inherit.aes = FALSE,    # Important to avoid looking for Binding in totals
-    size = 4) +
+  # geom_text(
+  #   data = totals,
+  #   aes(x = Species, y = 105, label = Total),
+  #   inherit.aes = FALSE,   
+  #   size = 4) +
   scale_y_continuous(
         expand = c(0, 0),
         breaks = seq(0, 100, by = 10),
@@ -2206,18 +2206,17 @@ ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
   ylab("Percentage (%)") +
   xlab("") +
   theme_classic() + 
-  theme(axis.text = element_text(color = "black", size = 12),
-    axis.title = element_text(size = 16, face = "bold"),
+  theme(axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 23, face = "bold"),
     axis.text.x = element_text(face = "italic"),
-    legend.title = element_text(size = 10, face = "bold"),
-    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 20, face = "bold"),
+    legend.text = element_text(size = 19),
     legend.key.size = unit(0.6, "cm")) +
-  guides(fill = guide_legend(reverse = F))
-```
+  guides(fill = guide_legend(reverse = F)); feature_plot
 
-- Ahya: 3852 genes for mRNA binding (4211-359), 1991 genes for 3' UTR binding (2350-359), 359 genes for both binding. 
-- Apoc: 2419 genes for mRNA binding (2468-49), 826 genes for 3' UTR binding (875-49), 49 genes for both binding. 
-- Nvec: 5806 genes for mRNA binding (5940-134), 446 genes for 3' UTR binding (580-134), and 134 genes for both binding. 
+ggsave("../output/miRNA_interactions/shared/target_binding_feature.pdf", plot = feature_plot, width = 10, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/target_binding_feature.png", plot = feature_plot, width = 10, height = 8, dpi = 300)
+```
 
 Compare number of binding bp 
 ```{r}
@@ -2250,8 +2249,11 @@ bp_plot <- ggplot(df_freq_all, aes(x = interaction_length, y = perc, fill = Spec
   theme(
     axis.title = element_text(size = 23, face = "bold"),
     axis.text = element_text(size = 21, color = "black"),
-    legend.position = "none",
-    legend.text = element_text(face = "italic"), # Keeps the names italicized
+    legend.position = c(0.15, 0.95),       # Places it near the top right (95% right, 95% up)
+    legend.justification = c("left", "top"), # Anchors the legend box by its top-right corner
+    legend.background = element_blank(),   # Optional: removes the white box background
+    legend.text = element_text(size = 15, face = "italic"), # Keeps the names italicized
+    legend.title = element_text(size = 16, face = "bold"),
     plot.margin = margin(10, 10, 10, 10)
   ); bp_plot
 
@@ -2259,6 +2261,7 @@ ggsave("../output/miRNA_interactions/shared/bp_target_binding.pdf", plot = bp_pl
 ggsave("../output/miRNA_interactions/shared/bp_target_binding.png", plot = bp_plot, width = 10, height = 6, dpi = 300)
 ```
 
+How many total interactions? 
 
 
 

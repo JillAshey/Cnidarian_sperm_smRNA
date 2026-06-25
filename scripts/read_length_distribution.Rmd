@@ -48,16 +48,32 @@ summary_data_ahya$start_nt <- sub("T", "U", summary_data_ahya$start_nt)
 
 Plot!
 ```{r}
-ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total, fill = start_nt)) +
+ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total, 
+                              fill = start_nt
+                              )) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
-  scale_fill_manual(values = c("A" = "goldenrod1",
-                               "C" = "green3",
-                               "G" = "dodgerblue",
-                               "U" = "red2")) +
+       y = "% of total reads",
+       fill = "Starting Nucleotide") + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + 
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 12, by = 2),
+        limits = c(0, 13)) +
+  scale_fill_manual(values = c("A" = "grey80",
+                               "C" = "grey60",
+                               "G" = "grey30",
+                               "U" = "black")) +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 23, face = "bold"),
+    #axis.text.x = element_text(hjust = 1),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 15),
+    legend.key.size = unit(0.6, "cm"))
+
+ggsave("../output/reads/ahya_starting_nt.pdf", plot = last_plot(), width = 14, height = 7, dpi = 300)
+ggsave("../output/reads/ahya_starting_nt.png", plot = last_plot(), width = 14, height = 7, dpi = 300)
 ```
 
 ### Nvec 
@@ -83,7 +99,7 @@ all_data_nvec<- file_list %>%
 Calculate % of total reads 
 ```{r}
 summary_data_nvec <- all_data_nvec %>%
-  filter(length <= 35) %>%
+  filter(length <= 40) %>%
   count(length, start_nt) %>%
   mutate(percent_total = n / sum(n) * 100)
 ```
@@ -95,15 +111,32 @@ summary_data_nvec$start_nt <- sub("T", "U", summary_data_nvec$start_nt)
 
 Plot!
 ```{r}
-ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total, fill = start_nt)) +
+ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total, 
+                              fill = start_nt
+                              )) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
-  scale_fill_manual(values = c("A" = "red2",
-                               "C" = "green3",
-                               "G" = "dodgerblue",
-                               "U" = "goldenrod1")) +
-  theme_classic()
+       y = "% of total reads",
+       fill = "Starting Nucleotide") + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + 
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 8, by = 2),
+        limits = c(0, 9)) +
+  scale_fill_manual(values = c("A" = "grey80",
+                               "C" = "grey60",
+                               "G" = "grey30",
+                               "U" = "black")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 23, face = "bold"),
+    #axis.text.x = element_text(hjust = 1),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 15),
+    legend.key.size = unit(0.6, "cm"))
+
+ggsave("../output/reads/nvec_starting_nt.pdf", plot = last_plot(), width = 14, height = 7, dpi = 300)
+ggsave("../output/reads/nvec_starting_nt.png", plot = last_plot(), width = 14, height = 7, dpi = 300)
 ```
 
 ### Apoc 
@@ -129,7 +162,7 @@ all_data_apoc<- file_list %>%
 Calculate % of total reads 
 ```{r}
 summary_data_apoc <- all_data_apoc %>%
-  filter(length <= 35) %>%
+  filter(length <= 40) %>%
   count(length, start_nt) %>%
   mutate(percent_total = n / sum(n) * 100)
 ```
@@ -141,15 +174,32 @@ summary_data_apoc$start_nt <- sub("T", "U", summary_data_apoc$start_nt)
 
 Plot!
 ```{r}
-ggplot(summary_data_apoc, aes(x = factor(length), y = percent_total, fill = start_nt)) +
+ggplot(summary_data_apoc, aes(x = factor(length), y = percent_total, 
+                              fill = start_nt
+                              )) +
   geom_bar(stat = "identity") +
   labs(x = "Read length",
-       y = "% of total reads") +
-  scale_fill_manual(values = c("A" = "red2",
-                               "C" = "green3",
-                               "G" = "dodgerblue",
-                               "U" = "goldenrod1")) +
-  theme_classic()
+       y = "% of total reads",
+       fill = "Starting Nucleotide") + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + 
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 8, by = 2),
+        limits = c(0, 9)) +
+  scale_fill_manual(values = c("A" = "grey80",
+                               "C" = "grey60",
+                               "G" = "grey30",
+                               "U" = "black")) +
+  theme_classic() +
+  theme(axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 23, face = "bold"),
+    #axis.text.x = element_text(hjust = 1),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 15),
+    legend.key.size = unit(0.6, "cm"))
+
+ggsave("../output/reads/apoc_starting_nt.pdf", plot = last_plot(), width = 14, height = 7, dpi = 300)
+ggsave("../output/reads/apoc_starting_nt.png", plot = last_plot(), width = 14, height = 7, dpi = 300)
 ```
 
 

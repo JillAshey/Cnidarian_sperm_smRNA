@@ -11,6 +11,7 @@ This script will plot miRNA, piRNA, rRNA, and tRNA by mapping percentages.
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(scales)
 ```
 
 Read in data. 
@@ -28,6 +29,24 @@ summary_by_rep <- mapping %>%
   mutate(Percent = Count / sum(Count) * 100) %>%
   ungroup()
 ```
+
+```{r}
+ggplot(summary_by_rep, aes(x = Replicate, y = Count, fill = Feature)) +
+  geom_col(position = position_dodge(preserve = "single"), color = "black", size = 0.3, stat = "identity") +
+  scale_y_log10(labels = scales::comma) + 
+  facet_wrap(~ Species, scales = "free_x") + # Splitting by species if you add more later
+  labs(
+    y = "Read Count (log10 scale)",
+    x = "Replicate",
+    fill = "RNA Feature"
+  ) +
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "italic") # Italicizes species names
+  )
+```
+
 
 Calculate average percentages across replicates
 ```{r}
@@ -168,16 +187,16 @@ ggplot(avg_percentages,
        aes(x = Species, y = Avg_Count, fill = Feature)) +
   geom_col(position = position_dodge(width = 0.8),
            width = 0.7, color = "black") +
-  scale_fill_manual(values = c(piRNA = "#F0E442",
-                               rRNA  = "#009E73",
-                               tRNA  = "#E69F00",
-                               miRNA = "#D55E00")) +
-  ylab("Average read count (log10 scale)") +
+  scale_fill_manual(values = c(piRNA = "#B25D91FF",
+                               rRNA  = "#EFC7E6FF",
+                               tRNA  = "#1BB6AFFF",
+                               miRNA = "#172869FF")) +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  ylab("Average read count") +
   xlab("") +
     coord_cartesian(clip = "off") +
-  scale_y_log10() +
+  #scale_y_log10() +
   theme_classic()
-
 ```
 
 Separate bar for miRNA
