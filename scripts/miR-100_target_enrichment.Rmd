@@ -8,3 +8,603 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+Read in miranda data 
+```{r}
+## Apoc 
+cds_apoc <- read.delim("../output/miRNA_interactions/apoc/miranda_strict_mRNA_parsed_apoc.txt", header = F)[,c(1,2,7)]
+colnames(cds_apoc) <- c("miRNA", "mRNA", "total_bp_shared")
+cds_apoc$Region <- "CDS"
+utr_apoc <- read.csv("../output/miRNA_interactions/apoc/miranda_strict_3UTR_parsed_genename_apoc.csv", header = T)[,c(2,8,11)]
+colnames(utr_apoc) <- c("miRNA", "total_bp_shared", "mRNA")
+utr_apoc$Region <- "3UTR"
+binding_apoc <- rbind(cds_apoc, utr_apoc)
+binding_apoc$miRNA <- sub("^>", "", binding_apoc$miRNA) 
+
+## Ahya 
+cds_ahya <- read.delim("../output/miRNA_interactions/ahya/miranda_strict_mRNA_parsed_ahya.txt", header = F)[,c(1,2,7)]
+colnames(cds_ahya) <- c("miRNA", "mRNA", "total_bp_shared")
+cds_ahya$Region <- "CDS"
+utr_ahya <- read.csv("../output/miRNA_interactions/ahya/miranda_strict_3UTR_parsed_genename_ahya.csv", header = T)[,c(2,8,11)]
+colnames(utr_ahya) <- c("miRNA", "total_bp_shared", "mRNA")
+utr_ahya$Region <- "3UTR"
+binding_ahya <- rbind(cds_ahya, utr_ahya)
+binding_ahya$miRNA <- sub("^>", "", binding_ahya$miRNA) 
+
+## Nvec 
+cds_nvec <- read.delim("../output/miRNA_interactions/nvec/miranda_strict_mRNA_parsed_nvec.txt", header = F)[,c(1,2,7)]
+colnames(cds_nvec) <- c("miRNA", "mRNA", "total_bp_shared")
+cds_nvec$Region <- "CDS"
+utr_nvec <- read.csv("../output/miRNA_interactions/nvec/miranda_strict_3UTR_parsed_genename_nvec.csv", header = T)[,c(2,8,11)]
+colnames(utr_nvec) <- c("miRNA", "total_bp_shared", "mRNA")
+utr_nvec$Region <- "3UTR"
+binding_nvec <- rbind(cds_nvec, utr_nvec)
+binding_nvec$miRNA <- sub("^>", "", binding_nvec$miRNA) 
+```
+
+Subset miR-100 from each dataset
+```{r}
+# Apoc - Cluster_1200 is miR-100
+mir100_binding_apoc <- binding_apoc %>%
+  filter(miRNA == "Cluster_1200")
+
+# Ahya - Cluster_1356 is miR-100
+mir100_binding_ahya <- binding_ahya %>%
+  filter(miRNA == "Cluster_1356")
+
+# Nvec - Cluster_1430 is miR-100
+mir100_binding_nvec <- binding_nvec %>%
+  filter(miRNA == "Cluster_1430")
+```
+
+How many unique mRNAs does miR-100 bind?
+```{r}
+length(unique(mir100_binding_apoc$mRNA))
+length(unique(mir100_binding_ahya$mRNA))
+length(unique(mir100_binding_nvec$mRNA))
+```
+
+Count how many targets are in the CDS, 3UTR or both
+```{r}
+# Apoc
+cds_genes_apoc  <- unique(mir100_binding_apoc$mRNA[mir100_binding_apoc$Region == "CDS"])
+utr_genes_apoc  <- unique(mir100_binding_apoc$mRNA[mir100_binding_apoc$Region == "3UTR"])
+both_genes_apoc <- intersect(cds_genes_apoc, utr_genes_apoc)
+cat("Apoc: Exclusive to CDS:", length(setdiff(cds_genes_apoc, utr_genes_apoc)), "\n",
+    "Apoc: Exclusive to 3UTR:", length(setdiff(utr_genes_apoc, cds_genes_apoc)), "\n",
+    "Apoc: Targeted in BOTH:", length(both_genes_apoc), "\n")
+
+# Ahya
+cds_genes_ahya  <- unique(mir100_binding_ahya$mRNA[mir100_binding_ahya$Region == "CDS"])
+utr_genes_ahya  <- unique(mir100_binding_ahya$mRNA[mir100_binding_ahya$Region == "3UTR"])
+both_genes_ahya <- intersect(cds_genes_ahya, utr_genes_ahya)
+cat("Ahya: Exclusive to CDS:", length(setdiff(cds_genes_ahya, utr_genes_ahya)), "\n",
+    "Ahya: Exclusive to 3UTR:", length(setdiff(utr_genes_ahya, cds_genes_ahya)), "\n",
+    "Ahya: Targeted in BOTH:", length(both_genes_ahya), "\n")
+
+# Nvec
+cds_genes_nvec  <- unique(mir100_binding_nvec$mRNA[mir100_binding_nvec$Region == "CDS"])
+utr_genes_nvec  <- unique(mir100_binding_nvec$mRNA[mir100_binding_nvec$Region == "3UTR"])
+both_genes_nvec <- intersect(cds_genes_nvec, utr_genes_nvec)
+cat("Nvec: Exclusive to CDS:", length(setdiff(cds_genes_nvec, utr_genes_nvec)), "\n",
+    "Nvec: Exclusive to 3UTR:", length(setdiff(utr_genes_nvec, cds_genes_nvec)), "\n",
+    "Nvec: Targeted in BOTH:", length(both_genes_nvec), "\n")
+```
+
+Plot binding percentages across mRNA, 3' UTR or both. 
+```{r}
+# Data frame with counts
+percent <- data.frame(
+  Species = rep(c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis"), each = 3),
+  Binding = rep(c("CDS only", "3' UTR only", "Both"), times = 3),
+  Count = c(242, 140, 0,
+            319, 136, 1,
+            900, 103, 0))
+
+# Calculate percentages within each species
+percent <- percent %>%
+  group_by(Species) %>%
+  mutate(Percent = Count / sum(Count) * 100) %>%
+  ungroup()
+
+# Calculate total counts per species for labels
+totals <- percent %>%
+  group_by(Species) %>%
+  summarize(Total = sum(Count))
+
+# Plot stacked bar plot with total counts on top of each bar
+feature_plot <- ggplot(percent, aes(x = Species, y = Percent, fill = Binding)) +
+  geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = F)) +
+  scale_fill_brewer(palette = "Blues", direction = 1) +
+  # geom_text(
+  #   data = totals,
+  #   aes(x = Species, y = 105, label = Total),
+  #   inherit.aes = FALSE,   
+  #   size = 4) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 100, by = 10),
+        limits = c(0, 105)) +
+  ylab("Percentage (%)") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  coord_cartesian(clip = "off") +
+  ylab("Percentage (%)") +
+  xlab("") +
+  theme_classic() + 
+  theme(axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 23, face = "bold"),
+    axis.text.x = element_text(face = "italic"),
+    legend.title = element_text(size = 20, face = "bold"),
+    legend.text = element_text(size = 19),
+    legend.key.size = unit(0.6, "cm")) +
+  guides(fill = guide_legend(reverse = F)); feature_plot
+
+ggsave("../output/miRNA_interactions/shared/mir100-target_binding_feature.pdf", plot = feature_plot, width = 10, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/mir100-target_binding_feature.png", plot = feature_plot, width = 10, height = 8, dpi = 300)
+```
+
+## Target homology of miR-100
+
+Read in broccoli results 
+```{r}
+broc_groups <- data.table::fread("../output/broccoli/dir_step3/table_OGs_protein_names.txt", header = T)
+```
+
+Identify targets in Broccoli data 
+```{r}
+# Function to extract gene IDs from protein IDs
+extract_gene_id <- function(protein_ids, species) {
+  if (species == "nvec") {
+    # Remove "protein|" prefix if present, keep the base ID
+    gsub("protein\\|", "", protein_ids)
+  } else if (species == "ahya") {
+    # Keep as is
+    protein_ids
+  } else if (species == "apoc") {
+    # Remove "protein|" prefix if present
+    gsub("protein\\|", "", protein_ids)
+  }
+}
+
+# Extract gene IDs from the broc_groups columns
+broc_groups[, Apoc_genes := lapply(strsplit(Apoc_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "apoc"))]
+broc_groups[, Nvec_genes := lapply(strsplit(Nvec_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "nvec"))]
+broc_groups[, Ahya_genes := lapply(strsplit(Ahya_proteins.faa, " "), 
+                                     function(x) extract_gene_id(x, "ahya"))]
+```
+
+Subset genes that are targeted by miR-100
+```{r}
+targets_ahya <- unique(mir100_binding_ahya$mRNA)
+targets_apoc <- unique(mir100_binding_apoc$mRNA)
+targets_nvec <- unique(mir100_binding_nvec$mRNA)
+
+filtered_broc <- broc_groups[
+  mapply(function(apoc, nvec, ahya) {
+    any(apoc %in% targets_apoc) | 
+    any(nvec %in% targets_nvec) | 
+    any(ahya %in% targets_ahya)
+  }, Apoc_genes, Nvec_genes, Ahya_genes)
+]
+```
+
+Add presence/absence cols 
+```{r}
+# Drop the protein cols 
+cols_to_remove <- c("Apoc_proteins.faa", "Nvec_proteins.faa", "Ahya_proteins.faa")
+filtered_broc[, (cols_to_remove) := NULL]
+
+filtered_broc[, present_apoc := sapply(Apoc_genes, function(x) length(x) > 0 && !all(x == "" | is.na(x)))]
+filtered_broc[, present_nvec := sapply(Nvec_genes, function(x) length(x) > 0 && !all(x == "" | is.na(x)))]
+filtered_broc[, present_ahya := sapply(Ahya_genes, function(x) length(x) > 0 && !all(x == "" | is.na(x)))]
+```
+
+Make a proportional venn diagram
+```{r}
+# 1. Identify which Orthologous Groups belong to each species
+nvec_og <- which(filtered_broc$present_nvec == TRUE)
+ahya_og <- which(filtered_broc$present_ahya == TRUE)
+apoc_og <- which(filtered_broc$present_apoc == TRUE)
+
+# 2. Fit the Euler diagram using your exact list structure
+fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
+
+# 3. Plot using your custom color scheme
+prop_venn <- plot(
+  fit_og, 
+  quantities = list(fontsize = 10), # Makes the count numbers clear
+  fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
+  labels = list(fontsize = 12, fontface = "bold")
+); prop_venn
+```
+
+
+
+## Apoc miR-100 target enrichment 
+
+### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+apoc_clust_genes <- as.character(unique(mir100_binding_apoc$mRNA))
+
+# All genes 
+apoc_all_genes <- as.character(apoc_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
+names(apoc_GeneList) <- apoc_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_BP <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_BP_FE <- runTest(GO_APOC_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_BP_En$Fisher<-as.numeric(GO_APOC_BP_En$Fisher)
+GO_APOC_BP_En_sig<-GO_APOC_BP_En[GO_APOC_BP_En$Fisher<0.05,]
+```
+
+### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_APOC_MF <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_APOC_MF_FE <- runTest(GO_APOC_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_APOC_MF_En <- GenTable(GO_APOC_MF, Fisher = GO_APOC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_APOC_MF_En$Fisher<-as.numeric(GO_APOC_MF_En$Fisher)
+GO_APOC_MF_En_sig<-GO_APOC_MF_En[GO_APOC_MF_En$Fisher<0.05,]
+```
+
+### Plotting BP + MF terms for Apoc miR-100 binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_APOC_BP_En_sig$ontology <- "Biological Processes"
+GO_APOC_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_APOC <- rbind(GO_APOC_BP_En_sig, GO_APOC_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology_apoc <- BP_MF_APOC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology_apoc, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+## Ahya miR-100 target enrichment 
+
+### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+ahya_clust_genes <- as.character(unique(mir100_binding_ahya$mRNA))
+
+# All genes 
+ahya_all_genes <- as.character(ahya_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+ahya_GeneList <- factor(as.integer(ahya_all_genes %in% ahya_clust_genes))
+names(ahya_GeneList) <- ahya_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+ahya_gene2go_topgo<-readMappings("../data/annotations/Ahya_gene2go.tab", IDsep=";", sep="\t")
+```
+
+### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_BP <-new("topGOdata", ontology="BP", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_BP_FE <- runTest(GO_AHYA_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_BP_En <- GenTable(GO_AHYA_BP, Fisher = GO_AHYA_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_BP_En$Fisher<-as.numeric(GO_AHYA_BP_En$Fisher)
+GO_AHYA_BP_En_sig<-GO_AHYA_BP_En[GO_AHYA_BP_En$Fisher<0.05,]
+```
+
+### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_AHYA_MF <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_AHYA_MF_FE <- runTest(GO_AHYA_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_AHYA_MF_En <- GenTable(GO_AHYA_MF, Fisher = GO_AHYA_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_AHYA_MF_En$Fisher<-as.numeric(GO_AHYA_MF_En$Fisher)
+GO_AHYA_MF_En_sig<-GO_AHYA_MF_En[GO_AHYA_MF_En$Fisher<0.05,]
+```
+
+### Plotting BP + MF terms for Ahya miR-100 binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_AHYA_BP_En_sig$ontology <- "Biological Processes"
+GO_AHYA_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_AHYA <- rbind(GO_AHYA_BP_En_sig, GO_AHYA_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology_ahya <- BP_MF_AHYA %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology_ahya, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+## Nvec miR-100 target enrichment 
+
+### Make list of genes for TopGO
+
+Read in gene to go information (generated above)
+```{r}
+nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
+```
+
+Make list of genes for input to TopGO
+```{r}
+# Genes of interest - ie those targeted by miRNAs 
+nvec_clust_genes <- as.character(unique(mir100_binding_nvec$mRNA))
+
+# All genes 
+nvec_all_genes <- as.character(nvec_gene2go$gene_name)
+
+# Apply 1 or 0 if gene is gene of interest 
+nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
+names(nvec_GeneList) <- nvec_all_genes
+```
+
+Read in gene-to-go-mappings
+```{r}
+nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
+```
+
+Set function to select genes of interest (ie those that have pvalue < 0.05)
+```{r}
+topDiffGenes <- function(allScore) {
+return(allScore < 0.05)}
+```
+
+### Biological Processes 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_BP <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_BP_FE <- runTest(GO_NVEC_BP, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_BP_En <- GenTable(GO_NVEC_BP, Fisher = GO_NVEC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_BP_En$Fisher<-as.numeric(GO_NVEC_BP_En$Fisher)
+GO_NVEC_BP_En_sig<-GO_NVEC_BP_En[GO_NVEC_BP_En$Fisher<0.05,]
+```
+
+### Molecular Functions 
+
+Create `topGOdata` object, which is required for topGO analysis
+```{r}
+GO_NVEC_MF <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
+```
+
+Run GO enrichment test 
+```{r}
+GO_NVEC_MF_FE <- runTest(GO_NVEC_MF, algorithm="weight01", statistic="fisher")
+```
+
+Generate results table 
+```{r}
+GO_NVEC_MF_En <- GenTable(GO_NVEC_MF, Fisher = GO_NVEC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+```
+Only taking the top 100 GO terms 
+
+Filter by significant results
+```{r}
+GO_NVEC_MF_En$Fisher<-as.numeric(GO_NVEC_MF_En$Fisher)
+GO_NVEC_MF_En_sig<-GO_NVEC_MF_En[GO_NVEC_MF_En$Fisher<0.05,]
+```
+
+### Plotting BP + MF terms for Nvec miR-100 binding 
+
+Plot top 10 terms
+```{r}
+## Bind dfs 
+GO_NVEC_BP_En_sig$ontology <- "Biological Processes"
+GO_NVEC_MF_En_sig$ontology <- "Molecular Functions"
+BP_MF_NVEC <- rbind(GO_NVEC_BP_En_sig, GO_NVEC_MF_En_sig)
+
+## Select top 10 terms for each ontology 
+top10_per_ontology_nvec <- BP_MF_NVEC %>%
+  group_by(ontology) %>%
+  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  ungroup()
+  
+ggplot(top10_per_ontology_nvec, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
+  geom_bar(stat = "identity") +
+  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
+  coord_flip() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
+  labs(x = "GO Term",
+       y = "Number of Significant Genes",
+       fill = "Fisher Value") +
+  theme_bw()
+```
+
+## Enriched terms for miR-100 targets in all app
+
+Find shared enriched terms 
+```{r}
+# Add species labels and keep only needed columns
+ahya <- BP_MF_AHYA %>%
+  mutate(species = "Acropora hyacinthus") %>%
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+
+apoc <- BP_MF_APOC %>%
+  mutate(species = "Astrangia poculata") %>%
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+
+nvec <- BP_MF_NVEC %>%
+  mutate(species = "Nematostella vectensis") %>%
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+
+# Shared GO IDs across all three
+shared_ids <- purrr::reduce(
+  list(ahya$GO.ID, apoc$GO.ID, nvec$GO.ID),
+  intersect)
+shared_ids
+```
+
+No shared GO terms for miR-100! Interesting 
+
+Plot individual go terms for each spp 
+```{r}
+all_spp_go <- rbind(apoc, ahya, nvec)
+
+# Filter for top 10 for each spp 
+top_go <- all_spp_go %>%
+  group_by(species) %>%
+  slice_min(order_by = Fisher, n = 10, with_ties = FALSE) %>%
+  ungroup()
+
+# Plot A: Ahya
+p1 <- top_go %>% 
+  filter(species == "Acropora hyacinthus") %>% 
+  ggplot(aes(x = -log10(Fisher), y = reorder(Term, -Fisher))) +
+  geom_point(aes(shape = ontology), size = 4, color = "#E69F00") +
+  theme_bw() +
+  facet_wrap(~species) +
+  labs(x = NULL, y = "GO Term", shape = "Ontology") + # x = NULL hides label for upper panels
+  theme(plot.title = element_text(face = "bold")); p1
+
+# Plot B: Apoc
+p2 <- top_go %>% 
+  filter(species == "Ahya") %>% 
+  ggplot(aes(x = -log10(Fisher), y = reorder(Term, -Fisher))) +
+  geom_point(aes(shape = ontology), size = 4, color = "#56B4E9") +
+  theme_bw() +
+  labs(title = "Ahya", x = NULL, y = "GO Term", shape = "Ontology") +
+  theme(plot.title = element_text(face = "bold"))
+
+# Plot C: Nvec
+p3 <- top_go %>% 
+  filter(species == "Nvec") %>% 
+  ggplot(aes(x = -log10(Fisher), y = reorder(Term, -Fisher))) +
+  geom_point(aes(shape = ontology), size = 4, color = "#009E73") +
+  theme_bw() +
+  labs(title = "Nvec", x = "-log10(Fisher p-value)", y = "GO Term", shape = "Ontology") +
+  theme(plot.title = element_text(face = "bold"))
+```
+
+
+
+
