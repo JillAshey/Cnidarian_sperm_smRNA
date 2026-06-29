@@ -1488,6 +1488,9 @@ length(shared_OGs) # This should equal 1946
 Save target file 
 ```{r}
 write.csv(upset_targets, "../output/piRNAs/cross-species/piRNA_overlap_orthologs.csv")
+
+# Read in again if needed 
+upset_targets <- read.csv("../output/piRNAs/cross-species/piRNA_overlap_orthologs.csv")
 ```
 
 
@@ -1940,26 +1943,37 @@ GO_APOC_MF_only_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_APOC_only_En_sig <- rbind(GO_APOC_BP_only_En_sig, GO_APOC_MF_only_En_sig)
+GO_APOC_only_En_sig$species <- "Astrangia poculata"
 ```
 
 Plot! 
 ```{r}
-## Select top 10 terms for each ontology 
+## Select top 5 terms for each ontology 
 top10_apoc_only <- GO_APOC_only_En_sig %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  slice_max(Significant, n = 5, with_ties = FALSE) %>%
   ungroup()
 
-ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher))) +
-  geom_point(size = 5, shape = 21, color = "black", fill = "black") +   
+apoc_only_plot <- ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black", fill = "#56B4E9") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Astrangia poculata" = "#56B4E9")) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 22, face = "bold"),
+    strip.text = element_text(face = "bold", size = 23),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); apoc_only_plot
+
+ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.pdf", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.png", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
@@ -2081,26 +2095,37 @@ GO_NVEC_MF_only_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_NVEC_only_En_sig <- rbind(GO_NVEC_BP_only_En_sig, GO_NVEC_MF_only_En_sig)
+GO_NVEC_only_En_sig$species <- "Nematostella vectensis"
 ```
 
 Plot! 
 ```{r}
-## Select top 10 terms for each ontology 
+## Select top 5 terms for each ontology 
 top10_nvec_only <- GO_NVEC_only_En_sig %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  slice_max(Significant, n = 5, with_ties = FALSE) %>%
   ungroup()
 
-ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), size = Significant)) +
-  geom_point(shape = 21, color = "black", fill = "black") +   
+nvec_only_plot <- ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black", fill = "#009E73") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Nematostella vectensis" = "#009E73")) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 22, face = "bold"),
+    strip.text = element_text(face = "bold", size = 23),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); nvec_only_plot
+
+ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.pdf", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.png", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
@@ -2224,26 +2249,37 @@ GO_AHYA_MF_only_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_AHYA_only_En_sig <- rbind(GO_AHYA_BP_only_En_sig, GO_AHYA_MF_only_En_sig)
+GO_AHYA_only_En_sig$species <- "Acropora hyacinthus"
 ```
 
 Plot! 
 ```{r}
-## Select top 10 terms for each ontology 
+## Select top 5 terms for each ontology 
 top10_ahya_only <- GO_AHYA_only_En_sig %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  slice_max(Significant, n = 5, with_ties = FALSE) %>%
   ungroup()
 
-ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher))) +
-  geom_point(size = 5, shape = 21, color = "black", fill = "black") +   
+ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black", fill = "#E69F00") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Astrangia poculata" = "#E69F00")) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("log(Enrichment score)") +
+  ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black"),
-    strip.text = element_text(face = "bold"))
+    axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 22, face = "bold"),
+    strip.text = element_text(face = "bold", size = 23),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); ahya_only_plot
+
+ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.pdf", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.png", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
