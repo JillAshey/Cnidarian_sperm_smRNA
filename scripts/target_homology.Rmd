@@ -55,55 +55,6 @@ Read in broccoli results
 broc_groups <- data.table::fread("../output/broccoli/dir_step3/table_OGs_protein_names.txt", header = T)
 ```
 
-Identify targets in Broccoli data 
-```{r}
-# Function to extract gene IDs from protein IDs
-extract_gene_id <- function(protein_ids, species) {
-  if (species == "nvec") {
-    # Remove "protein|" prefix if present, keep the base ID
-    gsub("protein\\|", "", protein_ids)
-  } else if (species == "ahya") {
-    # Keep as is
-    protein_ids
-  } else if (species == "apoc") {
-    # Remove "protein|" prefix if present
-    gsub("protein\\|", "", protein_ids)
-  }
-}
-
-# Extract gene IDs from the broc_groups columns
-broc_groups[, Apoc_genes := lapply(strsplit(Apoc_proteins.faa, " "), 
-                                     function(x) extract_gene_id(x, "apoc"))]
-broc_groups[, Nvec_genes := lapply(strsplit(Nvec_proteins.faa, " "), 
-                                     function(x) extract_gene_id(x, "nvec"))]
-broc_groups[, Ahya_genes := lapply(strsplit(Ahya_proteins.faa, " "), 
-                                     function(x) extract_gene_id(x, "ahya"))]
-```
-
-Subset genes that are targeted by miR-100
-```{r}
-targets_ahya <- unique(mir100_binding_ahya$mRNA)
-targets_apoc <- unique(mir100_binding_apoc$mRNA)
-targets_nvec <- unique(mir100_binding_nvec$mRNA)
-
-filtered_broc <- broc_groups[
-  mapply(function(apoc, nvec, ahya) {
-    any(apoc %in% targets_apoc) | 
-    any(nvec %in% targets_nvec) | 
-    any(ahya %in% targets_ahya)
-  }, Apoc_genes, Nvec_genes, Ahya_genes)
-]
-```
-
-
-
-
-
-
-
-
-
-
 Identify targets in broccoli data 
 ```{r}
 # Function to extract gene IDs from protein IDs
@@ -414,6 +365,10 @@ length(shared_OGs)
 Save target file 
 ```{r}
 write.csv(upset_targets, "../output/miRNA_interactions/shared/miRNA_target_orthologs.csv")
+
+# Read back in again if needed 
+upset_targets <- read.csv("../output/miRNA_interactions/shared/miRNA_target_orthologs.csv")
+
 ```
 
 ## Functional enrichment of shared miRNA targets 
@@ -865,30 +820,37 @@ GO_APOC_MF_only_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_APOC_only_En_sig <- rbind(GO_APOC_BP_only_En_sig, GO_APOC_MF_only_En_sig)
+GO_APOC_only_En_sig$species <- "Astrangia poculata"
 ```
 
 Plot! 
 ```{r}
-## Select top 10 terms for each ontology 
+## Select top 5 terms for each ontology 
 top10_apoc_only <- GO_APOC_only_En_sig %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
+  slice_max(Significant, n = 5, with_ties = FALSE) %>%
   ungroup()
 
-ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher))) +
-  geom_point(size = 8, shape = 21, color = "black") + 
+apoc_only_plot <- ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black", fill = "#56B4E9") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Astrangia poculata" = "#56B4E9")) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
   ylab("Enrichment Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black", size = 12),
-    axis.title = element_text(size = 13),
-    strip.text = element_text(face = "bold", size = 14),
-    axis.text.y = element_text(size = 10),
-    legend.text = element_text(face = "italic"),
-    plot.margin = margin(t = 10, r = 10, b = 10, l = 10))
+    axis.text = element_text(color = "black", size = 21),
+    axis.title = element_text(size = 22, face = "bold"),
+    strip.text = element_text(face = "bold", size = 23),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); apoc_only_plot
+
+ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_functions_shared_OGs.pdf", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_functions_shared_OGs.png", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Apoc genes in unique orthogroups 
@@ -1483,8 +1445,8 @@ ahya_og <- which(upset_targets$Ahya == 1)
 apoc_og <- which(upset_targets$Apoc == 1)
 
 fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
-prop_venn <- plot(fit_og, quantities = TRUE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
-     labels = list(fontsize = 12, fontface = "bold")); prop_venn
+prop_venn <- plot(fit_og, quantities = TRUE, labels = FALSE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6)); prop_venn
+     #labels = list(fontsize = 12, fontface = "bold")); prop_venn
 
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.pdf", plot = prop_venn, width = 5, height = 6, dpi = 300)
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.png", plot = prop_venn, width = 5, height = 6, dpi = 300)
@@ -1836,7 +1798,7 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
   scale_fill_manual(
     name = "Species",
     values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
-    labels = c("Ahya" = "Astrangia hyacinthus", 
+    labels = c("Ahya" = "Acropora hyacinthus", 
                "Apoc" = "Astrangia poculata", 
                "Nvec" = "Nematostella vectensis")
   ) +
@@ -1847,9 +1809,10 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
   theme_bw() +
   theme(
     axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 22),
+    axis.title = element_text(size = 22, face = "bold"),
     strip.text = element_text(face = "bold", size = 23),
-    legend.text = element_text(face = "italic", size = 10),
+    legend.text = element_text(face = "italic", size = 15),
+    legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
 
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 8, dpi = 300)
