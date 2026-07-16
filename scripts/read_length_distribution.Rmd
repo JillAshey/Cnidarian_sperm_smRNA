@@ -65,15 +65,15 @@ ggplot(summary_data_ahya, aes(x = factor(length), y = percent_total,
                                "G" = "grey30",
                                "U" = "black")) +
   theme_classic() +
-  theme(axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 23, face = "bold"),
+  theme(axis.text = element_text(color = "black", size = 28),
+    axis.title = element_text(size = 30, face = "bold"),
     #axis.text.x = element_text(hjust = 1),
     legend.title = element_text(size = 16, face = "bold"),
     legend.text = element_text(size = 15),
     legend.key.size = unit(0.6, "cm"))
 
-ggsave("../output/reads/ahya_starting_nt.pdf", plot = last_plot(), width = 14, height = 7, dpi = 300)
-ggsave("../output/reads/ahya_starting_nt.png", plot = last_plot(), width = 14, height = 7, dpi = 300)
+ggsave("../output/reads/ahya_starting_nt.pdf", plot = last_plot(), width = 18, height = 7, dpi = 300)
+ggsave("../output/reads/ahya_starting_nt.png", plot = last_plot(), width = 18, height = 7, dpi = 300)
 ```
 
 ### Nvec 
@@ -128,15 +128,15 @@ ggplot(summary_data_nvec, aes(x = factor(length), y = percent_total,
                                "G" = "grey30",
                                "U" = "black")) +
   theme_classic() +
-  theme(axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 23, face = "bold"),
+  theme(axis.text = element_text(color = "black", size = 28),
+    axis.title = element_text(size = 30, face = "bold"),
     #axis.text.x = element_text(hjust = 1),
     legend.title = element_text(size = 16, face = "bold"),
     legend.text = element_text(size = 15),
     legend.key.size = unit(0.6, "cm"))
 
-ggsave("../output/reads/nvec_starting_nt.pdf", plot = last_plot(), width = 14, height = 7, dpi = 300)
-ggsave("../output/reads/nvec_starting_nt.png", plot = last_plot(), width = 14, height = 7, dpi = 300)
+ggsave("../output/reads/nvec_starting_nt.pdf", plot = last_plot(), width = 18, height = 7, dpi = 300)
+ggsave("../output/reads/nvec_starting_nt.png", plot = last_plot(), width = 18, height = 7, dpi = 300)
 ```
 
 ### Apoc 
