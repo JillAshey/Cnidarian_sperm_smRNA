@@ -23,6 +23,32 @@ library(eulerr)
 library(rrvgo)
 ```
 
+## Generate gene2go files 
+
+Ahya 
+```{r}
+ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+
+# Format 
+ahya_gene_go_table <- ahya_annot %>%
+  unite("all_go_text", V20:V23, sep = "; ", na.rm = TRUE) %>%
+  mutate(GO_IDs = map_chr(all_go_text, ~ {
+    ids <- str_extract_all(.x, "GO:\\d{7}")[[1]]
+    unique_ids <- unique(ids)
+    paste(unique_ids, collapse = "; ")})) %>%
+  dplyr::select(gene_name = V1, GeneOntologyIDs = GO_IDs)
+
+# Save 
+write_tsv(ahya_gene_go_table, file = "../data/annotations/ahya_gene2go.tab")
+```
+
+
+
+
+
+
+
+
 ## miRNA targets (3UTR and mRNA)
 
 Read in data for all spp 
@@ -368,7 +394,6 @@ write.csv(upset_targets, "../output/miRNA_interactions/shared/miRNA_target_ortho
 
 # Read back in again if needed 
 upset_targets <- read.csv("../output/miRNA_interactions/shared/miRNA_target_orthologs.csv")
-
 ```
 
 ## Functional enrichment of shared miRNA targets 
@@ -431,6 +456,14 @@ GO_APOC_BP_all_spp_FE <- runTest(GO_APOC_BP_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_BP_all_spp)
+GO_APOC_BP_all_spp_En$Genes <- sapply(GO_APOC_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -456,6 +489,14 @@ GO_APOC_MF_all_spp_FE <- runTest(GO_APOC_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from topGO object
+sig_genes <- sigGenes(GO_APOC_MF_all_spp)
+GO_APOC_MF_all_spp_En$Genes <- sapply(GO_APOC_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -470,6 +511,24 @@ GO_APOC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_APOC_all_spp_En_sig <- rbind(GO_APOC_MF_all_spp_En_sig, GO_APOC_BP_all_spp_En_sig)
+```
+
+Read in annotation file 
+```{r}
+apoc_annot <- read.delim("../data/annotations/apoculata_GeneAnnotation_combined.txt")
+```
+
+Join GO results and annotation info
+```{r}
+apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  dplyr::rename(Protein_ID = Genes) %>%
+  left_join(apoc_annot, by = "Protein_ID")
+```
+
+Save as csv 
+```{r}
+write.csv(apoc_GO_annotated, "../output/miRNA_interactions/apoc/apoc_shared_miRNA_targets.csv")
 ```
 
 ### Nvec - shared between all three spp 
@@ -524,6 +583,14 @@ GO_NVEC_BP_all_spp_FE <- runTest(GO_NVEC_BP_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_BP_all_spp)
+GO_NVEC_BP_all_spp_En$Genes <- sapply(GO_NVEC_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -549,6 +616,14 @@ GO_NVEC_MF_all_spp_FE <- runTest(GO_NVEC_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_MF_all_spp)
+GO_NVEC_MF_all_spp_En$Genes <- sapply(GO_NVEC_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -564,6 +639,28 @@ GO_NVEC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 ```{r}
 GO_NVEC_all_spp_En_sig <- rbind(GO_NVEC_MF_all_spp_En_sig, GO_NVEC_BP_all_spp_En_sig)
 ```
+
+Read in annotation file 
+```{r}
+nvec_annot <- read.delim("../data/annotations/NV2g.20240221.GO.tsv", header = T)
+```
+
+Join GO results and annotation info
+```{r}
+apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  dplyr::rename(Protein_ID = Genes) %>%
+  left_join(apoc_annot, by = "Protein_ID")
+```
+
+Save as csv 
+```{r}
+write.csv(apoc_GO_annotated, "../output/miRNA_interactions/apoc/apoc_shared_miRNA_targets.csv")
+```
+
+
+
+
 
 ### Ahya - shared between all three spp 
 
@@ -583,7 +680,7 @@ upset_targets_ahya <- upset_targets %>%
     Ahya == 1,
     Apoc == 1)
 
-upset_targets_ahya$target <- gsub("-RA", "", upset_targets_ahya$target)
+#upset_targets_ahya$target <- gsub("-RA", "", upset_targets_ahya$target)
 ```
 
 Make list of genes for input to TopGO
@@ -618,7 +715,15 @@ GO_AHYA_BP_all_spp_FE <- runTest(GO_AHYA_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_BP_all_spp)
+GO_AHYA_BP_all_spp_En$Genes <- sapply(GO_AHYA_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -644,6 +749,14 @@ GO_AHYA_MF_all_spp_FE <- runTest(GO_AHYA_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_MF_all_spp)
+GO_AHYA_MF_all_spp_En$Genes <- sapply(GO_AHYA_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -658,6 +771,20 @@ GO_AHYA_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_AHYA_all_spp_En_sig <- rbind(GO_AHYA_MF_all_spp_En_sig, GO_AHYA_BP_all_spp_En_sig)
+```
+
+Join with annotation info
+```{r}
+ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+
+# Split genes from go enrichment into their own rows 
+ahya_go_unrolled <- GO_AHYA_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  mutate(Genes = trimws(Genes))
+
+# Join with annotation info
+ahya_joined_df <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1"))
 ```
 
 ### Enriched terms for miRNA target homologs in all 3 spp 
@@ -1057,7 +1184,7 @@ upset_targets_ahya_only <- upset_targets %>%
     Ahya == 1,
     Apoc == 0)
 
-upset_targets_ahya_only$target <- gsub("-RA", "", upset_targets_ahya_only$target)
+#upset_targets_ahya_only$target <- gsub("-RA", "", upset_targets_ahya_only$target)
 ```
 
 Make list of genes for input to TopGO
@@ -1092,7 +1219,15 @@ GO_AHYA_BP_only_FE <- runTest(GO_AHYA_BP_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_BP_only)
+GO_AHYA_BP_only_En$Genes <- sapply(GO_AHYA_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1118,6 +1253,14 @@ GO_AHYA_MF_only_FE <- runTest(GO_AHYA_MF_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_MF_only)
+GO_AHYA_MF_only_En$Genes <- sapply(GO_AHYA_MF_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_MF_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1135,22 +1278,42 @@ GO_AHYA_only_En_sig <- rbind(GO_AHYA_BP_only_En_sig, GO_AHYA_MF_only_En_sig)
 GO_AHYA_only_En_sig$species <- "Acropora hyacinthus"
 ```
 
+Join with annotation info
+```{r}
+ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+
+# Split genes from go enrichment into their own rows 
+ahya_go_unrolled <- GO_AHYA_only_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  mutate(Genes = trimws(Genes))
+
+# Join with annotation info
+ahya_joined_df <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, species, V16) %>%
+  dplyr::rename(Swissprot_protein = V16) %>%
+  mutate(Enrichment = Significant/Expected)
+```
+
 Plot! 
 ```{r}
 ## Select top 5 terms for each ontology 
-top10_ahya_only <- GO_AHYA_only_En_sig %>%
+top10_ahya_only <- ahya_joined_df %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 5, with_ties = FALSE) %>%
+  filter(GO.ID %in% (
+    distinct(., GO.ID, Fisher) %>%
+      slice_min(Fisher, n = 10, with_ties = FALSE) %>%
+      pull(GO.ID))) %>%
   ungroup()
 
 ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill = species)) +
-  geom_point(size = 10, shape = 21, color = "black", fill = "#E69F00") + 
+  geom_point(shape = 21, color = "black", fill = "#E69F00") + 
   scale_fill_manual(
     name = "Species",
     values = c("Acropora hyacinthus" = "#E69F00")) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
-  ylab("Enrichment Significance (-log P)") +
+  ylab("Significance (-log P)") +
   coord_flip() +
   theme_bw() +
   theme(
@@ -1706,7 +1869,7 @@ upset_targets_ahya <- upset_targets %>%
     Ahya == 1,
     Apoc == 1)
 
-upset_targets_ahya$target <- gsub("-RA", "", upset_targets_ahya$target)
+#upset_targets_ahya$target <- gsub("-RA", "", upset_targets_ahya$target)
 ```
 
 Make list of genes for input to TopGO
@@ -1741,7 +1904,15 @@ GO_AHYA_BP_all_spp_FE <- runTest(GO_AHYA_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 300)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_BP_all_spp)
+GO_AHYA_BP_all_spp_En$Genes <- sapply(GO_AHYA_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1767,6 +1938,14 @@ GO_AHYA_MF_all_spp_FE <- runTest(GO_AHYA_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_MF_all_spp)
+GO_AHYA_MF_all_spp_En$Genes <- sapply(GO_AHYA_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1781,6 +1960,20 @@ GO_AHYA_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_AHYA_all_spp_En_sig <- rbind(GO_AHYA_MF_all_spp_En_sig, GO_AHYA_BP_all_spp_En_sig)
+```
+
+Join with annotation info
+```{r}
+ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+
+# Split genes from go enrichment into their own rows 
+ahya_go_unrolled <- GO_AHYA_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  mutate(Genes = trimws(Genes))
+
+# Join with annotation info
+ahya_joined_df <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1"))
 ```
 
 ### Enriched terms for piRNA overlap for all 3 spp 
@@ -2174,7 +2367,7 @@ upset_targets_ahya_only <- upset_targets %>%
     Ahya == 1,
     Apoc == 0)
 
-upset_targets_ahya_only$target <- gsub("-RA", "", upset_targets_ahya_only$target)
+#upset_targets_ahya_only$target <- gsub("-RA", "", upset_targets_ahya_only$target)
 ```
 
 Make list of genes for input to TopGO
@@ -2209,7 +2402,15 @@ GO_AHYA_BP_only_FE <- runTest(GO_AHYA_BP_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 300)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_BP_only)
+GO_AHYA_BP_only_En$Genes <- sapply(GO_AHYA_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2234,7 +2435,15 @@ GO_AHYA_MF_only_FE <- runTest(GO_AHYA_MF_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_AHYA_MF_only)
+GO_AHYA_MF_only_En$Genes <- sapply(GO_AHYA_MF_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_AHYA_MF_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2252,12 +2461,32 @@ GO_AHYA_only_En_sig <- rbind(GO_AHYA_BP_only_En_sig, GO_AHYA_MF_only_En_sig)
 GO_AHYA_only_En_sig$species <- "Acropora hyacinthus"
 ```
 
+Join with annotation info
+```{r}
+ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+
+# Split genes from go enrichment into their own rows 
+ahya_go_unrolled <- GO_AHYA_only_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  mutate(Genes = trimws(Genes))
+
+# Join with annotation info
+ahya_joined_df <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, species, V16) %>%
+  dplyr::rename(Swissprot_protein = V16) %>%
+  mutate(Enrichment = Significant/Expected)
+```
+
 Plot! 
 ```{r}
 ## Select top 5 terms for each ontology 
-top10_ahya_only <- GO_AHYA_only_En_sig %>%
+top10_ahya_only <- ahya_joined_df %>%
   group_by(ontology) %>%
-  slice_max(Significant, n = 5, with_ties = FALSE) %>%
+  filter(GO.ID %in% (
+    distinct(., GO.ID, Fisher) %>%
+      slice_min(Fisher, n = 10, with_ties = FALSE) %>%
+      pull(GO.ID))) %>%
   ungroup()
 
 ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill = species)) +

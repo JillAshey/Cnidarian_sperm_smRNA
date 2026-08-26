@@ -210,123 +210,6 @@ To summarize:
 
 This equals about ~63% of the piRNAs. The rest are in intergenic space (could be in other elements but these are unannotated). Much less unique piRNAs in Apoc than in Ahya. 
 
-### piRNA gene overlap enrichment 
-
-Perform GO enrichment for genes that are overlapping with piRNAs. 
-
-#### Make list of genes for TopGO
-
-Read in gene to go information (generated above)
-```{r}
-apoc_gene2go<-read.delim("../data/annotations/Apoc_gene2go.tab", sep="\t")
-```
-
-Isolate gene names in `pirna_gene`
-```{r}
-pirna_gene <- pirna_gene %>%
-  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
-pirna_gene$gene_name <- gsub("TU", "model", pirna_gene$gene_name)
-```
-
-Make list of genes for input to TopGO
-```{r}
-# Genes of interest - ie those targeted by miRNAs 
-apoc_clust_genes <- as.character(unique(pirna_gene$gene_name))
-
-# All genes 
-apoc_all_genes <- as.character(apoc_gene2go$gene_name)
-
-# Apply 1 or 0 if gene is gene of interest 
-apoc_GeneList <- factor(as.integer(apoc_all_genes %in% apoc_clust_genes))
-names(apoc_GeneList) <- apoc_all_genes
-```
-
-Read in gene-to-go-mappings
-```{r}
-apoc_gene2go_topgo<-readMappings("../data/annotations/Apoc_gene2go.tab", IDsep=";", sep="\t")
-```
-
-Set function to select genes of interest (ie those that have pvalue < 0.05)
-```{r}
-topDiffGenes <- function(allScore) {
-return(allScore < 0.05)}
-```
-
-#### Biological Processes 
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_APOC_BP <-new("topGOdata", ontology="BP", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_APOC_BP_FE <- runTest(GO_APOC_BP, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_APOC_BP_En <- GenTable(GO_APOC_BP, Fisher = GO_APOC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_APOC_BP_En$Fisher<-as.numeric(GO_APOC_BP_En$Fisher)
-GO_APOC_BP_En_sig<-GO_APOC_BP_En[GO_APOC_BP_En$Fisher<0.05,]
-```
-
-#### Molecular Functions
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_APOC_MF <-new("topGOdata", ontology="MF", gene2GO=apoc_gene2go_topgo, allGenes=apoc_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_APOC_MF_FE <- runTest(GO_APOC_MF, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_APOC_MF_En <- GenTable(GO_APOC_MF, Fisher = GO_APOC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_APOC_MF_En$Fisher<-as.numeric(GO_APOC_MF_En$Fisher)
-GO_APOC_MF_En_sig<-GO_APOC_MF_En[GO_APOC_MF_En$Fisher<0.05,]
-```
-
-#### Plotting enrichment 
-
-Plot top 10 terms
-```{r}
-## Bind dfs 
-GO_APOC_BP_En_sig$ontology <- "Biological Processes"
-GO_APOC_MF_En_sig$ontology <- "Molecular Functions"
-BP_MF_APOC <- rbind(GO_APOC_BP_En_sig, GO_APOC_MF_En_sig)
-
-## Select top 10 terms for each ontology 
-top10_per_ontology <- BP_MF_APOC %>%
-  group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
-  ungroup()
-  
-ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
-  geom_bar(stat = "identity") +
-  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
-  coord_flip() +
-  scale_fill_gradient(low = "blue", high = "red") +
-  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
-  labs(x = "GO Term",
-       y = "Number of Significant Genes",
-       fill = "Fisher Value") +
-  theme_bw()
-```
-
 ## Nvec 
 
 Read in repeatmasker out file
@@ -473,232 +356,13 @@ To summarize:
 
 This equals about ~44% of the piRNAs. The rest are in intergenic space (could be in other elements but these are unannotated). This matches Figure 7 ovary piRNA targets in Hydra ovaries (Praher et al. 2017).
 
-### piRNA gene overlap enrichment 
-
-Perform GO enrichment for genes that are overlapping with piRNAs. 
-
-#### Make list of genes for TopGO
-
-Read in gene to go information
-```{r}
-nvec_gene2go<-read.delim("../data/annotations/Nvec_gene2go.tab", sep="\t")
-```
-
-Isolate gene names in `pirna_gene`
-```{r}
-pirna_gene <- pirna_gene %>%
-  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
-```
-
-Make list of genes for input to TopGO
-```{r}
-# Genes of interest - ie those targeted by miRNAs 
-nvec_clust_genes <- as.character(unique(pirna_gene$gene_name))
-
-# All genes 
-nvec_all_genes <- as.character(nvec_gene2go$gene_name)
-
-# Apply 1 or 0 if gene is gene of interest 
-nvec_GeneList <- factor(as.integer(nvec_all_genes %in% nvec_clust_genes))
-names(nvec_GeneList) <- nvec_all_genes
-```
-
-Read in gene-to-go-mappings
-```{r}
-nvec_gene2go_topgo<-readMappings("../data/annotations/Nvec_gene2go.tab", IDsep=";", sep="\t")
-```
-
-Set function to select genes of interest (ie those that have pvalue < 0.05)
-```{r}
-topDiffGenes <- function(allScore) {
-return(allScore < 0.05)}
-```
-
-#### Biological Processes 
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_NVEC_BP <-new("topGOdata", ontology="BP", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_NVEC_BP_FE <- runTest(GO_NVEC_BP, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_NVEC_BP_En <- GenTable(GO_NVEC_BP, Fisher = GO_NVEC_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_NVEC_BP_En$Fisher<-as.numeric(GO_NVEC_BP_En$Fisher)
-GO_NVEC_BP_En_sig<-GO_NVEC_BP_En[GO_NVEC_BP_En$Fisher<0.05,]
-```
-
-#### Molecular Functions 
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_NVEC_MF <-new("topGOdata", ontology="MF", gene2GO=nvec_gene2go_topgo, allGenes=nvec_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_NVEC_MF_FE <- runTest(GO_NVEC_MF, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_NVEC_MF_En <- GenTable(GO_NVEC_MF, Fisher = GO_NVEC_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_NVEC_MF_En$Fisher<-as.numeric(GO_NVEC_MF_En$Fisher)
-GO_NVEC_MF_En_sig<-GO_NVEC_MF_En[GO_NVEC_MF_En$Fisher<0.05,]
-```
-
-#### Plotting enrichment 
-
-Plot top 10 terms
-```{r}
-## Bind dfs 
-GO_NVEC_BP_En_sig$ontology <- "Biological Processes"
-GO_NVEC_MF_En_sig$ontology <- "Molecular Functions"
-BP_MF_NVEC <- rbind(GO_NVEC_BP_En_sig, GO_NVEC_MF_En_sig)
-
-## Select top 10 terms for each ontology 
-top10_per_ontology <- BP_MF_NVEC %>%
-  group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
-  ungroup()
-  
-ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
-  geom_bar(stat = "identity") +
-  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
-  coord_flip() +
-  scale_fill_gradient(low = "blue", high = "red") +
-  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
-  labs(x = "GO Term",
-       y = "Number of Significant Genes",
-       fill = "Fisher Value") +
-  theme_bw()
-```
-
 ## Ahya 
-
-Read in repeatmasker out file 
-```{r}
-out_file <- read.table("~/Desktop/GFFs/ahya/Ahyacinthus.chrsV1.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
-```
-
-Retain only chromosome, start, stop, TE name, Family Name and percent divergence
-```{r}
-bed_file <- out_file[,c(5:7,11,2)]
-
-#remove empty lines 
-bed_file <- bed_file %>%
-  drop_na(.)
-```
-
-Calculate the proportion of each repeat type 
-```{r}
-bed_file <- bed_file %>%
-  mutate(length = V7 - V6 + 1)  # Calculate length of each interval
-
-# Summarize total length per repeat type
-length_per_repeat <- bed_file %>%
-  group_by(V11) %>%
-  summarise(total_length = sum(length)) %>%
-  ungroup()
-
-# Calculate total length of all repeats
-total_length_all <- sum(length_per_repeat$total_length)
-
-# Calculate proportion of each repeat type
-length_per_repeat <- length_per_repeat %>%
-  mutate(proportion = total_length / total_length_all) %>%
-  mutate(proportion_precent = proportion*100)
-
-# Assume length_per_repeat contains columns: V11 (repeat type), proportion (calculated proportion)
-ggplot(length_per_repeat, aes(x = reorder(V11, -proportion_precent), y = proportion_precent, fill = V11)) +
-  geom_bar(stat = "identity") +                       # Bar heights represent proportions
-  #scale_y_continuous(labels = scales::percent) +     # Y-axis as percentages
-  labs(x = "Repeat Element Type", y = "Proportion of Genome (%)", 
-       title = "Proportion of Genomic Repeat Elements") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1))  # Tilt x labels for readability
-```
-
-Write out bed file
-```{r}
-write.table(bed_file, file = "~/Desktop/GFFs/ahya/Ahya_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
-```
-
-### piRNA clusters 
-
-Read in bed overlap file
-```{r}
-cluster_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNA_cluster_TEs_intersect.txt")
-```
-
-Calculate number of unique piRNA clusters (unique genomic intervals in V1:V3)
-```{r}
-unique_clusters <- cluster_bed %>%
-  distinct(V1, V2, V3)
-
-num_unique_piRNA_clusters <- nrow(unique_clusters)
-```
-
-18 out of 29 piRNA clusters overlap with some TE. 
-
-Calculate how many unique piRNA clusters overlap each repeat type (V7)
-```{r}
-clusters_per_repeat <- cluster_bed %>%
-  distinct(V1, V2, V3, V7) %>%
-  group_by(V7) %>%
-  summarise(num_clusters = n()) %>%
-  ungroup() %>%
-  mutate(proportion = num_clusters / num_unique_piRNA_clusters)
-
-# Plot the proportions of piRNA clusters overlapping each repeat type
-ggplot(clusters_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Repeat type", y = "Proportion of piRNA clusters overlapping", title = "Proportion of piRNA clusters overlapping RepeatMasker elements - Ahya") +
-  theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-Read in piRNA cluster-gene overlap 
-```{r}
-cluster_gene <- read.table("../output/piRNAs/ahya/Ahya_piRNA_cluster_genes_intersect.txt")
-```
-
-Calculate number of unique piRNA clusters overlapping genes (unique genomic intervals in V1:V3) and vice versa (unique genomic intervals in V4, V6, V7)
-```{r}
-## unique pirna
-unique_cluster_gene <- cluster_gene %>%
-  distinct(V1, V2, V3)
-
-num_unique_cluster_gene <- nrow(unique_cluster_gene)
-
-## unique gene
-unique_gene <- cluster_gene %>%
-  distinct(V4, V7, V8)
-
-num_unique_gene <- nrow(unique_gene)
-```
 
 ### piRNAs
 
 Read in piRNA TE overlap 
 ```{r}
-pirna_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_TEs_intersect.txt")
+pirna_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_TEs_repeats_intersect.txt")
 ```
 
 Calculate number of unique piRNAs (unique genomic intervals in V1:V3)
@@ -709,21 +373,54 @@ unique_pirna <- pirna_bed %>%
 num_unique_piRNAs <- nrow(unique_pirna)
 ```
 
-Calculate how many unique piRNAs overlap each repeat type (V7)
+Look at repeats and piRNA overlap 
 ```{r}
-pirna_per_repeat <- pirna_bed %>%
-  distinct(V1, V2, V3, V7) %>%
-  group_by(V7) %>%
-  summarise(num_clusters = n()) %>%
-  ungroup() %>%
-  mutate(proportion = num_clusters / num_unique_piRNAs)
+pirna_summary <- pirna_bed %>%
+  mutate(piRNA_ID = paste(V1, V2, V3, sep = "_")) %>%
+  mutate(Repeat_Family = str_extract(V12, "(?<=genus:)[^|;]+")) %>%
+  distinct(piRNA_ID, Repeat_Family, .keep_all = TRUE) %>%
+  mutate(Repeat_Group = substr(Repeat_Family, 1, 4))
 
-# Plot the proportions of piRNA clusters overlapping each repeat type
-ggplot(pirna_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Repeat type", y = "Proportion of piRNAs overlapping", title = "Proportion of piRNAs overlapping RepeatMasker elements - Ahya") +
-  theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+total_unique_pirnas <- n_distinct(pirna_summary$piRNA_ID)
+cat("Total unique piRNAs overlapping repeats:", total_unique_pirnas, "\n")
+
+# Count piRNAs per repeat type/family
+repeat_counts <- pirna_summary %>%
+  count(Repeat_Group, sort = TRUE, name = "piRNA_Count") %>%
+  mutate(Species = "Acropora hyacinthus")
+```
+
+Summarize repeat data further 
+```{r}
+# Clean up messy names 
+repeat_clean <- repeat_counts %>%
+  mutate(
+    Clean_Group = case_when(
+      startsWith(Repeat_Group, "DNA") ~ "DNA Transposon",
+      startsWith(Repeat_Group, "LTR") ~ "LTR Retrotransposon",
+      startsWith(Repeat_Group, "LINE") ~ "LINE",
+      startsWith(Repeat_Group, "Unkn") ~ "Unknown",
+      startsWith(Repeat_Group, "Simp") ~ "Simple Repeat",
+      startsWith(Repeat_Group, "Low")  ~ "Low Complexity",
+      startsWith(Repeat_Group, "RC")   ~ "Rolling Circle (Helitron)",
+      TRUE ~ "Other")) %>%
+  group_by(Species, Clean_Group) %>%
+  summarise(piRNA_Count = sum(piRNA_Count), .groups = "drop")
+
+# Plot 
+ggplot(repeat_clean, aes(x = Species, y = piRNA_Count, fill = Clean_Group)) +
+  geom_col(position = "fill", width = 0.5, color = "black", linewidth = 0.2) +
+  #scale_fill_brewer(palette = "Set2") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = NULL,
+    y = "Percentage of Total piRNAs",
+    fill = "Repeat Class"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(face = "italic"),
+    panel.grid.major.x = element_blank())
 ```
 
 Read in piRNA-gene overlap 
@@ -773,132 +470,13 @@ overlapping_tes <- unique_pirna[subjectHits(overlaps), ]
 length(overlaps)
 ```
 
-2727 piRNAs overlap with both TEs and genes. 
+72962 piRNAs overlap with both TEs and genes. 
 
 To summarize: 
 - 364493 piRNAs in Ahya
-- 5613 piRNAs overlap with some TE
-- 116936 piRNAs overlap with genes
-- 2727 piRNAs overlap with both TE and genes 
-- 2727+116936+5613 = 125276 piRNAs overlapping TEs, genes or both 
-
-This equals about ~34% of the piRNAs. The rest are in intergenic space (could be in other elements but these are unannotated). This matches Figure 7 ovary piRNA targets in Hydra ovaries (Praher et al. 2017).
-
-### piRNA gene overlap enrichment 
-
-Perform GO enrichment for genes that are overlapping with piRNAs. 
-
-#### Make list of genes for TopGO
-
-Read in gene to go information (generated above)
-```{r}
-ahya_gene2go<-read.delim("../data/annotations/Ahya_gene2go.tab", sep="\t")
-```
-
-Isolate gene names in `pirna_gene`
-```{r}
-pirna_gene <- pirna_gene %>%
-  mutate(gene_name = str_extract(V12, "(?<=ID=)[^;]+"))
-```
-
-Make list of genes for input to TopGO
-```{r}
-# Genes of interest - ie those targeted by miRNAs 
-ahya_clust_genes <- as.character(unique(pirna_gene$gene_name))
-
-# All genes 
-ahya_all_genes <- as.character(ahya_gene2go$gene_name)
-
-# Apply 1 or 0 if gene is gene of interest 
-ahya_GeneList <- factor(as.integer(ahya_all_genes %in% ahya_clust_genes))
-names(ahya_GeneList) <- ahya_all_genes
-```
-
-Read in gene-to-go-mappings
-```{r}
-ahya_gene2go_topgo<-readMappings("../data/annotations/Ahya_gene2go.tab", IDsep=";", sep="\t")
-```
-
-Set function to select genes of interest (ie those that have pvalue < 0.05)
-```{r}
-topDiffGenes <- function(allScore) {
-return(allScore < 0.05)}
-```
-
-#### Biological Processes 
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_AHYA_BP <-new("topGOdata", ontology="BP", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_AHYA_BP_FE <- runTest(GO_AHYA_BP, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_AHYA_BP_En <- GenTable(GO_AHYA_BP, Fisher = GO_AHYA_BP_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_AHYA_BP_En$Fisher<-as.numeric(GO_AHYA_BP_En$Fisher)
-GO_AHYA_BP_En_sig<-GO_AHYA_BP_En[GO_AHYA_BP_En$Fisher<0.05,]
-```
-
-#### Molecular Functions
-
-Create `topGOdata` object, which is required for topGO analysis
-```{r}
-GO_AHYA_MF <-new("topGOdata", ontology="MF", gene2GO=ahya_gene2go_topgo, allGenes=ahya_GeneList, annot = annFUN.gene2GO, geneSel=topDiffGenes)
-```
-
-Run GO enrichment test 
-```{r}
-GO_AHYA_MF_FE <- runTest(GO_AHYA_MF, algorithm="weight01", statistic="fisher")
-```
-
-Generate results table 
-```{r}
-GO_AHYA_MF_En <- GenTable(GO_AHYA_MF, Fisher = GO_AHYA_MF_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
-```
-Only taking the top 100 GO terms 
-
-Filter by significant results
-```{r}
-GO_AHYA_MF_En$Fisher<-as.numeric(GO_AHYA_MF_En$Fisher)
-GO_AHYA_MF_En_sig<-GO_AHYA_MF_En[GO_AHYA_MF_En$Fisher<0.05,]
-```
-
-#### Plotting enrichment 
-
-Plot top 10 terms
-```{r}
-## Bind dfs 
-GO_AHYA_BP_En_sig$ontology <- "Biological Processes"
-GO_AHYA_MF_En_sig$ontology <- "Molecular Functions"
-BP_MF_AHYA <- rbind(GO_AHYA_BP_En_sig, GO_AHYA_MF_En_sig)
-
-## Select top 10 terms for each ontology 
-top10_per_ontology <- BP_MF_AHYA %>%
-  group_by(ontology) %>%
-  slice_max(Significant, n = 10, with_ties = FALSE) %>%
-  ungroup()
-  
-ggplot(top10_per_ontology, aes(x = reorder(Term, Significant), y = Significant, fill = Fisher)) +
-  geom_bar(stat = "identity") +
-  #geom_text(aes(label = gene_count), vjust = -0.5, color = "black", size = 3) +
-  coord_flip() +
-  scale_fill_gradient(low = "blue", high = "red") +
-  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
-  labs(x = "GO Term",
-       y = "Number of Significant Genes",
-       fill = "Fisher Value") +
-  theme_bw()
-```
+- 265966 piRNAs overlap with some TE
+- 119663 piRNAs overlap with genes
+- 72962 piRNAs overlap with both TE and genes 
 
 ## Species comparisons
 
@@ -908,7 +486,7 @@ Plot percent of piRNAs overlapping with TEs, genes, both or intergenic regions
 percent <- data.frame(
   Species = rep(c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis"), each = 4),
   Element = rep(c("TEs only", "Genes only", "Both", "Intergenic"), times = 3),
-  Count = c(5613, 116936, 2727, 239217, 
+  Count = c(193004, 46701, 72962, 51826, 
             59, 3037, 142, 2299,
             544, 12783, 180, 16964))
 
@@ -959,103 +537,8 @@ ggsave("../output/piRNAs/cross-species/piRNA_overlaps.png",
        pirna_overlap_spp, width = 10, height = 6, units = "in", dpi = 600, bg = "white")
 ```
 
-### Functional comparisons 
 
-Compare terms identified in GO enrichment above across species.
 
-Add species name in dfs 
-```{r}
-BP_MF_AHYA$Species <- "Acropora hyacinthus"
-BP_MF_APOC$Species <- "Astrangia poculata"
-BP_MF_NVEC$Species <- "Nematostella vectensis"
-
-all_spp_go <- rbind(BP_MF_AHYA, BP_MF_APOC, BP_MF_NVEC)
-```
-
-Assess shared GO terms between species 
-```{r}
-# Count the number of unique species for each GO.IDs
-shared_go_pi <- all_spp_go %>%
-  group_by(GO.ID) %>%
-  summarise(unique_species = n_distinct(Species)) %>%
-  filter(unique_species > 1) %>%
-  dplyr::select(GO.ID)
-
-# Create a new dataframe with only the shared GO.IDs
-shared_go_pi_df <- all_spp_go %>%
-  filter(GO.ID %in% shared_go_pi$GO.ID)
-```
-
-Plot! A couple of options
-```{r}
-GO_plot_pi1 <- ggplot(shared_go_pi_df, aes(x = Term, y = -log10(Fisher), shape = Species, fill = Species)) +
-  geom_point(size = 3, color = "black", stroke = 0.1) +  # Black border around shapes
-  scale_shape_manual(values = c(21, 22, 23)) +  # Shapes that can be filled
-  scale_fill_manual(values = c("#408EC6", "#7A2048", "#1E2761")) +  # Custom colors for each species
-  scale_size(range = c(2, 12)) + 
-  xlab('') + 
-  ylab('log(Enrichment score)') +
-  coord_flip() +
-  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
-  theme_bw(); GO_plot_pi1 # this is what I used in my Moorea ncRNA paper 
-
-ggplot(shared_go_pi_df, aes(x = Term, y = -log10(Fisher), fill = Species)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
-  ylab(expression('-log'[10]*'(Fisher p-value)')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplot(shared_go_pi_df, aes(x = Term, y = -log10(Fisher), fill = Species)) +
-  geom_bar(stat = "identity") +
-  ylab(expression('-log'[10]*'(Fisher p-value)')) +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-ggplot(shared_go_pi_df, aes(x = Species, y = Term, color = -log10(Fisher), size = -log10(Fisher))) +
-  geom_point() +
-  scale_color_viridis_c() +
-  labs(y = "Term", color = expression('(Fisher p-value)')) +
-  theme_classic()
-
-tile_go <- ggplot(shared_go_pi_df, aes(x = Species, y = Term, fill = Fisher)) +
-  geom_tile(color = "white") +
-  scale_fill_viridis_c(option = "A", name = expression('Fisher p-value')) +
-  facet_grid(vars(ontology), scales = "free", space = "free_y") + 
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
-        strip.text = element_text(size = 12, face = "bold"),
-        axis.text = element_text(size = 11, color = "black"),
-        axis.title.y = element_text(size = 13, face = "bold"),
-        axis.title.x = element_text(size = 13, face = "bold")) +
-  xlab("") + 
-  ylab("GO Term"); tile_go
-
-ggsave("../output/piRNAs/cross-species/piRNA_gene_overlap_enrichment.pdf",
-       tile_go, width = 10, height = 9, units = "in", dpi = 600, bg = "white")
-ggsave("../output/piRNAs/cross-species/piRNA_gene_overlap_enrichment.png",
-       tile_go, width = 10, height = 9, units = "in", dpi = 600, bg = "white")
-```
-
-I think I like the tile plot the best. 
-
-Plot only terms that show up in all three species. 
-```{r}
-shared_terms <- shared_go_pi_df %>%
-  group_by(Term) %>%
-  filter(n_distinct(Species) == 3) %>%
-  ungroup()
-
-# Now plot as before
-ggplot(shared_terms, aes(x = Species, y = Term, fill = -log10(Fisher))) +
-  geom_tile(color = "white") +
-  scale_fill_viridis_c(option = "D", name = expression('-log'[10]*'(Fisher p-value)')) +
-  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
-  xlab("Species") +
-  ylab("GO Term") +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
-        strip.text = element_text(size = 12, face = "bold"))
-```
 
 
 
