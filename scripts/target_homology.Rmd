@@ -25,6 +25,25 @@ library(rrvgo)
 
 ## Generate gene2go files 
 
+Apoc 
+```{r}
+apoc_annot <- read.delim("../data/annotations/apoc_blast_GO.tsv", header = F)
+
+# Format 
+apoc_gene_go_table <- apoc_annot %>%
+  unite("all_go_text", V20:V23, sep = "; ", na.rm = TRUE) %>%
+  mutate(GO_IDs = map_chr(all_go_text, ~ {
+    ids <- str_extract_all(.x, "GO:\\d{7}")[[1]]
+    unique_ids <- unique(ids)
+    paste(unique_ids, collapse = "; ")})) %>%
+  dplyr::select(gene_name = V1, GeneOntologyIDs = GO_IDs)
+apoc_gene_go_table$gene_name <- gsub("protein|", "", apoc_gene_go_table$gene_name)
+apoc_gene_go_table$gene_name <- sub("^\\|", "", apoc_gene_go_table$gene_name)
+
+# Save 
+write_tsv(apoc_gene_go_table, file = "../data/annotations/apoc_gene2go.tab")
+```
+
 Ahya 
 ```{r}
 ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
@@ -42,12 +61,22 @@ ahya_gene_go_table <- ahya_annot %>%
 write_tsv(ahya_gene_go_table, file = "../data/annotations/ahya_gene2go.tab")
 ```
 
+Nvec 
+```{r}
+nvec_annot <- read.delim("../data/annotations/nvec_blast_GO.tsv", header = F)
 
+# Format 
+nvec_gene_go_table <- nvec_annot %>%
+  unite("all_go_text", V20:V23, sep = "; ", na.rm = TRUE) %>%
+  mutate(GO_IDs = map_chr(all_go_text, ~ {
+    ids <- str_extract_all(.x, "GO:\\d{7}")[[1]]
+    unique_ids <- unique(ids)
+    paste(unique_ids, collapse = "; ")})) %>%
+  dplyr::select(gene_name = V1, GeneOntologyIDs = GO_IDs)
 
-
-
-
-
+# Save 
+write_tsv(nvec_gene_go_table, file = "../data/annotations/nvec_gene2go.tab")
+```
 
 ## miRNA targets (3UTR and mRNA)
 
@@ -455,7 +484,7 @@ GO_APOC_BP_all_spp_FE <- runTest(GO_APOC_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_APOC_BP_all_spp)
@@ -488,7 +517,7 @@ GO_APOC_MF_all_spp_FE <- runTest(GO_APOC_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from topGO object
 sig_genes <- sigGenes(GO_APOC_MF_all_spp)
@@ -515,15 +544,18 @@ GO_APOC_all_spp_En_sig <- rbind(GO_APOC_MF_all_spp_En_sig, GO_APOC_BP_all_spp_En
 
 Read in annotation file 
 ```{r}
-apoc_annot <- read.delim("../data/annotations/apoculata_GeneAnnotation_combined.txt")
+apoc_annot <- read.delim("../data/annotations/apoc_blast_GO.tsv", header = F)
+apoc_annot$V1 <- gsub("protein|", "", apoc_annot$V1)
+apoc_annot$V1 <- sub("^\\|", "", apoc_annot$V1)
 ```
 
 Join GO results and annotation info
 ```{r}
 apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
   separate_rows(Genes, sep = ",\\s*") %>%
-  dplyr::rename(Protein_ID = Genes) %>%
-  left_join(apoc_annot, by = "Protein_ID")
+  left_join(apoc_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
 ```
 
 Save as csv 
@@ -582,7 +614,7 @@ GO_NVEC_BP_all_spp_FE <- runTest(GO_NVEC_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_NVEC_BP_all_spp)
@@ -615,7 +647,7 @@ GO_NVEC_MF_all_spp_FE <- runTest(GO_NVEC_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_NVEC_MF_all_spp)
@@ -642,25 +674,22 @@ GO_NVEC_all_spp_En_sig <- rbind(GO_NVEC_MF_all_spp_En_sig, GO_NVEC_BP_all_spp_En
 
 Read in annotation file 
 ```{r}
-nvec_annot <- read.delim("../data/annotations/NV2g.20240221.GO.tsv", header = T)
+nvec_annot <- read.delim("../data/annotations/nvec_blast_GO.tsv", header = F)
 ```
 
 Join GO results and annotation info
 ```{r}
-apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
+nvec_GO_annotated <- GO_NVEC_all_spp_En_sig %>%
   separate_rows(Genes, sep = ",\\s*") %>%
-  dplyr::rename(Protein_ID = Genes) %>%
-  left_join(apoc_annot, by = "Protein_ID")
+  left_join(nvec_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
 ```
 
 Save as csv 
 ```{r}
-write.csv(apoc_GO_annotated, "../output/miRNA_interactions/apoc/apoc_shared_miRNA_targets.csv")
+write.csv(nvec_GO_annotated, "../output/miRNA_interactions/nvec/nvec_shared_miRNA_targets.csv")
 ```
-
-
-
-
 
 ### Ahya - shared between all three spp 
 
@@ -715,7 +744,7 @@ GO_AHYA_BP_all_spp_FE <- runTest(GO_AHYA_BP_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_AHYA_BP_all_spp_En <- GenTable(GO_AHYA_BP_all_spp, Fisher = GO_AHYA_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_AHYA_BP_all_spp)
@@ -748,7 +777,7 @@ GO_AHYA_MF_all_spp_FE <- runTest(GO_AHYA_MF_all_spp, algorithm="weight01", stati
 
 Generate results table 
 ```{r}
-GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_AHYA_MF_all_spp_En <- GenTable(GO_AHYA_MF_all_spp, Fisher = GO_AHYA_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_AHYA_MF_all_spp)
@@ -773,18 +802,28 @@ GO_AHYA_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 GO_AHYA_all_spp_En_sig <- rbind(GO_AHYA_MF_all_spp_En_sig, GO_AHYA_BP_all_spp_En_sig)
 ```
 
-Join with annotation info
+Read in annotation file 
 ```{r}
 ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
+```
 
+Join GO results and annotation info
+```{r}
 # Split genes from go enrichment into their own rows 
 ahya_go_unrolled <- GO_AHYA_all_spp_En_sig %>%
   separate_rows(Genes, sep = ",\\s*") %>%
   mutate(Genes = trimws(Genes))
 
 # Join with annotation info
-ahya_joined_df <- ahya_go_unrolled %>%
-  left_join(ahya_annot, by = c("Genes" = "V1"))
+ahya_GO_annotated <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+```
+
+Save as csv 
+```{r}
+write.csv(ahya_GO_annotated, "../output/miRNA_interactions/ahya/ahya_shared_miRNA_targets.csv")
 ```
 
 ### Enriched terms for miRNA target homologs in all 3 spp 
@@ -792,23 +831,29 @@ ahya_joined_df <- ahya_go_unrolled %>%
 Find shared enriched terms 
 ```{r}
 # Add species labels and keep only needed columns
-ahya <- GO_AHYA_all_spp_En_sig %>%
+ahya <- ahya_GO_annotated %>%
   mutate(species = "Ahya") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
-apoc <- GO_APOC_all_spp_En_sig %>%
+apoc <- apoc_GO_annotated %>%
   mutate(species = "Apoc") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
-nvec <- GO_NVEC_all_spp_En_sig %>%
+nvec <- nvec_GO_annotated %>%
   mutate(species = "Nvec") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
 # Shared GO IDs across all three
 shared_ids <- purrr::reduce(
   list(ahya$GO.ID, apoc$GO.ID, nvec$GO.ID),
   intersect)
 shared_ids
+
+# Shared proteins across all three 
+shared_prot <- purrr::reduce(
+  list(ahya$Protein_abbrv, apoc$Protein_abbrv, nvec$Protein_abbrv),
+  intersect)
+shared_prot
 ```
 
 Filter by shared GO terms 
@@ -818,6 +863,7 @@ go_all <- bind_rows(ahya, apoc, nvec)
 
 go_shared <- go_all %>%
   filter(GO.ID %in% shared_ids)
+length(unique(go_shared$GO.ID))
 ```
 
 Plot! 
@@ -837,15 +883,82 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
   coord_flip() +
   theme_bw() +
   theme(
-    axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 22, face = "bold"),
-    strip.text = element_text(face = "bold", size = 23),
-    legend.text = element_text(face = "italic", size = 15),
-    legend.title = element_text(face = "bold", size = 16),
+    axis.text = element_text(color = "black", size = 28),
+    axis.title = element_text(size = 29, face = "bold"),
+    strip.text = element_text(face = "bold", size = 29),
+    legend.text = element_text(face = "italic", size = 24),
+    legend.title = element_text(face = "bold", size = 25),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
 
-ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 8, dpi = 300)
-ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 15, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_GO_shared_OGs.pdf", plot = shared_enrich, width = 20, height = 15, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_GO_shared_OGs.png", plot = shared_enrich, width = 20, height = 15, dpi = 300)
+```
+
+Filter by shared proteins  
+```{r}
+# Filter to shared prots
+prot_shared <- go_all %>%
+  filter(Protein_abbrv %in% shared_prot)
+length(unique(prot_shared$Protein_abbrv))
+```
+
+Plot! 
+```{r}
+shared_prot_plot <- ggplot(prot_shared, aes(x = Protein_abbrv, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
+    labels = c("Ahya" = "Acropora hyacinthus", 
+               "Apoc" = "Astrangia poculata", 
+               "Nvec" = "Nematostella vectensis")
+  ) +
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("Enrichment Significance (-log P)") +
+  coord_flip() +
+  theme_bw() +
+  theme(
+    axis.text = element_text(color = "black", size = 28),
+    axis.title = element_text(size = 29, face = "bold"),
+    strip.text = element_text(face = "bold", size = 30),
+    legend.text = element_text(face = "italic", size = 20),
+    legend.title = element_text(face = "bold", size = 21),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_prot_plot
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_protein_shared_OGs.pdf", plot = shared_prot_plot, width = 20, height = 25, dpi = 300)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_protein_shared_OGs.png", plot = shared_prot_plot, width = 20, height = 25, dpi = 300)
+```
+
+Use rrvgo to summarize terms for Apoc genes in unique orthogroups 
+```{r}
+# 1. Prepare your data
+# We need the GO IDs and the p-values (Fisher)
+go_ids <- go_all$GO.ID
+score_vector <- as.numeric(go_all$Fisher)
+names(score_vector) <- go_all$GO.ID
+
+# 2. Calculate the similarity matrix
+# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
+simMatrix <- calculateSimMatrix(go_ids,
+                                orgdb="org.Ce.eg.db", 
+                                ont="BP", 
+                                method="Rel")
+score_vector <- score_vector[rownames(simMatrix)]
+
+# 3. Reduce redundancy
+# The threshold (0.7) determines how much to "collapse" similar terms
+reducedTerms <- reduceSimMatrix(simMatrix,
+                                score_vector,
+                                threshold=0.85,
+                                orgdb="org.Ce.eg.db")
+
+# 4. Visualizing the "Semantic Space"
+#scatterPlot(simMatrix, reducedTerms)
+treemapPlot(reducedTerms)
+
+#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.pdf", plot = last_plot(), width = 10, height = 6, dpi = 300)
+#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.png", plot = last_plot(), width = 10, height = 6, dpi = 300)
 ```
 
 ## Functional enrichment of miRNA targets that are species-specific 
@@ -908,6 +1021,14 @@ GO_APOC_BP_only_FE <- runTest(GO_APOC_BP_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_APOC_BP_only_En <- GenTable(GO_APOC_BP_only, Fisher = GO_APOC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_BP_only)
+GO_APOC_BP_only_En$Genes <- sapply(GO_APOC_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -933,6 +1054,14 @@ GO_APOC_MF_only_FE <- runTest(GO_APOC_MF_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_APOC_MF_only_En <- GenTable(GO_APOC_MF_only, Fisher = GO_APOC_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_MF_only)
+GO_APOC_MF_only_En$Genes <- sapply(GO_APOC_MF_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_MF_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -976,8 +1105,8 @@ apoc_only_plot <- ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); apoc_only_plot
 
-ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_functions_shared_OGs.pdf", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_functions_shared_OGs.png", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_GO_shared_OGs.pdf", plot = apoc_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/apoc/apoc_miRNA_target_enriched_GO_shared_OGs.png", plot = apoc_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Apoc genes in unique orthogroups 
@@ -1065,6 +1194,14 @@ GO_NVEC_BP_only_FE <- runTest(GO_NVEC_BP_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_NVEC_BP_only_En <- GenTable(GO_NVEC_BP_only, Fisher = GO_NVEC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_BP_only)
+GO_APOC_BP_only_En$Genes <- sapply(GO_APOC_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1133,8 +1270,8 @@ nvec_only_plot <- ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); nvec_only_plot
 
-ggsave("../output/miRNA_interactions/nvec/nvec_miRNA_target_enriched_functions_shared_OGs.pdf", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/miRNA_interactions/nvec/nvec_miRNA_target_enriched_functions_shared_OGs.png", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/nvec/nvec_miRNA_target_enriched_GO_shared_OGs.pdf", plot = nvec_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/nvec/nvec_miRNA_target_enriched_GO_shared_OGs.png", plot = nvec_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
@@ -1219,7 +1356,7 @@ GO_AHYA_BP_only_FE <- runTest(GO_AHYA_BP_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_AHYA_BP_only)
@@ -1302,12 +1439,12 @@ top10_ahya_only <- ahya_joined_df %>%
   group_by(ontology) %>%
   filter(GO.ID %in% (
     distinct(., GO.ID, Fisher) %>%
-      slice_min(Fisher, n = 10, with_ties = FALSE) %>%
+      slice_min(Fisher, n = 5, with_ties = FALSE) %>%
       pull(GO.ID))) %>%
   ungroup()
 
 ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill = species)) +
-  geom_point(shape = 21, color = "black", fill = "#E69F00") + 
+  geom_point(size = 10, shape = 21, color = "black", fill = "#E69F00") + 
   scale_fill_manual(
     name = "Species",
     values = c("Acropora hyacinthus" = "#E69F00")) +
@@ -1324,8 +1461,8 @@ ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); ahya_only_plot
 
-ggsave("../output/miRNA_interactions/ahya/ahya_miRNA_target_enriched_functions_shared_OGs.pdf", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/miRNA_interactions/ahya/ahya_miRNA_target_enriched_functions_shared_OGs.png", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/ahya/ahya_miRNA_target_enriched_GO_shared_OGs.pdf", plot = ahya_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/miRNA_interactions/ahya/ahya_miRNA_target_enriched_GO_shared_OGs.png", plot = ahya_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Ahya genes in unique orthogroups 
