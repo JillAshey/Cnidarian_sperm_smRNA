@@ -2339,6 +2339,14 @@ GO_APOC_BP_only_FE <- runTest(GO_APOC_BP_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_APOC_BP_only_En <- GenTable(GO_APOC_BP_only, Fisher = GO_APOC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_BP_only)
+GO_APOC_BP_only_En$Genes <- sapply(GO_APOC_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2364,6 +2372,14 @@ GO_APOC_MF_only_FE <- runTest(GO_APOC_MF_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_APOC_MF_only_En <- GenTable(GO_APOC_MF_only, Fisher = GO_APOC_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_MF_only)
+GO_APOC_MF_only_En$Genes <- sapply(GO_APOC_MF_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_MF_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2407,8 +2423,8 @@ apoc_only_plot <- ggplot(top10_apoc_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); apoc_only_plot
 
-ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.pdf", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.png", plot = apoc_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.pdf", plot = apoc_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/piRNAs/apoc/apoc_only_piRNA_overlap_enriched_functions.png", plot = apoc_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
@@ -2491,6 +2507,14 @@ GO_NVEC_BP_only_FE <- runTest(GO_NVEC_BP_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_NVEC_BP_only_En <- GenTable(GO_NVEC_BP_only, Fisher = GO_NVEC_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_BP_only)
+GO_NVEC_BP_only_En$Genes <- sapply(GO_NVEC_BP_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_BP_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2516,6 +2540,14 @@ GO_NVEC_MF_only_FE <- runTest(GO_NVEC_MF_only, algorithm="weight01", statistic="
 Generate results table 
 ```{r}
 GO_NVEC_MF_only_En <- GenTable(GO_NVEC_MF_only, Fisher = GO_NVEC_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_MF_only)
+GO_NVEC_MF_only_En$Genes <- sapply(GO_NVEC_MF_only_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_MF_only, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -2559,8 +2591,8 @@ nvec_only_plot <- ggplot(top10_nvec_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); nvec_only_plot
 
-ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.pdf", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.png", plot = nvec_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.pdf", plot = nvec_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/piRNAs/nvec/nvec_only_piRNA_overlap_enriched_functions.png", plot = nvec_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
@@ -2644,7 +2676,7 @@ GO_AHYA_BP_only_FE <- runTest(GO_AHYA_BP_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 300)
+GO_AHYA_BP_only_En <- GenTable(GO_AHYA_BP_only, Fisher = GO_AHYA_BP_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_AHYA_BP_only)
@@ -2677,7 +2709,7 @@ GO_AHYA_MF_only_FE <- runTest(GO_AHYA_MF_only, algorithm="weight01", statistic="
 
 Generate results table 
 ```{r}
-GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 200)
+GO_AHYA_MF_only_En <- GenTable(GO_AHYA_MF_only, Fisher = GO_AHYA_MF_only_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
 
 # Extract all significant genes from your topGO object
 sig_genes <- sigGenes(GO_AHYA_MF_only)
@@ -2703,31 +2735,14 @@ GO_AHYA_only_En_sig <- rbind(GO_AHYA_BP_only_En_sig, GO_AHYA_MF_only_En_sig)
 GO_AHYA_only_En_sig$species <- "Acropora hyacinthus"
 ```
 
-Join with annotation info
-```{r}
-ahya_annot <- read.delim("../data/annotations/ahya_blast_GO.tsv", header = F)
-
-# Split genes from go enrichment into their own rows 
-ahya_go_unrolled <- GO_AHYA_only_En_sig %>%
-  separate_rows(Genes, sep = ",\\s*") %>%
-  mutate(Genes = trimws(Genes))
-
-# Join with annotation info
-ahya_joined_df <- ahya_go_unrolled %>%
-  left_join(ahya_annot, by = c("Genes" = "V1")) %>%
-  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, species, V16) %>%
-  dplyr::rename(Swissprot_protein = V16) %>%
-  mutate(Enrichment = Significant/Expected)
-```
-
 Plot! 
 ```{r}
 ## Select top 5 terms for each ontology 
-top10_ahya_only <- ahya_joined_df %>%
+top10_ahya_only <- GO_AHYA_only_En_sig %>%
   group_by(ontology) %>%
   filter(GO.ID %in% (
     distinct(., GO.ID, Fisher) %>%
-      slice_min(Fisher, n = 10, with_ties = FALSE) %>%
+      slice_min(Fisher, n = 5, with_ties = FALSE) %>%
       pull(GO.ID))) %>%
   ungroup()
 
@@ -2749,8 +2764,8 @@ ahya_only_plot <- ggplot(top10_ahya_only, aes(x = Term, y = -log(Fisher), fill =
     legend.title = element_text(face = "bold", size = 16),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); ahya_only_plot
 
-ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.pdf", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
-ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.png", plot = ahya_only_plot, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.pdf", plot = ahya_only_plot, width = 12, height = 8, dpi = 300)
+ggsave("../output/piRNAs/ahya/ahya_only_piRNA_overlap_enriched_functions.png", plot = ahya_only_plot, width = 12, height = 8, dpi = 300)
 ```
 
 Use rrvgo to summarize terms for Nvec genes in unique orthogroups 
