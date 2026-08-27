@@ -21,6 +21,7 @@ library(patchwork)
 library(topGO)
 library(eulerr)
 library(rrvgo)
+library(cowplot)
 ```
 
 ## Generate gene2go files 
@@ -1770,6 +1771,13 @@ fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
 prop_venn <- plot(fit_og, quantities = TRUE, labels = FALSE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6)); prop_venn
      #labels = list(fontsize = 12, fontface = "bold")); prop_venn
 
+
+prop_venn <- plot(
+  fit_og, 
+  quantities = list(cex = 2.5, fontface = "bold"), # Large numbers inside circles
+  labels = FALSE,
+  fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6)); prop_venn
+
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.pdf", plot = prop_venn, width = 5, height = 6, dpi = 300)
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_proportional_venn_OGs.png", plot = prop_venn, width = 5, height = 6, dpi = 300)
 ```
@@ -1854,6 +1862,14 @@ GO_APOC_BP_all_spp_FE <- runTest(GO_APOC_BP_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_APOC_BP_all_spp_En <- GenTable(GO_APOC_BP_all_spp, Fisher = GO_APOC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_APOC_BP_all_spp)
+GO_APOC_BP_all_spp_En$Genes <- sapply(GO_APOC_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1879,6 +1895,14 @@ GO_APOC_MF_all_spp_FE <- runTest(GO_APOC_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_APOC_MF_all_spp_En <- GenTable(GO_APOC_MF_all_spp, Fisher = GO_APOC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from topGO object
+sig_genes <- sigGenes(GO_APOC_MF_all_spp)
+GO_APOC_MF_all_spp_En$Genes <- sapply(GO_APOC_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_APOC_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1893,6 +1917,27 @@ GO_APOC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_APOC_all_spp_En_sig <- rbind(GO_APOC_MF_all_spp_En_sig, GO_APOC_BP_all_spp_En_sig)
+```
+
+Read in annotation file 
+```{r}
+apoc_annot <- read.delim("../data/annotations/apoc_blast_GO.tsv", header = F)
+apoc_annot$V1 <- gsub("protein|", "", apoc_annot$V1)
+apoc_annot$V1 <- sub("^\\|", "", apoc_annot$V1)
+```
+
+Join GO results and annotation info
+```{r}
+apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  left_join(apoc_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+```
+
+Save as csv 
+```{r}
+write.csv(apoc_GO_annotated, "../output/piRNAs/apoc/apoc_shared_piRNA_overlaps.csv")
 ```
 
 ### Nvec - shared between all three spp 
@@ -1947,6 +1992,14 @@ GO_NVEC_BP_all_spp_FE <- runTest(GO_NVEC_BP_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_NVEC_BP_all_spp_En <- GenTable(GO_NVEC_BP_all_spp, Fisher = GO_NVEC_BP_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_BP_all_spp)
+GO_NVEC_BP_all_spp_En$Genes <- sapply(GO_NVEC_BP_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_BP_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1972,6 +2025,14 @@ GO_NVEC_MF_all_spp_FE <- runTest(GO_NVEC_MF_all_spp, algorithm="weight01", stati
 Generate results table 
 ```{r}
 GO_NVEC_MF_all_spp_En <- GenTable(GO_NVEC_MF_all_spp, Fisher = GO_NVEC_MF_all_spp_FE, orderBy = "Fisher", numChar = 51, topNodes = 100)
+
+# Extract all significant genes from your topGO object
+sig_genes <- sigGenes(GO_NVEC_MF_all_spp)
+GO_NVEC_MF_all_spp_En$Genes <- sapply(GO_NVEC_MF_all_spp_En$GO.ID, function(go_id) {
+  genes_in_term <- genesInTerm(GO_NVEC_MF_all_spp, go_id)[[1]]
+  significant_in_term <- intersect(genes_in_term, sig_genes)
+  paste(significant_in_term, collapse = ", ")
+})
 ```
 Only taking the top 100 GO terms 
 
@@ -1986,6 +2047,25 @@ GO_NVEC_MF_all_spp_En_sig$ontology <- "Molecular Functions"
 
 ```{r}
 GO_NVEC_all_spp_En_sig <- rbind(GO_NVEC_MF_all_spp_En_sig, GO_NVEC_BP_all_spp_En_sig)
+```
+
+Read in annotation file 
+```{r}
+nvec_annot <- read.delim("../data/annotations/nvec_blast_GO.tsv", header = F)
+```
+
+Join GO results and annotation info
+```{r}
+nvec_GO_annotated <- GO_NVEC_all_spp_En_sig %>%
+  separate_rows(Genes, sep = ",\\s*") %>%
+  left_join(nvec_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+```
+
+Save as csv 
+```{r}
+write.csv(nvec_GO_annotated, "../output/piRNAs/nvec/nvec_shared_piRNA_overlaps.csv")
 ```
 
 ### Ahya - shared between all three spp 
@@ -2109,8 +2189,15 @@ ahya_go_unrolled <- GO_AHYA_all_spp_En_sig %>%
   mutate(Genes = trimws(Genes))
 
 # Join with annotation info
-ahya_joined_df <- ahya_go_unrolled %>%
-  left_join(ahya_annot, by = c("Genes" = "V1"))
+ahya_GO_annotated <- ahya_go_unrolled %>%
+  left_join(ahya_annot, by = c("Genes" = "V1")) %>%
+  dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
+  dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+```
+
+Save as csv 
+```{r}
+write.csv(ahya_GO_annotated, "../output/piRNAs/ahya/ahya_shared_piRNA_overlaps.csv")
 ```
 
 ### Enriched terms for piRNA overlap for all 3 spp 
@@ -2149,7 +2236,7 @@ go_shared <- go_all %>%
 Plot! 
 ```{r}
 shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = species)) +
-  geom_point(size = 10, shape = 21, color = "black") + 
+  geom_point(size = 12, shape = 21, color = "black", stroke = 0.8) + 
   scale_fill_manual(
     name = "Species",
     values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
@@ -2157,22 +2244,40 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
                "Apoc" = "Astrangia poculata", 
                "Nvec" = "Nematostella vectensis")
   ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 55)) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
   ylab("Enrichment Significance (-log P)") +
   coord_flip() +
-  theme_bw() +
+  theme_bw(base_size = 20) +
   theme(
-    axis.text = element_text(color = "black", size = 21),
-    axis.title = element_text(size = 22, face = "bold"),
-    strip.text = element_text(face = "bold", size = 23),
-    legend.text = element_text(face = "italic", size = 15),
-    legend.title = element_text(face = "bold", size = 16),
-    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
+    axis.text.y = element_text(color = "black", size = 22),
+    axis.text.x = element_text(color = "black", size = 24),
+    axis.title = element_text(size = 26, face = "bold"),
+    strip.text = element_text(face = "bold", size = 28),
+    legend.text = element_text(face = "italic", size = 24),
+    legend.title = element_text(face = "bold", size = 26),
+    legend.key.size = unit(1.2, "cm"),
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)); shared_enrich
 
-ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 8, dpi = 300)
-ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 15, height = 8, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 17, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 15, height = 17, dpi = 300)
 ```
+
+Combine venn plot and enrichment plot 
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.5, 1.6));combined_plot
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_shared_OGs.pdf", plot = combined_plot, width = 20, height = 29, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_shared_OGs.png", plot = combined_plot, width = 20, height = 29, dpi = 300)
+```
+
 
 ## Functional enrichment of genes overlapping with piRNAs that are species-specific 
 
