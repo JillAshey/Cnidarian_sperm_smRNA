@@ -11,120 +11,20 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
 library(MetBrewer)
+library(cowplot)
 ```
 
 ## Apoc 
 
-Read in repeatmasker out file 
-```{r}
-out_file <- read.table("~/Desktop/GFFs/apoc/apoculata.genome.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
-```
-
-Retain only chromosome, start, stop, TE name, Family Name and percent divergence
-```{r}
-bed_file <- out_file[,c(5:7,11,2)]
-
-#remove empty lines 
-bed_file <- bed_file %>%
-  drop_na(.)
-```
-
-Calculate the proportion of each repeat type 
-```{r}
-bed_file <- bed_file %>%
-  mutate(length = V7 - V6 + 1)  # Calculate length of each interval
-
-# Summarize total length per repeat type
-length_per_repeat <- bed_file %>%
-  group_by(V11) %>%
-  summarise(total_length = sum(length)) %>%
-  ungroup()
-
-# Calculate total length of all repeats
-total_length_all <- sum(length_per_repeat$total_length)
-
-# Calculate proportion of each repeat type
-length_per_repeat <- length_per_repeat %>%
-  mutate(proportion = total_length / total_length_all) %>%
-  mutate(proportion_precent = proportion*100)
-
-# Assume length_per_repeat contains columns: V11 (repeat type), proportion (calculated proportion)
-ggplot(length_per_repeat, aes(x = reorder(V11, -proportion_precent), y = proportion_precent, fill = V11)) +
-  geom_bar(stat = "identity") +                       # Bar heights represent proportions
-  #scale_y_continuous(labels = scales::percent) +     # Y-axis as percentages
-  labs(x = "Repeat Element Type", y = "Proportion of Genome (%)", 
-       title = "Proportion of Genomic Repeat Elements") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 45, hjust = 1))  # Tilt x labels for readability
-```
-
-Write out bed file
-```{r}
-write.table(bed_file, file = "~/Desktop/GFFs/apoc/Apoc_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
-```
-
-### piRNA clusters
-
-Read in bed overlap file
-```{r}
-cluster_bed <- read.table("../output/piRNAs/apoc/Apoc_piRNA_cluster_TEs_intersect.txt")
-```
-
-Calculate number of unique piRNA clusters (unique genomic intervals in V1:V3)
-```{r}
-unique_clusters <- cluster_bed %>%
-  distinct(V1, V2, V3)
-
-num_unique_piRNA_clusters <- nrow(unique_clusters)
-```
-
-3 piRNA clusters overlap with some TE. That is so little!!! 
-
-Calculate how many unique piRNA clusters overlap each repeat type (V7)
-```{r}
-clusters_per_repeat <- cluster_bed %>%
-  distinct(V1, V2, V3, V7) %>%
-  group_by(V7) %>%
-  summarise(num_clusters = n()) %>%
-  ungroup() %>%
-  mutate(proportion = num_clusters / num_unique_piRNA_clusters)
-
-# Plot the proportions of piRNA clusters overlapping each repeat type
-ggplot(clusters_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Repeat type", y = "Proportion of piRNA clusters overlapping", title = "Proportion of piRNA clusters overlapping RepeatMasker elements - Apoc") +
-  theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-And they only overlap simple repeats. 
-
-Read in piRNA cluster-gene overlap 
-```{r}
-cluster_gene <- read.table("../output/piRNAs/apoc/Apoc_piRNA_cluster_genes_intersect.txt")
-```
-
-Calculate number of unique piRNA clusters overlapping genes (unique genomic intervals in V1:V3) and vice versa (unique genomic intervals in V4, V6, V7)
-```{r}
-## unique pirna
-unique_cluster_gene <- cluster_gene %>%
-  distinct(V1, V2, V3)
-
-num_unique_cluster_gene <- nrow(unique_cluster_gene)
-
-## unique gene
-unique_gene <- cluster_gene %>%
-  distinct(V4, V7, V8)
-
-num_unique_gene <- nrow(unique_gene)
-```
-
-### piRNAs
+### piRNAs 
 
 Read in piRNA TE overlap 
 ```{r}
-pirna_bed <- read.table("../output/piRNAs/apoc/Apoc_piRNAs_TEs_intersect.txt")
+pirna_bed <- read.table("../output/piRNAs/apoc/Apoc_piRNAs_TEs_repeats_intersect.txt")
+
+# Isolate repeat type 
+pirna_bed <- pirna_bed %>%
+  mutate(repeat_type = str_extract(V13, "(?<=Motif:)[^ ]+"))
 ```
 
 Calculate number of unique piRNAs (unique genomic intervals in V1:V3)
@@ -134,27 +34,56 @@ unique_pirna <- pirna_bed %>%
 
 num_unique_piRNAs <- nrow(unique_pirna)
 ```
+2575 piRNAs overlap with TEs 
 
-Calculate how many unique piRNAs overlap each repeat type (V7)
+Read in repeat out file 
 ```{r}
-pirna_per_repeat <- pirna_bed %>%
-  distinct(V1, V2, V3, V7) %>%
-  group_by(V7) %>%
-  summarise(num_clusters = n()) %>%
-  ungroup() %>%
-  mutate(proportion = num_clusters / num_unique_piRNAs)
+repeat_map <- read.table("../output/piRNAs/Apoc/apoculata.genome.fasta.out", header = F, skip = 3, fill = T)
 
-# Plot the proportions of piRNA clusters overlapping each repeat type
-ggplot(pirna_per_repeat, aes(x = reorder(V7, -proportion), y = proportion, fill = V7)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Repeat type", y = "Proportion of piRNAs overlapping", title = "Proportion of piRNAs overlapping RepeatMasker elements - Apoc") +
-  theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1))
+# Assign proper column names
+colnames(repeat_map) <- c(
+  "SW_score", "perc_div", "perc_del", "perc_ins", 
+  "query_seq", "pos_begin", "pos_end", "pos_left", 
+  "strand", "Repeat_Family", "Repeat_Class", 
+  "rep_begin", "rep_end", "rep_left", "ID"
+)
+
+# Keep only the distinct names 
+rep_lookup <- repeat_map %>%
+  dplyr::select(Repeat_Family, Repeat_Class) %>%
+  distinct()
+```
+
+Merge the intersection file and the repeat look up file 
+```{r}
+pirna_summary <- pirna_bed %>%
+  mutate(piRNA_ID = paste(V1, V2, V3, sep = "_")) %>%
+  left_join(rep_lookup, by = c("repeat_type" = "Repeat_Family")) %>%
+  distinct(piRNA_ID, repeat_type, .keep_all = TRUE)
+```
+
+Reassign repeat names 
+```{r}
+apoc_repeat_counts <- pirna_summary %>%
+  count(Repeat_Class, name = "piRNA_Count") %>%
+  mutate(
+    Species = "Astrangia poculata",
+    Clean_Group = case_when(
+      str_detect(Repeat_Class, "^DNA|^RC")                          ~ "DNA Transposon",
+      str_detect(Repeat_Class, "^LTR")                              ~ "LTR Retrotransposon",
+      str_detect(Repeat_Class, "^LINE")                             ~ "LINE",
+      str_detect(Repeat_Class, "^SINE")                             ~ "SINE",
+      Repeat_Class %in% c("tRNA", "rRNA", "snRNA")                  ~ "ncRNA",
+      Repeat_Class %in% c("Simple_repeat", "Low_complexity")        ~ "Simple / Low Complexity",
+      Repeat_Class == "Unknown" | is.na(Repeat_Class)              ~ "Unknown",
+      TRUE                                                          ~ "Other")) %>%
+  group_by(Species, Clean_Group) %>%
+  summarise(piRNA_Count = sum(piRNA_Count), .groups = "drop")
 ```
 
 Read in piRNA-gene overlap 
 ```{r}
-pirna_gene <- read.table("../output/piRNAs/apoc/Apoc_piRNAs_genes_intersect.txt")
+pirna_gene <- read.table("../output/piRNAs/apoc/apoc_piRNAs_genes_intersect.txt", sep = "\t")
 ```
 
 Calculate lengths
@@ -178,6 +107,7 @@ unique_gene <- pirna_gene %>%
 
 num_unique_gene <- nrow(unique_gene)
 ```
+3179 piRNAs overlap with genes 
 
 Is there overlap between the piRNAs overlapping genes v. TEs?
 ```{r}
@@ -199,16 +129,15 @@ overlapping_tes <- unique_pirna[subjectHits(overlaps), ]
 length(overlaps)
 ```
 
-142 piRNAs overlap with both TEs and genes. 
+1391 piRNAs overlap both genes and TEs.
 
 To summarize: 
 - 5537 piRNAs in Apoc
-- 201 piRNAs overlap with some TE
-- 3179 piRNAs overlap with genes
-- 142 piRNAs overlap with both TE and genes 
-- 201+3179+142 = 3522 piRNAs overlapping TEs, genes or both 
-
-This equals about ~63% of the piRNAs. The rest are in intergenic space (could be in other elements but these are unannotated). Much less unique piRNAs in Apoc than in Ahya. 
+- 1184 piRNAs overlap with only TEs (2575 - 1391 = 1184)
+- 1788 piRNAs overlap with only genes (3179 - 1391 = 1788)
+- 1391 piRNAs overlap with both TE and genes 
+- 1184+1788+1391 = 4363 piRNAs overlapping TEs, genes or both 
+- 1174 piRNAs in intergenic space (5537 - 4363 = 1174)
 
 ## Nvec 
 
@@ -342,6 +271,10 @@ To summarize:
 Read in piRNA TE overlap 
 ```{r}
 pirna_bed <- read.table("../output/piRNAs/ahya/Ahya_piRNAs_TEs_repeats_intersect.txt")
+
+# Isolate repeat type 
+pirna_bed <- pirna_bed %>%
+  mutate(repeat_type = str_extract(V13, "(?<=Motif:)[^ ]+"))
 ```
 
 Calculate number of unique piRNAs (unique genomic intervals in V1:V3)
@@ -351,38 +284,49 @@ unique_pirna <- pirna_bed %>%
 
 num_unique_piRNAs <- nrow(unique_pirna)
 ```
+285871 piRNAs overlap with TEs 
 
-Look at repeats and piRNA overlap 
+Read in repeat out file 
+```{r}
+repeat_map <- read.table("../output/piRNAs/ahya/Ahyacinthus.chrsV1.fasta.out", header = F, skip = 3, fill = T)
+
+# Assign proper column names
+colnames(repeat_map) <- c(
+  "SW_score", "perc_div", "perc_del", "perc_ins", 
+  "query_seq", "pos_begin", "pos_end", "pos_left", 
+  "strand", "Repeat_Family", "Repeat_Class", 
+  "rep_begin", "rep_end", "rep_left", "ID"
+)
+
+# Keep only the distinct names 
+rep_lookup <- repeat_map %>%
+  dplyr::select(Repeat_Family, Repeat_Class) %>%
+  distinct()
+```
+
+Merge the intersection file and the repeat look up file 
 ```{r}
 pirna_summary <- pirna_bed %>%
   mutate(piRNA_ID = paste(V1, V2, V3, sep = "_")) %>%
-  mutate(Repeat_Family = str_extract(V12, "(?<=genus:)[^|;]+")) %>%
-  distinct(piRNA_ID, Repeat_Family, .keep_all = TRUE) %>%
-  mutate(Repeat_Group = substr(Repeat_Family, 1, 4))
-
-total_unique_pirnas <- n_distinct(pirna_summary$piRNA_ID)
-cat("Total unique piRNAs overlapping repeats:", total_unique_pirnas, "\n")
-
-# Count piRNAs per repeat type/family
-repeat_counts <- pirna_summary %>%
-  count(Repeat_Group, sort = TRUE, name = "piRNA_Count") %>%
-  mutate(Species = "Acropora hyacinthus")
+  left_join(rep_lookup, by = c("repeat_type" = "Repeat_Family")) %>%
+  distinct(piRNA_ID, repeat_type, .keep_all = TRUE)
 ```
 
-Summarize repeat data further 
+Reassign repeat names 
 ```{r}
-# Clean up messy names 
-ahya_repeat_counts <- repeat_counts %>%
+ahya_repeat_counts <- pirna_summary %>%
+  count(Repeat_Class, name = "piRNA_Count") %>%
   mutate(
+    Species = "Acropora hyacinthus",
     Clean_Group = case_when(
-      startsWith(Repeat_Group, "DNA") ~ "DNA Transposon",
-      startsWith(Repeat_Group, "LTR") ~ "LTR Retrotransposon",
-      startsWith(Repeat_Group, "LINE") ~ "LINE",
-      startsWith(Repeat_Group, "Unkn") ~ "Unknown",
-      startsWith(Repeat_Group, "Simp") ~ "Simple Repeat",
-      startsWith(Repeat_Group, "Low")  ~ "Low Complexity",
-      startsWith(Repeat_Group, "RC")   ~ "Rolling Circle (Helitron)",
-      TRUE ~ "Other")) %>%
+      str_detect(Repeat_Class, "^DNA|^RC")                          ~ "DNA Transposon",
+      str_detect(Repeat_Class, "^LTR")                              ~ "LTR Retrotransposon",
+      str_detect(Repeat_Class, "^LINE")                             ~ "LINE",
+      str_detect(Repeat_Class, "^SINE")                             ~ "SINE",
+      Repeat_Class %in% c("tRNA", "rRNA", "snRNA")                  ~ "ncRNA",
+      Repeat_Class %in% c("Simple_repeat", "Low_complexity")        ~ "Simple / Low Complexity",
+      Repeat_Class == "Unknown" | is.na(Repeat_Class)              ~ "Unknown",
+      TRUE                                                          ~ "Other")) %>%
   group_by(Species, Clean_Group) %>%
   summarise(piRNA_Count = sum(piRNA_Count), .groups = "drop")
 ```
@@ -413,6 +357,7 @@ unique_gene <- pirna_gene %>%
 
 num_unique_gene <- nrow(unique_gene)
 ```
+119663 piRNAs overlap with genes 
 
 Is there overlap between the piRNAs overlapping genes v. TEs?
 ```{r}
@@ -434,21 +379,21 @@ overlapping_tes <- unique_pirna[subjectHits(overlaps), ]
 length(overlaps)
 ```
 
-72962 piRNAs overlap with both TEs and genes. 
+84075 piRNAs overlap with both TEs and genes. 
 
 To summarize: 
 - 364493 piRNAs in Ahya
-- 193004 piRNAs overlap with some TE (265966 - 72962 = 193004)
-- 46701 piRNAs overlap with genes (119663 - 72962)
-- 72962 piRNAs overlap with both TE and genes 
-- 193004+46701+72962 = 312667 piRNAs overlapping TEs, genes or both 
-- 51826 piRNAs in intergenic space (364493 - 312667)
+- 201796 piRNAs overlap with only TE (285871 - 84075 = 201796)
+- 35588 piRNAs overlap with only genes (119663 - 84075 = 35588)
+- 84075 piRNAs overlap with both TE and genes 
+- 201796+35588+84075 = 321459 piRNAs overlapping TEs, genes or both 
+- 43034 piRNAs in intergenic space (364493 - 321459 = 43034)
 
 ## Species comparisons
 
 Plot TE overlap types across spp 
 ```{r}
-all_repeat <- rbind(ahya_repeat_counts, nvec_repeat_counts)
+all_repeat <- rbind(ahya_repeat_counts, apoc_repeat_counts, nvec_repeat_counts)
 
 # Standardize categories across both species
 all_repeat_clean <- all_repeat %>%
@@ -512,7 +457,7 @@ pirna_repeat_overlap_spp <- ggplot(percent, aes(x = Species, y = Percent, fill =
   geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = TRUE)) +
   #scale_fill_brewer(palette = "Demuth", direction = -1) +
   #scale_fill_viridis_d(option = "turbo", direction = -1) +
-  scale_fill_manual(values = botanical_greens) +
+  scale_fill_manual(values = botanical_greens, name = "Repetitive Element") +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(0, 100, by = 10),
@@ -543,8 +488,8 @@ Plot percent of piRNAs overlapping with TEs, genes, both or intergenic regions
 percent <- data.frame(
   Species = rep(c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis"), each = 4),
   Element = rep(c("TEs only", "Genes only", "Both", "Intergenic"), times = 3),
-  Count = c(193004, 46701, 72962, 51826, 
-            59, 3037, 142, 2299,
+  Count = c(201796, 35588, 84075, 43034, 
+            1184, 1788, 1391, 1174,
             8176, 7484, 5479, 9332))
 
 # Calculate percentages within each species
@@ -553,18 +498,13 @@ percent <- percent %>%
   mutate(Percent = Count / sum(Count) * 100) %>%
   ungroup()
 
-# Calculate total counts per species for labels
-totals <- percent %>%
-  group_by(Species) %>%
-  summarize(Total = sum(Count))
-
 # Ensure the order of factors is correct
 percent$Element <- factor(percent$Element, 
                                 levels = c("Intergenic", "Genes only", "Both", "TEs only"))
 
 pirna_overlap_spp <- ggplot(percent, aes(x = Species, y = Percent, fill = Element)) +
   geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = T)) +
-  scale_fill_brewer(palette = "Greens", direction = -1) +
+  scale_fill_brewer(palette = "Greens", direction = -1, name = "Genomic Element") +
   scale_y_continuous(
         expand = c(0, 0),
         breaks = seq(0, 100, by = 10),
@@ -588,8 +528,272 @@ ggsave("../output/piRNAs/cross-species/piRNA_overlaps.png",
        pirna_overlap_spp, width = 10, height = 6, units = "in", dpi = 600, bg = "white")
 ```
 
+## Ping pong signatures for piRNAs 
 
+Set custom plot theme
+```{r}
+theme_custom <- theme_classic(base_size = 9) +
+  theme(
+    text = element_text(family = "sans"),
+    axis.text = element_text(color = "black", size = 20),
+    axis.title = element_text(size = 22, face = "bold"),
+    strip.text = element_text(face = "bold", size = 20),
+    plot.title = element_text(face = "italic", size = 24, hjust = 0.5),
+    #panel.border = element_rect(color = "grey60", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    #panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 10),
+    legend.key.size = unit(0.4, "cm"))
+    #plot.margin = margin(2,2,2,2))
+```
 
+### Nvec 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_nvec <- read.csv("../output/piRNAs/nvec/piRNA_pingpong_nvec.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_nvec <- pp_nvec %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_nvec <- summary_data_nvec %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_nvec <- mean(
+  5.42328080965236, # nvec 1
+  8.81178350311666, # nvec 2
+  13.099921789492, # nvec 3
+  10.001391045776 # nvec 4
+)
+print(zscore_nvec)
+```
+
+Plot
+```{r}
+overlap_plot_nvec <- ggplot(summary_data_filt_nvec, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Nematostella vectensis") +
+  geom_label(
+    aes(x = 12, y = 55, label = "Z-score = 5.42"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 6) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 80, by = 10),
+        limits = c(0, 80)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+  theme_custom; overlap_plot_nvec
+
+ggsave("../output/piRNAs/nvec/ping_pong_10nt_overlap_nvec.pdf",
+       overlap_plot_nvec, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/nvec/ping_pong_10nt_overlap_nvec.png",
+       overlap_plot_nvec, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+
+### Apoc 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_apoc <- read.csv("../output/piRNAs/apoc/piRNA_pingpong_apoc.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_apoc <- pp_apoc %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_apoc <- summary_data_apoc %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_apoc <- mean(
+  11.8021967062251, # apoc 2
+  35.5967468197136, # apoc 3
+  8.86279373084146 # apoc 4
+)
+print(zscore_apoc)
+```
+
+Plot
+```{r}
+overlap_plot_apoc <- ggplot(summary_data_filt_nvec, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Astrangia poculata") +
+  geom_label(
+    aes(x = 12, y = 55, label = "Z-score = 11.80"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 6) +
+  scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 80, by = 10),
+        limits = c(0, 80)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+    theme_custom +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank()); overlap_plot_apoc
+
+ggsave("../output/piRNAs/apoc/ping_pong_10nt_overlap_apoc.pdf",
+       overlap_plot_apoc, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/apoc/ping_pong_10nt_overlap_apoc.png",
+       overlap_plot_apoc, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+
+### Ahya 
+
+Ping pong signatures - overlap at position 10 
+
+Read in data 
+```{r}
+pp_ahya <- read.csv("../output/piRNAs/ahya/piRNA_pingpong_ahya.csv")
+```
+
+Calculate mean and se per overlap across reps
+```{r}
+summary_data_ahya <- pp_ahya %>%
+  group_by(overlap_bp) %>%
+  summarise(
+    mean_read_pairs = mean(read_pairs, na.rm = TRUE),
+    sd_read_pairs = sd(read_pairs, na.rm = TRUE),
+    n = sum(!is.na(read_pairs)),  # count non-NA values per group
+    sem_read_pairs = sd_read_pairs / sqrt(n))
+```
+
+Filter so we only plot up to 20bp
+```{r}
+summary_data_filt_ahya <- summary_data_ahya %>%
+  filter(overlap_bp <= 20)
+```
+
+Average z-scores across the reps
+```{r}
+zscore_ahya <- mean(
+  8.31329382842131, # ahya 1
+  2.13223121260409, # ahya 2
+  30.923292527817, # ahya 3
+  7.64386102569554 # ahya 4
+)
+print(zscore_ahya)
+```
+
+Plot
+```{r}
+overlap_plot_ahya <- ggplot(summary_data_filt_ahya, aes(x = overlap_bp, y = mean_read_pairs)) +
+  geom_col(fill = "forestgreen", color = "black", width = 0.7) +  # black outline and narrower bars
+  geom_errorbar(aes(ymin = mean_read_pairs - sem_read_pairs,
+                    ymax = mean_read_pairs + sem_read_pairs),
+                width = 0.2) +
+  labs(x = "5' Overlap (nt)", y = "Read pairs score", title = "Acropora hyacinthus") +
+  geom_label(
+    aes(x = 12, y = 250000, label = "Z-score = 8.31"),
+    fill = "white",       # background color of the box
+    color = "black",      # text color
+    label.size = 0.5,     # thickness of the box border
+    fontface = "plain",
+    hjust = 0,
+    vjust = 0,
+    size = 6) +
+   scale_y_continuous(
+         expand = c(0, 0)) +
+  scale_x_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 20, by = 1),
+        limits = c(0, 20.5)) +
+  theme_custom +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank()); overlap_plot_ahya
+
+ggsave("../output/piRNAs/ahya/ping_pong_10nt_overlap_ahya.pdf",
+       overlap_plot_ahya, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/ahya/ping_pong_10nt_overlap_ahya.png",
+       overlap_plot_ahya, width = 6, height = 4, units = "in", dpi = 600, bg = "white")
+```
+
+## Plot all piRNA things 
+
+```{r}
+# Left col - ping pong signatures 
+left_col <- plot_grid(
+  overlap_plot_ahya, 
+  overlap_plot_apoc, 
+  overlap_plot_nvec, 
+  ncol = 1, 
+  align = "v",
+  labels = c("A", "B", "C"), 
+  label_size = 22
+)
+
+# Right col - repeat overlap and genomic overlap 
+right_col <- plot_grid(
+  pirna_repeat_overlap_spp, 
+  pirna_overlap_spp, 
+  ncol = 1, 
+  align = "v",
+  labels = c("D", "E"), 
+  label_size = 22,
+  rel_heights = c(1, 1) # Adjust height ratio if one needs more space
+)
+
+# Combine cols
+full_figure <- plot_grid(
+  left_col, 
+  right_col, 
+  ncol = 2, 
+  rel_widths = c(0.8, 1.2)); full_figure
+
+ggsave("../output/piRNAs/cross-species/piRNA_features.pdf",
+       full_figure, width = 20, height = 16, units = "in", dpi = 600, bg = "white")
+ggsave("../output/piRNAs/cross-species/piRNA_features.png",
+       full_figure, width = 20, height = 16, units = "in", dpi = 600, bg = "white")
+```
 
 
 

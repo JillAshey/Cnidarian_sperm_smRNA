@@ -22,6 +22,7 @@ library(topGO)
 library(eulerr)
 library(rrvgo)
 library(cowplot)
+library(ggtext)
 ```
 
 ## Generate gene2go files 
@@ -395,13 +396,16 @@ cat("Apoc targets with homologs:", sum(upset_targets$species == "Apoc"),
 Other ways to visualize
 ```{r}
 ## Proportional venn diagram
-nvec_og <- which(upset_data$Nvec == 1)
-ahya_og <- which(upset_data$Ahya == 1)
-apoc_og <- which(upset_data$Apoc == 1)
+nvec_og <- which(upset_targets$Nvec == 1)
+ahya_og <- which(upset_targets$Ahya == 1)
+apoc_og <- which(upset_targets$Apoc == 1)
 
 fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
-prop_venn <- plot(fit_og, quantities = TRUE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6),
-     labels = list(fontsize = 12, fontface = "bold")); prop_venn
+prop_venn <- plot(
+  fit_og, 
+  quantities = list(cex = 2.5, fontface = "bold"), # Large numbers inside circles
+  labels = FALSE,
+  fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6)); prop_venn
 
 ggsave("../output/miRNA_interactions/shared/miRNA_target_proportional_venn_OGs.pdf", plot = prop_venn, width = 5, height = 6, dpi = 300)
 ggsave("../output/miRNA_interactions/shared/miRNA_target_proportional_venn_OGs.png", plot = prop_venn, width = 5, height = 6, dpi = 300)
@@ -410,9 +414,9 @@ ggsave("../output/miRNA_interactions/shared/miRNA_target_proportional_venn_OGs.p
 Identify shared OGs
 ```{r}
 # Identify the OGs shared by all three
-shared_OGs <- upset_data$OG[upset_data$Nvec == 1 & 
-                            upset_data$Ahya == 1 & 
-                            upset_data$Apoc == 1]
+shared_OGs <- upset_targets$OG[upset_targets$Nvec == 1 & 
+                            upset_targets$Ahya == 1 & 
+                            upset_targets$Apoc == 1]
 
 # These are your "Core Sperm Orthogroups"
 length(shared_OGs)
@@ -557,11 +561,14 @@ apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
   left_join(apoc_annot, by = c("Genes" = "V1")) %>%
   dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
   dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+
+length(unique(apoc_GO_annotated$Genes))
 ```
 
 Save as csv 
 ```{r}
 write.csv(apoc_GO_annotated, "../output/miRNA_interactions/apoc/apoc_shared_miRNA_targets.csv")
+apoc_GO_annotated <- read.csv("../output/miRNA_interactions/apoc/apoc_shared_miRNA_targets.csv")
 ```
 
 ### Nvec - shared between all three spp 
@@ -685,11 +692,14 @@ nvec_GO_annotated <- GO_NVEC_all_spp_En_sig %>%
   left_join(nvec_annot, by = c("Genes" = "V1")) %>%
   dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
   dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+
+length(unique(nvec_GO_annotated$Genes))
 ```
 
 Save as csv 
 ```{r}
 write.csv(nvec_GO_annotated, "../output/miRNA_interactions/nvec/nvec_shared_miRNA_targets.csv")
+nvec_GO_annotated <- read.csv("../output/miRNA_interactions/nvec/nvec_shared_miRNA_targets.csv")
 ```
 
 ### Ahya - shared between all three spp 
@@ -820,11 +830,14 @@ ahya_GO_annotated <- ahya_go_unrolled %>%
   left_join(ahya_annot, by = c("Genes" = "V1")) %>%
   dplyr::select(GO.ID, Term, Annotated, Significant, Expected, Fisher, Genes, ontology, V16, V17) %>%
   dplyr::rename("Protein" = "V16", "Protein_abbrv" = "V17")
+
+length(unique(ahya_GO_annotated$Genes))
 ```
 
 Save as csv 
 ```{r}
 write.csv(ahya_GO_annotated, "../output/miRNA_interactions/ahya/ahya_shared_miRNA_targets.csv")
+ahya_GO_annotated <- read.csv("../output/miRNA_interactions/ahya/ahya_shared_miRNA_targets.csv")
 ```
 
 ### Enriched terms for miRNA target homologs in all 3 spp 
@@ -852,7 +865,7 @@ shared_ids
 
 # Shared proteins across all three 
 shared_prot <- purrr::reduce(
-  list(ahya$Protein_abbrv, apoc$Protein_abbrv, nvec$Protein_abbrv),
+  list(ahya$Protein, apoc$Protein, nvec$Protein),
   intersect)
 shared_prot
 ```
@@ -870,7 +883,7 @@ length(unique(go_shared$GO.ID))
 Plot! 
 ```{r}
 shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = species)) +
-  geom_point(size = 10, shape = 21, color = "black") + 
+  geom_point(size = 12, shape = 21, color = "black", stroke = 0.8) + 
   scale_fill_manual(
     name = "Species",
     values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
@@ -878,29 +891,46 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
                "Apoc" = "Astrangia poculata", 
                "Nvec" = "Nematostella vectensis")
   ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 55)) +
   facet_wrap(~ontology, scales = "free_y", ncol = 1) +
   xlab("") +
   ylab("Enrichment Significance (-log P)") +
   coord_flip() +
-  theme_bw() +
+  theme_bw(base_size = 20) +
   theme(
-    axis.text = element_text(color = "black", size = 28),
-    axis.title = element_text(size = 29, face = "bold"),
-    strip.text = element_text(face = "bold", size = 29),
+    axis.text.y = element_text(color = "black", size = 22),
+    axis.text.x = element_text(color = "black", size = 24),
+    axis.title = element_text(size = 26, face = "bold"),
+    strip.text = element_text(face = "bold", size = 28),
     legend.text = element_text(face = "italic", size = 24),
-    legend.title = element_text(face = "bold", size = 25),
-    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_enrich
+    legend.title = element_text(face = "bold", size = 26),
+    legend.key.size = unit(1.2, "cm"),
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)); shared_enrich
 
 ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_GO_shared_OGs.pdf", plot = shared_enrich, width = 20, height = 15, dpi = 300)
 ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_GO_shared_OGs.png", plot = shared_enrich, width = 20, height = 15, dpi = 300)
 ```
 
+Combine venn plot and enrichment plot 
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.5, 1.6));combined_plot
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_shared_OGs.pdf", plot = combined_plot, width = 20, height = 27, dpi = 600)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_shared_OGs.png", plot = combined_plot, width = 20, height = 27, dpi = 600)
+```
+
 Filter by shared proteins  
 ```{r}
 # Filter to shared prots
-prot_shared <- go_all %>%
-  filter(Protein_abbrv %in% shared_prot)
-length(unique(prot_shared$Protein_abbrv))
+prot_shared <- go_shared %>%
+  filter(Protein %in% shared_prot)
+length(unique(prot_shared$Protein))
 ```
 
 Plot! 
@@ -931,36 +961,90 @@ ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_protein_shared
 ggsave("../output/miRNA_interactions/shared/miRNA_target_enriched_protein_shared_OGs.png", plot = shared_prot_plot, width = 20, height = 25, dpi = 300)
 ```
 
-Use rrvgo to summarize terms for Apoc genes in unique orthogroups 
+Try some other plots 
 ```{r}
-# 1. Prepare your data
-# We need the GO IDs and the p-values (Fisher)
-go_ids <- go_all$GO.ID
-score_vector <- as.numeric(go_all$Fisher)
-names(score_vector) <- go_all$GO.ID
+prot_shared_clean <- prot_shared %>%
+  filter(!is.na(Protein) & Protein != "") %>%
+  mutate(
+    Protein_Clean = sub(" \\(.*", "", Protein),
+    Protein_Short = str_trunc(Protein_Clean, width = 28, side = "right"),
+    Term_Short = str_trunc(Term, width = 40, side = "right"),
+    # Set levels with newline break for 2-line strip headers
+    species = factor(species, 
+                     levels = c("Ahya", "Apoc", "Nvec"),
+                     labels = c("Acropora\nhyacinthus", 
+                                "Astrangia\npoculata", 
+                                "Nematostella\nvectensis")),
+    log_p = -log(Fisher))
 
-# 2. Calculate the similarity matrix
-# Use "org.Ce.eg.db" (Nematode) or "org.Hs.eg.db" if no coral-specific DB is available
-simMatrix <- calculateSimMatrix(go_ids,
-                                orgdb="org.Ce.eg.db", 
-                                ont="BP", 
-                                method="Rel")
-score_vector <- score_vector[rownames(simMatrix)]
+spp_colors <- c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")
 
-# 3. Reduce redundancy
-# The threshold (0.7) determines how much to "collapse" similar terms
-reducedTerms <- reduceSimMatrix(simMatrix,
-                                score_vector,
-                                threshold=0.85,
-                                orgdb="org.Ce.eg.db")
-
-# 4. Visualizing the "Semantic Space"
-#scatterPlot(simMatrix, reducedTerms)
-treemapPlot(reducedTerms)
-
-#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.pdf", plot = last_plot(), width = 10, height = 6, dpi = 300)
-#ggsave("../output/miRNA_interactions/apoc/apoc_unique_miRNA_target_semsim.png", plot = last_plot(), width = 10, height = 6, dpi = 300)
+# Plot! 
+shared_enrich <- ggplot(prot_shared_clean, aes(x = "", y = Protein_Short, fill = species, alpha = log_p)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  scale_fill_manual(
+    name = "Species",
+    values = c("Acropora\nhyacinthus" = "#E69F00", 
+               "Astrangia\npoculata" = "#56B4E9", 
+               "Nematostella\nvectensis" = "#009E73"),
+    labels = c("Acropora\nhyacinthus" = "*Acropora hyacinthus*", 
+               "Astrangia\npoculata" = "*Astrangia poculata*", 
+               "Nematostella\nvectensis" = "*Nematostella vectensis*")
+  ) +
+  scale_alpha_continuous(
+    name = "-log(P-value)",
+    range = c(0.35, 1.0)
+  ) +
+  facet_grid(Term_Short ~ species, scales = "free_y", space = "free_y") +
+  xlab("") +
+  ylab("Protein Name") +
+  theme_bw(base_size = 20) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank(),
+    panel.spacing = unit(0.2, "lines"),
+    
+    # Facet Headers
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 20, face = "bold"),
+    strip.text.x = element_text(size = 22, face = "bold.italic"),
+    strip.background = element_rect(fill = "grey92", color = NA),
+    
+    # Typography
+    axis.text.y = element_text(color = "black", size = 18),
+    axis.title = element_text(size = 26, face = "bold"),
+    
+    # Legend Alignment & Styling
+    legend.text = element_markdown(size = 24), 
+    legend.title = element_text(face = "bold", size = 26, hjust = 0),
+    legend.key.size = unit(1.2, "cm"),
+    
+    # Force strict left alignment across both legends
+    legend.box = "vertical",
+    legend.box.just = "left",        # Aligns both legend blocks to the left
+    legend.position = "right",
+    legend.justification = c(0, 1),  # Pins legend box top-left within the margin
+    legend.spacing.y = unit(0.8, "cm"),
+    
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)
+  ); shared_enrich
 ```
+
+Combine with venn plot and save 
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.5, 1.6)
+); combined_plot
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_shared_OGs.pdf", plot = combined_plot, width = 24, height = 27, dpi = 600)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_shared_OGs.png", plot = combined_plot, width = 24, height = 27, dpi = 600)
+```
+
 
 ## Functional enrichment of miRNA targets that are species-specific 
 
@@ -2260,8 +2344,8 @@ shared_enrich <- ggplot(go_shared, aes(x = Term, y = -log(Fisher), fill = specie
     legend.key.size = unit(1.2, "cm"),
     plot.margin = margin(t = 15, r = 20, b = 15, l = 20)); shared_enrich
 
-ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 17, dpi = 300)
-ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 15, height = 17, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.pdf", plot = shared_enrich, width = 15, height = 17, dpi = 600)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_functions_shared_OGs.png", plot = shared_enrich, width = 15, height = 17, dpi = 600)
 ```
 
 Combine venn plot and enrichment plot 

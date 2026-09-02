@@ -1,0 +1,117 @@
+---
+title: "Tree"
+author: "Jill Ashey"
+date: "2026-08-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggtree)
+library(ape)
+```
+
+```{r}
+tree <- read.tree("../data/phyliptree.phy")
+
+tree$tip.label <- str_remove_all(tree$tip.label, "'")
+
+ggtree(tree) + 
+  geom_tiplab() +
+  theme_tree2()
+
+tree <- read.delim("../data/ncbi_datasets.tsv")
+```
+
+```{r}
+library(dplyr)
+library(ape)
+library(ggtree)
+library(ggplot2)
+
+# 1. Prepare taxonomic path from your dataframe
+# Ordering levels from broad (Phylum) down to Species
+tax_df <- tree %>%
+  select(Phylum.name, Class.name, Order.name, Family.name, Genus.name, Tax.name) %>%
+  distinct() %>%
+  mutate(across(everything(), as.factor))
+
+# Convert taxonomy table to a phylo tree structure using ape
+tax_formula <- ~Phylum.name/Class.name/Order.name/Family.name/Genus.name/Tax.name
+phylo_tree <- as.phylo(tax_formula, data = tax_df, shrink = TRUE)
+
+# Set equal branch lengths for a clean cladogram aesthetic
+phylo_tree$edge.length <- rep(1, nrow(phylo_tree$edge))
+
+# 2. Visualize with ggtree
+p <- ggtree(phylo_tree, branch.length = "none", size = 1) +
+  geom_tiplab(aes(label = paste0("  ", label)), fontface = "italic", offset = 0.1) +
+  theme_tree2() +
+  scale_x_continuous(expand = expansion(mult = c(0.1, 0.4))); p
+
+# 3. Add node annotations to highlight Bilaterian/Cnidarian divergence and Anthozoa/Scleractinia
+p + 
+  # Highlight the Cnidaria clade
+  geom_hilight(node = MRCA(phylo_tree, "Acropora hyacinthus", "Nematostella vectensis"), 
+               fill = "steelblue", alpha = 0.15) +
+  # Add clade markers for key taxonomic nodes
+  geom_cladelab(node = MRCA(phylo_tree, "Acropora hyacinthus", "Nematostella vectensis"), 
+                label = "Cnidaria (Anthozoa)", align = TRUE, offset = 1.2, barcolor = "steelblue") +
+  geom_cladelab(node = MRCA(phylo_tree, "Acropora hyacinthus", "Astrangia poculata"), 
+                label = "Scleractinia", align = TRUE, offset = 0.8, barcolor = "darkorange") +
+  geom_cladelab(node = nodeid(phylo_tree, "Homo sapiens"), 
+                label = "Bilateria (Chordata)", align = TRUE, offset = 1.2, barcolor = "darkgreen")
+```
+
+```{r}
+library(dplyr)
+library(ape)
+library(ggtree)
+library(ggplot2)
+
+# 1. Prepare taxonomic dataframe
+tax_df <- tree %>%
+  select(Phylum.name, Class.name, Order.name, Family.name, Genus.name, Tax.name) %>%
+  distinct() %>%
+  mutate(across(everything(), as.factor))
+
+# 2. Build phylo tree
+tax_formula <- ~Phylum.name/Class.name/Order.name/Family.name/Genus.name/Tax.name
+phylo_tree <- as.phylo(tax_formula, data = tax_df, shrink = TRUE)
+phylo_tree$edge.length <- rep(1, nrow(phylo_tree$edge))
+
+# 3. Base plot with expanded x-axis limits to prevent text truncation
+p <- ggtree(phylo_tree, branch.length = "none", size = 1) +
+  geom_tiplab(aes(label = paste0("  ", label)), fontface = "italic", offset = 0.05) +
+  scale_x_continuous(limits = c(0, 6.5)) +
+  theme_tree();p
+
+# 4. Find internal nodes dynamically
+cnidaria_node    <- MRCA(phylo_tree, "Acropora hyacinthus", "Nematostella vectensis")
+scleractinia_node <- MRCA(phylo_tree, "Acropora hyacinthus", "Astrangia poculata")
+human_node       <- nodeid(phylo_tree, "Homo sapiens")
+
+# 5. Add clean annotations, staggered clade bars, and node labels
+p + 
+  # Shaded highlight box over Cnidaria
+  geom_hilight(node = cnidaria_node, fill = "steelblue", alpha = 0.12) +
+  
+  # Inner Clade Bar: Scleractinia
+  geom_cladelab(node = scleractinia_node, label = "Scleractinia", 
+                align = TRUE, offset = 1.3, barcolor = "#E69F00", 
+                barsize = 1.2, textcolor = "#E69F00", fontsize = 4.5) +
+                
+  # Outer Clade Bar: Cnidaria (Anthozoa)
+  geom_cladelab(node = cnidaria_node, label = "Cnidaria (Anthozoa)", 
+                align = TRUE, offset = 2.3, barcolor = "steelblue", 
+                barsize = 1.2, textcolor = "steelblue", fontsize = 4.5) +
+                
+  # Label for Bilateria (Chordata)
+  geom_cladelab(node = human_node, label = "Bilateria (Chordata)", 
+                align = TRUE, offset = 2.3, barcolor = "darkgreen", 
+                barsize = 1.2, textcolor = "darkgreen", fontsize = 4.5)
+```
+
+
