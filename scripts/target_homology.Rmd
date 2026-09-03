@@ -1962,7 +1962,6 @@ fit_og <- euler(list(Nvec = nvec_og, Ahya = ahya_og, Apoc = apoc_og))
 prop_venn <- plot(fit_og, quantities = TRUE, labels = FALSE, fills = list(fill = c("#009E73", "#E69F00", "#56B4E9"), alpha = 0.6)); prop_venn
      #labels = list(fontsize = 12, fontface = "bold")); prop_venn
 
-
 prop_venn <- plot(
   fit_og, 
   quantities = list(cex = 2.5, fontface = "bold"), # Large numbers inside circles
@@ -2129,6 +2128,7 @@ apoc_GO_annotated <- GO_APOC_all_spp_En_sig %>%
 Save as csv 
 ```{r}
 write.csv(apoc_GO_annotated, "../output/piRNAs/apoc/apoc_shared_piRNA_overlaps.csv")
+apoc_GO_annotated <- read.csv("../output/piRNAs/apoc/apoc_shared_piRNA_overlaps.csv")
 ```
 
 ### Nvec - shared between all three spp 
@@ -2257,6 +2257,7 @@ nvec_GO_annotated <- GO_NVEC_all_spp_En_sig %>%
 Save as csv 
 ```{r}
 write.csv(nvec_GO_annotated, "../output/piRNAs/nvec/nvec_shared_piRNA_overlaps.csv")
+nvec_GO_annotated <- read.csv("../output/piRNAs/nvec/nvec_shared_piRNA_overlaps.csv")
 ```
 
 ### Ahya - shared between all three spp 
@@ -2389,6 +2390,7 @@ ahya_GO_annotated <- ahya_go_unrolled %>%
 Save as csv 
 ```{r}
 write.csv(ahya_GO_annotated, "../output/piRNAs/ahya/ahya_shared_piRNA_overlaps.csv")
+ahya_GO_annotated <- read.csv("../output/piRNAs/ahya/ahya_shared_piRNA_overlaps.csv")
 ```
 
 ### Enriched terms for piRNA overlap for all 3 spp 
@@ -2396,23 +2398,29 @@ write.csv(ahya_GO_annotated, "../output/piRNAs/ahya/ahya_shared_piRNA_overlaps.c
 Find shared enriched terms 
 ```{r}
 # Add species labels and keep only needed columns
-ahya <- GO_AHYA_all_spp_En_sig %>%
+ahya <- ahya_GO_annotated %>%
   mutate(species = "Ahya") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
-apoc <- GO_APOC_all_spp_En_sig %>%
+apoc <- apoc_GO_annotated %>%
   mutate(species = "Apoc") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
-nvec <- GO_NVEC_all_spp_En_sig %>%
+nvec <- nvec_GO_annotated %>%
   mutate(species = "Nvec") %>%
-  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology)
+  dplyr::select(species, GO.ID, Term, Fisher, Significant, ontology, Protein, Protein_abbrv)
 
 # Shared GO IDs across all three
 shared_ids <- purrr::reduce(
   list(ahya$GO.ID, apoc$GO.ID, nvec$GO.ID),
   intersect)
 shared_ids
+
+# Shared proteins across all three 
+shared_prot <- purrr::reduce(
+  list(ahya$Protein, apoc$Protein, nvec$Protein),
+  intersect)
+shared_prot
 ```
 
 Filter by shared GO terms 
@@ -2422,6 +2430,11 @@ go_all <- bind_rows(ahya, apoc, nvec)
 
 go_shared <- go_all %>%
   filter(GO.ID %in% shared_ids)
+length(unique(go_shared$GO.ID))
+length(unique(go_shared$Protein))
+
+# Save as csv 
+write.csv(go_shared, "../output/piRNAs/cross-species/piRNA_overlap_shared_enriched_functions.csv")
 ```
 
 Plot! 
@@ -2469,6 +2482,275 @@ ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_shared_OGs.pd
 ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_shared_OGs.png", plot = combined_plot, width = 20, height = 29, dpi = 300)
 ```
 
+Filter by shared proteins 
+```{r}
+# Filter to shared prots
+prot_shared <- go_shared %>%
+  filter(Protein %in% shared_prot)
+length(unique(prot_shared$Protein))
+length(unique(prot_shared$GO.ID))
+```
+
+Add protein abbreviations
+```{r}
+# Standardized short abbreviation lookup table
+protein_abbr_map <- c(
+  "Large ribosomal subunit protein uL2 (60S ribosomal protein L8)" = "RPL8",
+  "Uncharacterized protein K02A2.6" = "K02A2.6",
+  "Transcriptional regulator Erg" = "ERG",
+  "Small ribosomal subunit protein eS19 (40S ribosomal protein S19)" = "RPS19",
+  "rRNA 2'-O-methyltransferase fibrillarin (EC 2.1.1.-) (Histone-glutamine methyltransferase)" = "FBL",
+  "DNA-directed RNA polymerase II subunit RPB1 (RNA polymerase II subunit B1) (EC 2.7.7.6) (DNA-directed RNA polymerase III largest subunit) (RNA polymerase II subunit A)" = "POLR2A",
+  "Retrovirus-related Pol polyprotein from transposon 17.6 [Includes: Protease (EC 3.4.23.-); Reverse transcriptase (EC 2.7.7.49); Endonuclease]" = "POL17",
+  "Transposon Ty3-I Gag-Pol polyprotein (Gag3-Pol3) (Transposon Ty3-2 TYA-TYB polyprotein) [Cleaved into: Capsid protein (CA) (p24); Spacer peptide p3; Nucleocapsid protein p11 (NC); Ty3 protease (PR) (EC 3.4.23.-) (p16); Spacer peptide J; Reverse transcriptase/ribonuclease H (RT) (RT-RH) (EC 2.7.7.49) (EC 2.7.7.7) (EC 3.1.26.4) (p55); Integrase p52 (IN); Integrase p49 (IN)]" = "Ty3B GAGPOL",
+  "52 kDa repressor of the inhibitor of the protein kinase (p52rIPK) (58 kDa interferon-induced protein kinase-interacting protein) (p58IPK-interacting protein) (Death-associated protein 4) (THAP domain-containing protein 0) (THAP domain-containing protein 12)" = "THAP12",
+  "Structural maintenance of chromosomes protein 6 (SMC protein 6) (SMC-6) (xSMC6)" = "SMC6",
+  "Transposon Tf1-107 polyprotein (EC 2.7.7.49) (EC 2.7.7.7) (EC 3.4.23.-)" = "Tf1-107",
+  "Endoplasmin (EC 3.6.4.-) (94 kDa glucose-regulated protein) (GRP-94) (Heat shock protein 90 kDa beta member 1)" = "HSP90B1",
+  "Large ribosomal subunit protein eL20 (60S ribosomal protein L18a)" = "RPL18A",
+  "Spliceosome RNA helicase Ddx39b (EC 3.6.4.13) (56 kDa U2AF65-associated protein) (ATP-dependent RNA helicase p47) (DEAD box protein Uap56)" = "DDX39B",
+  "Transposon Ty3-G Gag-Pol polyprotein (Gag3-Pol3) (Transposon Ty3-1 TYA-TYB polyprotein) [Cleaved into: Capsid protein (CA) (p24); Spacer peptide p3; Nucleocapsid protein p11 (NC); Ty3 protease (PR) (EC 3.4.23.-) (p16); Spacer peptide J; Reverse transcriptase/ribonuclease H (RT) (RT-RH) (EC 2.7.7.49) (EC 2.7.7.7) (EC 3.1.26.4) (p55); Integrase p61 (IN); Integrase p58 (IN)]" = "Ty3G GAGPOL",
+  "Small ribosomal subunit protein uS3 (EC 4.2.99.18) (40S ribosomal protein S3)" = "RPS3",
+  "UDP-N-acetylglucosamine--peptide N-acetylglucosaminyltransferase 110 kDa subunit (EC 2.4.1.255) (O-GlcNAc transferase subunit p110) (O-linked N-acetylglucosamine transferase 110 kDa subunit) (OGT)" = "OGT",
+  "THO complex subunit 2 (Tho2)" = "THOC2",
+  "Apoptosis-inducing factor 1, mitochondrial (EC 1.6.99.-) (Programmed cell death protein 8)" = "AIFM1",
+  "Lysine--tRNA ligase (EC 2.7.7.-) (EC 6.1.1.6) (Lysyl-tRNA synthetase) (LysRS)" = "KARS1",
+  "Heat shock factor protein 1 (HSF 1) (HSF 3A) (HSTF 3A) (Heat shock transcription factor 1) (HSTF 1)" = "HSF1",
+  "Retinoblastoma-like protein 1 (107 kDa retinoblastoma-associated protein) (p107) (pRb1)" = "RBL1",
+  "Polyadenylate-binding protein 4 (PABP-4) (Poly(A)-binding protein 4) (Activated-platelet protein 1) (APP-1) (Inducible poly(A)-binding protein) (iPABP)" = "PABP4",
+  "Small ribosomal subunit protein uS4 (40S ribosomal protein S9)" = "RPS9",
+  "Large ribosomal subunit protein eL18 (60S ribosomal protein L18)" = "RPL18",
+  "Protein Smaug homolog 1 (Smaug 1) (Sterile alpha motif domain-containing protein 4A)" = "SAMD4A",
+  "Histone H2A.V (H2A.F/Z)" = "H2AFV",
+  "Large ribosomal subunit protein uL10 (60S acidic ribosomal protein P0) (60S ribosomal protein L10E)" = "RPLP0",
+  "Large ribosomal subunit protein eL19 (60S ribosomal protein L19)" = "RPL19",
+  "Core histone macro-H2A.1 (Histone macroH2A1) (mH2A1) (H2A.y) (H2A/y)" = "H2AFY",
+  "Ubiquitin-ribosomal protein eL40 fusion protein (CEP52) [Cleaved into: Ubiquitin; Large ribosomal subunit protein eL40 (60S ribosomal protein L40)]" = "UBA52",
+  "Large ribosomal subunit protein eL36 (60S ribosomal protein L36)" = "RPL36",
+  "Small ribosomal subunit protein eS1 (40S ribosomal protein S3a)" = "RPS3A",
+  "Large ribosomal subunit protein eL31 (60S ribosomal protein L31)" = "RPL31",
+  "Small ribosomal subunit protein uS8 (40S ribosomal protein S15a)" = "RPS15A",
+  "Small ribosomal subunit protein uS2 (40S ribosomal protein SA)" = "RPSA",
+  "Small ribosomal subunit protein eS8 (40S ribosomal protein S8)" = "RPS8",
+  "Dynein axonemal heavy chain 11 (Axonemal beta dynein heavy chain 11) (Ciliary dynein heavy chain 11)" = "DNAH11",
+  "Glycogen synthase kinase-3 beta (GSK-3 beta) (EC 2.7.11.26) (Serine/threonine-protein kinase GSK3B) (EC 2.7.11.1)" = "GSK3B",
+  "Dynein axonemal heavy chain 6 (Axonemal beta dynein heavy chain 6) (Ciliary dynein heavy chain 6)" = "DNAH6",
+  "NLR family CARD domain-containing protein 3 (CARD15-like protein) (Caterpiller protein 16.2) (CLR16.2) (NACHT, LRR and CARD domains-containing protein 3) (Nucleotide-binding oligomerization domain protein 3)" = "NLRC3",
+  "Endoplasmic reticulum chaperone BiP (EC 3.6.4.10) (78 kDa glucose-regulated protein) (GRP-78) (Binding-immunoglobulin protein) (BiP) (Heat shock protein 70 family protein 5) (HSP70 family protein 5) (Heat shock protein family A member 5) (Immunoglobulin heavy chain-binding protein)" = "HSPA5",
+  "E3 ubiquitin-protein ligase rnf213-alpha (EC 2.3.2.27) (EC 3.6.4.-) (E3 ubiquitin-lipopolysaccharide ligase rnf213-alpha) (EC 2.3.2.-) (Mysterin-A) (Mysterin-alpha) (RING finger protein 213-A) (RING finger protein 213-alpha)" = "RNF213A",
+  "Valine--tRNA ligase (EC 6.1.1.9) (Valyl-tRNA synthetase) (ValRS)" = "VARS1",
+  "Myosin-10 (Cellular myosin heavy chain, type B) (Myosin heavy chain 10) (Myosin heavy chain, non-muscle IIb) (Non-muscle myosin heavy chain B) (NMMHC-B) (Non-muscle myosin heavy chain IIb) (NMMHC II-b) (NMMHC-IIB)" = "MYH10",
+  "Heat shock protein HSP 90-alpha 1" = "HSP90AA1",
+  "Adhesion G protein-coupled receptor V1 (EC 3.4.-.-) (G protein-coupled receptor 98) (Monogenic audiogenic seizure susceptibility protein 1 homolog) (Very large G protein-coupled receptor 1)" = "ADGRV1",
+  "Tubulin beta chain (Beta-tubulin)" = "TUBB",
+  "Tubulin alpha-1 chain (EC 3.6.5.-)" = "TUBA1A",
+  "Glucose-6-phosphate 1-dehydrogenase (G6PD) (EC 1.-.-.-) (EC 1.1.1.49)" = "G6PD",
+  "Solute carrier family 25 member 3 (Phosphate carrier protein, mitochondrial) (Phosphate transport protein) (PTP)" = "SLC25A3",
+  "Rho guanine nucleotide exchange factor 7 (Beta-Pix) (COOL-1) (PAK-interacting exchange factor beta) (p85)" = "ARHGEF7",
+  "Filamin-A (FLN-A) (Actin-binding protein 280) (ABP-280) (Alpha-filamin) (Endothelial actin-binding protein) (Filamin-1) (Non-muscle filamin)" = "FLNA",
+  "Dynein intermediate chain 2, ciliary" = "DNAI2",
+  "Centrosomal protein of 192 kDa (Cep192) (Cep192/SPD-2)" = "CEP192",
+  "Translocon-associated protein subunit alpha (TRAP-alpha) (Signal sequence receptor subunit alpha) (SSR-alpha)" = "SSR1"
+)
+
+# Add column 'Protein_Abbr' to dataframe
+prot_shared <- prot_shared %>%
+  mutate(Protein_Abbr = protein_abbr_map[Protein])
+```
+
+
+Plot! 
+```{r}
+shared_prot_plot <- ggplot(prot_shared, aes(x = Protein_abbrv, y = -log(Fisher), fill = species)) +
+  geom_point(size = 10, shape = 21, color = "black") + 
+  scale_fill_manual(
+    name = "Species",
+    values = c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73"),
+    labels = c("Ahya" = "Acropora hyacinthus", 
+               "Apoc" = "Astrangia poculata", 
+               "Nvec" = "Nematostella vectensis")
+  ) +
+  facet_wrap(~ontology, scales = "free_y", ncol = 1) +
+  xlab("") +
+  ylab("Enrichment Significance (-log P)") +
+  coord_flip() +
+  theme_bw() +
+  theme(
+    axis.text = element_text(color = "black", size = 28),
+    axis.title = element_text(size = 29, face = "bold"),
+    strip.text = element_text(face = "bold", size = 30),
+    legend.text = element_text(face = "italic", size = 20),
+    legend.title = element_text(face = "bold", size = 21),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)); shared_prot_plot
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_protein_shared_OGs.pdf", plot = shared_prot_plot, width = 20, height = 25, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_enriched_protein_shared_OGs.png", plot = shared_prot_plot, width = 20, height = 25, dpi = 300)
+```
+
+Try some other plots 
+```{r}
+prot_shared_clean <- prot_shared %>%
+  filter(!is.na(Protein) & Protein != "") %>%
+  mutate(
+    Protein_Clean = sub(" \\(.*", "", Protein),
+    Protein_Short = str_trunc(Protein_Clean, width = 28, side = "right"),
+    Term_Short = str_trunc(Term, width = 40, side = "right"),
+    species = factor(species, 
+                     levels = c("Ahya", "Apoc", "Nvec"),
+                     labels = c("Acropora\nhyacinthus", 
+                                "Astrangia\npoculata", 
+                                "Nematostella\nvectensis")),
+    log_p = -log(Fisher)) %>%
+  group_by(Term_Short) %>% 
+  filter(n_distinct(Protein_Short) > 4) %>% 
+  ungroup() %>%
+  mutate(
+    Term_Short = droplevels(factor(Term_Short)),
+    Protein_Short = droplevels(factor(Protein_Short)))
+
+spp_colors <- c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")
+
+# Plot! 
+shared_enrich <- ggplot(prot_shared_clean, aes(x = "", y = Protein_Short, fill = species, alpha = log_p)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  scale_fill_manual(
+    name = "Species",
+    values = c("Acropora\nhyacinthus" = "#E69F00", 
+               "Astrangia\npoculata" = "#56B4E9", 
+               "Nematostella\nvectensis" = "#009E73"),
+    labels = c("Acropora\nhyacinthus" = "*Acropora hyacinthus*", 
+               "Astrangia\npoculata" = "*Astrangia poculata*", 
+               "Nematostella\nvectensis" = "*Nematostella vectensis*")
+  ) +
+  scale_alpha_continuous(
+    name = "-log(P-value)",
+    range = c(0.35, 1.0)
+  ) +
+  facet_grid(Term_Short ~ species, scales = "free_y", space = "free_y") +
+  xlab("") +
+  ylab("Gene Name") +
+  theme_bw(base_size = 20) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank(),
+    panel.spacing = unit(0.2, "lines"),
+    
+    # Facet Headers
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 20, face = "bold"),
+    strip.text.x = element_text(size = 22, face = "bold.italic"),
+    strip.background = element_rect(fill = "grey92", color = NA),
+    
+    # Typography
+    axis.text.y = element_text(color = "black", size = 18),
+    axis.title = element_text(size = 26, face = "bold"),
+    
+    # Legend Alignment & Styling
+    legend.text = element_markdown(size = 24), 
+    legend.title = element_text(face = "bold", size = 26, hjust = 0),
+    legend.key.size = unit(1.2, "cm"),
+    
+    # Force strict left alignment across both legends
+    legend.box = "vertical",
+    legend.box.just = "left",        # Aligns both legend blocks to the left
+    legend.position = "right",
+    legend.justification = c(0, 1),  # Pins legend box top-left within the margin
+    legend.spacing.y = unit(0.8, "cm"),
+    
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)
+  ); shared_enrich
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlaps_enriched_GO_shared_OGs.pdf", plot = shared_enrich, width = 20, height = 25, dpi = 300)
+ggsave("../output/piRNAs/cross-species/piRNA_overlaps_enriched_GO_shared_OGs.png", plot = shared_enrich, width = 20, height = 25, dpi = 300)
+```
+
+Plot just the abbreviations
+```{r}
+shared_enrich_abbr <- ggplot(prot_shared_clean, aes(x = "", y = Protein_Abbr, fill = species, alpha = log_p)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  scale_fill_manual(
+    name = "Species",
+    values = c("Acropora\nhyacinthus" = "#E69F00", 
+               "Astrangia\npoculata" = "#56B4E9", 
+               "Nematostella\nvectensis" = "#009E73"),
+    labels = c("Acropora\nhyacinthus" = "*Acropora hyacinthus*", 
+               "Astrangia\npoculata" = "*Astrangia poculata*", 
+               "Nematostella\nvectensis" = "*Nematostella vectensis*")
+  ) +
+  scale_alpha_continuous(
+    name = "-log(P-value)",
+    range = c(0.35, 1.0)
+  ) +
+  facet_grid(Term_Short ~ species, scales = "free_y", space = "free_y") +
+  xlab("") +
+  ylab("Gene Name") +
+  theme_bw(base_size = 20) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank(),
+    panel.spacing = unit(0.2, "lines"),
+    
+    # Facet Headers
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 20, face = "bold"),
+    strip.text.x = element_text(size = 22, face = "bold.italic"),
+    strip.background = element_rect(fill = "grey92", color = NA),
+    
+    # Typography
+    axis.text.y = element_text(color = "black", size = 18),
+    axis.title = element_text(size = 26, face = "bold"),
+    
+    # Legend Alignment & Styling
+    legend.text = element_markdown(size = 24), 
+    legend.title = element_text(face = "bold", size = 26, hjust = 0),
+    legend.key.size = unit(1.2, "cm"),
+    
+    # Force strict left alignment across both legends
+    legend.box = "vertical",
+    legend.box.just = "left",        # Aligns both legend blocks to the left
+    legend.position = "right",
+    legend.justification = c(0, 1),  # Pins legend box top-left within the margin
+    legend.spacing.y = unit(0.8, "cm"),
+    
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)
+  ); shared_enrich_abbr
+```
+
+Combine with venn plot and save 
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.35, 1.65)
+); combined_plot
+
+combined_plot_buffered <- ggdraw(combined_plot) +
+  theme(plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"))
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_protein_shared_OGs.pdf", plot = combined_plot_buffered, width = 24, height = 35, dpi = 600)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_protein_shared_OGs.png", plot = combined_plot_buffered, width = 24, height = 35, dpi = 600)
+```
+
+Combine with venn plot and save -- abbreviation plot
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich_abbr, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.35, 1.65)
+); combined_plot
+
+combined_plot_buffered <- ggdraw(combined_plot) +
+  theme(plot.margin = margin(t = 20, r = 20, b = 20, l = 20, unit = "pt"))
+
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_protein_shared_OGs.pdf", plot = combined_plot_buffered, width = 24, height = 40, dpi = 600)
+ggsave("../output/piRNAs/cross-species/piRNA_overlap_venn_function_protein_shared_OGs.png", plot = combined_plot_buffered, width = 24, height = 40, dpi = 600)
+```
 
 ## Functional enrichment of genes overlapping with piRNAs that are species-specific 
 
