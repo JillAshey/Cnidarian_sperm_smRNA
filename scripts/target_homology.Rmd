@@ -931,6 +931,47 @@ Filter by shared proteins
 prot_shared <- go_shared %>%
   filter(Protein %in% shared_prot)
 length(unique(prot_shared$Protein))
+
+# Refine prot abbreviations 
+prot_shared <- prot_shared %>%
+  mutate(Protein_abbrv = case_when(
+    str_detect(Protein, "^Multiple epidermal growth") ~ "MEGF8",
+    str_detect(Protein, "^Polycystin") ~ "PKD1L2",
+    str_detect(Protein, "^Hemicentin") ~ "HMCN1",
+    str_detect(Protein, "^Mucin") ~ "MUCL1",
+    str_detect(Protein, "^Protocadherin") ~ "FAT4",
+    str_detect(Protein, "^Protocadherin") ~ "FAT4",
+    str_detect(Protein, "^Oncoprotein") ~ "OIT3",
+    str_detect(Protein, "^Sushi") ~ "SVEP1",
+    str_detect(Protein, "^TBC1") ~ "TBC1D9",
+    str_detect(Protein, "^E3 ubiquitin-protein ligase TRIM71") ~ "TRIM71",
+    str_detect(Protein, "^Receptor-type") ~ "PTPRD",
+    str_detect(Protein, "^Neuroblast") ~ "AHNAK",
+    str_detect(Protein, "^Metabotropic") ~ "GRM3",
+    str_detect(Protein, "^Dynein") ~ "DNAH11",
+    str_detect(Protein, "^ABC") ~ "ABCB1",
+    str_detect(Protein, "^Asparagine") ~ "ASNS",
+    str_detect(Protein, "^PX domain") ~ "PXK",
+    str_detect(Protein, "^Kinesin-like") ~ "UNC104",
+    str_detect(Protein, "^Probable serine") ~ "PATS1",
+    str_detect(Protein, "^Structural maintenance") ~ "SMCHD1",
+    str_detect(Protein, "^Cyclic GMP") ~ "cGLR3",
+    str_detect(Protein, "^ATP-dependent") ~ "PIF1",
+    str_detect(Protein, "^Transposon") ~ "TY3B-I",
+    str_detect(Protein, "^Progesterone") ~ "PIBF1",
+    str_detect(Protein, "^DBH-like") ~ "MOXD1",
+    str_detect(Protein, "^Protein NLRC3") ~ "NLRC3",
+    str_detect(Protein, "^Filamin") ~ "FLNA",
+    str_detect(Protein, "^Transcriptional adapter") ~ "TADA2A",
+    str_detect(Protein, "^DNA-directed") ~ "POLR1B",
+    str_detect(Protein, "^Transformation/transcription") ~ "TRRAP",
+    str_detect(Protein, "^F-box") ~ "FBXW7",
+    str_detect(Protein, "^E3 ubiquitin-protein ligase UBR5") ~ "UBR5",
+    str_detect(Protein, "^E3 ubiquitin-protein ligase rnf213") ~ "RNF213A",
+    str_detect(Protein, "^Laminin") ~ "LANA",
+    str_detect(Protein, "^Collagen") ~ "COL6A4",
+    str_detect(Protein, "^TNF receptor") ~ "TRAF6",
+    TRUE ~ NA_character_))
 ```
 
 Plot! 
@@ -997,7 +1038,7 @@ shared_enrich <- ggplot(prot_shared_clean, aes(x = "", y = Protein_Short, fill =
   ) +
   facet_grid(Term_Short ~ species, scales = "free_y", space = "free_y") +
   xlab("") +
-  ylab("Protein Name") +
+  ylab("Gene Name") +
   theme_bw(base_size = 20) +
   theme(
     axis.text.x = element_blank(),
@@ -1030,6 +1071,58 @@ shared_enrich <- ggplot(prot_shared_clean, aes(x = "", y = Protein_Short, fill =
   ); shared_enrich
 ```
 
+Plot just the abbreviations
+```{r}
+shared_enrich_abbr <- ggplot(prot_shared_clean, aes(x = "", y = Protein_abbrv, fill = species, alpha = log_p)) +
+  geom_tile(color = "white", linewidth = 0.5) +
+  scale_fill_manual(
+    name = "Species",
+    values = c("Acropora\nhyacinthus" = "#E69F00", 
+               "Astrangia\npoculata" = "#56B4E9", 
+               "Nematostella\nvectensis" = "#009E73"),
+    labels = c("Acropora\nhyacinthus" = "*Acropora hyacinthus*", 
+               "Astrangia\npoculata" = "*Astrangia poculata*", 
+               "Nematostella\nvectensis" = "*Nematostella vectensis*")
+  ) +
+  scale_alpha_continuous(
+    name = "-log(P-value)",
+    range = c(0.35, 1.0)
+  ) +
+  facet_grid(Term_Short ~ species, scales = "free_y", space = "free_y") +
+  xlab("") +
+  ylab("Gene Name") +
+  theme_bw(base_size = 20) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank(),
+    panel.spacing = unit(0.2, "lines"),
+    
+    # Facet Headers
+    strip.text.y = element_text(angle = 0, hjust = 0, size = 20, face = "bold"),
+    strip.text.x = element_text(size = 22, face = "bold.italic"),
+    strip.background = element_rect(fill = "grey92", color = NA),
+    
+    # Typography
+    axis.text.y = element_text(color = "black", size = 18),
+    axis.title = element_text(size = 26, face = "bold"),
+    
+    # Legend Alignment & Styling
+    legend.text = element_markdown(size = 24), 
+    legend.title = element_text(face = "bold", size = 26, hjust = 0),
+    legend.key.size = unit(1.2, "cm"),
+    
+    # Force strict left alignment across both legends
+    legend.box = "vertical",
+    legend.box.just = "left",        # Aligns both legend blocks to the left
+    legend.position = "right",
+    legend.justification = c(0, 1),  # Pins legend box top-left within the margin
+    legend.spacing.y = unit(0.8, "cm"),
+    
+    plot.margin = margin(t = 15, r = 20, b = 15, l = 20)
+  ); shared_enrich_abbr
+```
+
 Combine with venn plot and save 
 ```{r}
 combined_plot <- plot_grid(
@@ -1045,6 +1138,20 @@ ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_s
 ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_shared_OGs.png", plot = combined_plot, width = 24, height = 27, dpi = 600)
 ```
 
+Combine with venn plot and save -- abbreviation plot
+```{r}
+combined_plot <- plot_grid(
+  prop_venn, 
+  shared_enrich_abbr, 
+  nrow = 2, 
+  labels = c("A", "B"), 
+  label_size = 40,
+  rel_heights = c(0.5, 1.6)
+); combined_plot
+
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_abbr_shared_OGs.pdf", plot = combined_plot, width = 24, height = 27, dpi = 600)
+ggsave("../output/miRNA_interactions/shared/miRNA_target_venn_function_protein_abbr_shared_OGs.png", plot = combined_plot, width = 24, height = 27, dpi = 600)
+```
 
 ## Functional enrichment of miRNA targets that are species-specific 
 

@@ -6,3 +6,7 @@
 
 output/piRNAs/ahya/Ahya_piRNAs_TEs_repeats_intersect.txt
 .RDataTmp1
+output/piRNAs/apoc/apoculata.genome.fasta.out
+output/piRNAs/apoc/Apoc_piRNAs_TEs_repeats_intersect.txt
+output/piRNAs/ahya/Ahyacinthus.chrsV1.fasta.out
+output/piRNAs/ahya/Ahya_piRNAs_TEs_repeats_intersect_OGgff.txt
