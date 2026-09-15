@@ -878,6 +878,10 @@ go_all <- bind_rows(ahya, apoc, nvec)
 go_shared <- go_all %>%
   filter(GO.ID %in% shared_ids)
 length(unique(go_shared$GO.ID))
+length(unique(go_shared$Protein))
+
+# Save as csv 
+write.csv(go_shared, "../output/miRNA_interactions/shared/miRNA_target_shared_enriched_functions.csv")
 ```
 
 Plot! 
@@ -931,6 +935,7 @@ Filter by shared proteins
 prot_shared <- go_shared %>%
   filter(Protein %in% shared_prot)
 length(unique(prot_shared$Protein))
+length(unique(prot_shared$GO.ID))
 
 # Refine prot abbreviations 
 prot_shared <- prot_shared %>%
@@ -1010,13 +1015,18 @@ prot_shared_clean <- prot_shared %>%
     Protein_Clean = sub(" \\(.*", "", Protein),
     Protein_Short = str_trunc(Protein_Clean, width = 28, side = "right"),
     Term_Short = str_trunc(Term, width = 40, side = "right"),
-    # Set levels with newline break for 2-line strip headers
     species = factor(species, 
                      levels = c("Ahya", "Apoc", "Nvec"),
                      labels = c("Acropora\nhyacinthus", 
                                 "Astrangia\npoculata", 
                                 "Nematostella\nvectensis")),
-    log_p = -log(Fisher))
+    log_p = -log(Fisher)) %>%
+  group_by(Term_Short) %>% 
+  filter(n_distinct(Protein_Short) > 1) %>% 
+  ungroup() %>%
+  mutate(
+    Term_Short = droplevels(factor(Term_Short)),
+    Protein_Short = droplevels(factor(Protein_Short)))
 
 spp_colors <- c("Ahya" = "#E69F00", "Apoc" = "#56B4E9", "Nvec" = "#009E73")
 

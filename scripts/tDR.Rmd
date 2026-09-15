@@ -1,0 +1,73 @@
+---
+title: "tDRs"
+author: "Jill Ashey"
+date: "2026-09-08"
+output: html_document
+---
+
+Plot tRNA-derived RNAs (or tRNA fragments?) across species 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readr)
+```
+
+Read in data 
+```{r}
+files <- c("../output/tDR/ahya_tdr_counts.csv", "../output/tDR/apoc_tdr_counts.csv", "../output/tDR/nvec_tdr_counts.csv")
+species <- c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis")
+
+# Read, add species column, and combine
+combined_tdr <- purrr::map2_dfr(files, species, ~ {
+  read_csv(.x, show_col_types = FALSE) %>%
+    mutate(Species = .y)
+})
+```
+
+Summarize by species and type 
+```{r}
+species_tdr_summary <- combined_tdr %>%
+  group_by(Species, Type) %>%
+  summarise(Total_Count = sum(Count), .groups = "drop") %>%
+  group_by(Species) %>%
+  mutate(Percentage = (Total_Count / sum(Total_Count)) * 100)
+```
+
+Plot! 
+```{r}
+# Set levels
+species_tdr_summary$Type <- factor(species_tdr_summary$Type, levels = c("5' tDR", "i-tDR", "3' tDR"))
+species_tdr_summary$Species <- factor(species_tdr_summary$Species, levels = c("Acropora hyacinthus", "Astrangia poculata", "Nematostella vectensis"))
+
+tdr_plot <- ggplot(species_tdr_summary, aes(x = Species, y = Percentage, fill = Type)) +
+  geom_bar(stat = "identity", width = 0.8, color = "black", position = position_stack(reverse = T)) +
+    scale_y_continuous(
+        expand = c(0, 0),
+        breaks = seq(0, 100, by = 10),
+        limits = c(0, 105)) +
+
+    scale_fill_manual(values = c(
+    "5' tDR" = "darkblue",  
+    "3' tDR" = "darkred",   
+    "i-tDR"  = "darkolivegreen4")) +
+  ylab("Percentage (%)") +
+  xlab("") +
+  scale_x_discrete(labels = function(x) gsub(" ", "\n", x)) +
+  theme_classic() + 
+  theme(axis.text = element_text(color = "black", size = 20),
+    axis.title = element_text(size = 22, face = "bold"),
+    axis.text.x = element_text(face = "italic"),
+    legend.title = element_text(size = 15, face = "bold"),
+    legend.text = element_text(size = 15),
+    legend.key.size = unit(0.6, "cm")) +
+  guides(fill = guide_legend(reverse = TRUE)); tdr_plot
+
+ggsave("../output/tDR/tDR_percentage.pdf",
+       tdr_plot, width = 8, height = 6, units = "in", dpi = 600, bg = "white")
+ggsave("../output/tDR/tDR_percentage.png",
+       tdr_plot, width = 8, height = 6, units = "in", dpi = 600, bg = "white")
+```
+
+

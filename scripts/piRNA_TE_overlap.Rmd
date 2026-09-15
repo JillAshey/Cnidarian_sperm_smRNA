@@ -12,6 +12,7 @@ library(tidyverse)
 library(GenomicRanges)
 library(MetBrewer)
 library(cowplot)
+library(ggseqlogo)
 ```
 
 ## Apoc 

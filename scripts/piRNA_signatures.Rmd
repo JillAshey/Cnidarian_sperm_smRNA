@@ -11,6 +11,7 @@ piRNAs have specific signatures that can be examined to see if they were derived
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(ggseqlogo)
 ```
 
 Set custom plot theme
