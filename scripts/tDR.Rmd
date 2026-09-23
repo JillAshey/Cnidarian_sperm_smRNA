@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(readr)
+library(cowplot)
 ```
 
 Read in data 
@@ -59,9 +60,12 @@ tdr_plot <- ggplot(species_tdr_summary, aes(x = Species, y = Percentage, fill = 
   theme(axis.text = element_text(color = "black", size = 20),
     axis.title = element_text(size = 22, face = "bold"),
     axis.text.x = element_text(face = "italic"),
-    legend.title = element_text(size = 15, face = "bold"),
+    legend.title = element_text(size = 16, face = "bold"),
     legend.text = element_text(size = 15),
     legend.key.size = unit(0.6, "cm")) +
+  theme(
+    aspect.ratio = 1.2, # Prevents vertical stretching
+    legend.position = "bottom") +
   guides(fill = guide_legend(reverse = TRUE)); tdr_plot
 
 ggsave("../output/tDR/tDR_percentage.pdf",
@@ -69,5 +73,237 @@ ggsave("../output/tDR/tDR_percentage.pdf",
 ggsave("../output/tDR/tDR_percentage.png",
        tdr_plot, width = 8, height = 6, units = "in", dpi = 600, bg = "white")
 ```
+
+## tRNA position
+
+Set colors 
+```{r}
+trna_colors <- c(
+  "GlyGCC" = "#0072B2",  # Deep Blue
+  "AspGTC" = "#D55E00",  # Vermilion / Red-Orange
+  "LysCTT" = "#CC79A7",  # Pink / Magenta
+  "GluCTC" = "#E69F00",  # Amber Yellow
+  "HisGTG" = "#009E73",  # Teal / Green
+  "GluTTC" = "#F0E442",  # Bright Yellow
+  "ThrGGT" = "#56B4E9",  # Sky Blue
+  "ThrAGT" = "#785EF0",  # Bright Purple
+  "AlaGGC" = "#882255",  # Wine / Deep Red
+  "MetCAT" = "#117733"   # Dark Forest Green
+)
+
+theme_custom <- theme_classic(base_size = 9) +
+  theme(
+    text = element_text(family = "sans"),
+    axis.text = element_text(color = "black", size = 18),
+    axis.title = element_text(size = 21, face = "bold"),
+    plot.title = element_text(face = "italic", size = 24, hjust = 0.5),
+    #panel.border = element_rect(color = "grey60", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    #panel.grid.major.x = element_line(color = "grey90", linewidth = 0.3),
+    legend.title = element_text(size = 16, face = "bold"),
+    legend.text = element_text(size = 15),
+    legend.key.size = unit(0.4, "cm"),
+    legend.position = c(0.75, 0.75))
+    #plot.margin = margin(2,2,2,2))
+```
+
+
+### Positional coverage - Ahya
+
+Read in df
+```{r}
+ahya_trna <- read_csv("../output/tDR/ahya_trna_positional_coverage.csv")
+```
+
+Extract tRNA and anticodon family 
+```{r}
+ahya_trna_clean <- ahya_trna %>%
+  mutate(isoacceptor = str_extract(tRNA, "[A-Z][a-z]{2}[A-Z]{3}")) %>%
+  filter(!is.na(isoacceptor)) %>%
+  group_by(isoacceptor, Position) %>%
+  summarise(
+    Total_RPM = sum(RPM),
+    Total_Raw = sum(Raw_Count),
+    .groups = "drop") %>%
+  group_by(isoacceptor) %>%
+  filter(Total_Raw > 0) %>%
+  ungroup()
+
+length(unique(ahya_trna_clean$isoacceptor))
+```
+
+Identify most expressed tRNA isoacceptors 
+```{r}
+ahya_top_trnas <- ahya_trna_clean %>%
+  group_by(isoacceptor) %>%
+  summarise(max_rpm = max(Total_RPM)) %>%
+  arrange(desc(max_rpm)) %>%
+  slice_head(n = 4) %>%
+  pull(isoacceptor)
+```
+
+Plot for Ahya
+```{r}
+# Filter for top tRNAs or specific ones (e.g., c("LeuTAG", "GlyGCC", "GluCTC"))
+ahya_trna_plot <- ahya_trna_clean %>%
+  filter(isoacceptor %in% ahya_top_trnas)
+
+ahya_plot <- ggplot(ahya_trna_plot, aes(x = Position, y = Total_RPM, color = isoacceptor)) +
+  geom_line(linewidth = 1.1, alpha = 0.85) +
+  #facet_wrap(~ isoacceptor, scales = "free_y", ncol = 3) +
+  scale_x_continuous(limits = c(1, 85), breaks = seq(0, 80, by = 20)) +  labs(
+    x = "Mature tRNA Nucleotide Position",
+    y = "Coverage Normalized \nto Total Reads (RPM)",
+    color = "Isoacceptor",
+    title = "Acropora hyacinthus"
+  ) +
+  scale_color_manual(values = trna_colors) +
+  theme_classic() +
+  theme_custom; ahya_plot
+```
+
+### Positional coverage - Apoc
+
+Read in df
+```{r}
+apoc_trna <- read_csv("../output/tDR/apoc_trna_positional_coverage.csv")
+```
+
+Extract tRNA and anticodon family 
+```{r}
+apoc_trna_clean <- apoc_trna %>%
+  mutate(isoacceptor = str_extract(tRNA, "[A-Z][a-z]{2}[A-Z]{3}")) %>%
+  filter(!is.na(isoacceptor)) %>%
+  group_by(isoacceptor, Position) %>%
+  summarise(
+    Total_RPM = sum(RPM),
+    Total_Raw = sum(Raw_Count),
+    .groups = "drop") %>%
+  group_by(isoacceptor) %>%
+  filter(Total_Raw > 0) %>%
+  ungroup()
+
+length(unique(apoc_trna_clean$isoacceptor))
+```
+
+Identify most expressed tRNA isoacceptors 
+```{r}
+apoc_top_trnas <- apoc_trna_clean %>%
+  group_by(isoacceptor) %>%
+  summarise(max_rpm = max(Total_RPM)) %>%
+  arrange(desc(max_rpm)) %>%
+  slice_head(n = 4) %>%
+  pull(isoacceptor)
+```
+
+Plot for Apoc
+```{r}
+# Filter for top tRNAs or specific ones (e.g., c("LeuTAG", "GlyGCC", "GluCTC"))
+apoc_trna_plot <- apoc_trna_clean %>%
+  filter(isoacceptor %in% apoc_top_trnas)
+
+apoc_plot <- ggplot(apoc_trna_plot, aes(x = Position, y = Total_RPM, color = isoacceptor)) +
+  geom_line(linewidth = 1.1, alpha = 0.85) +
+  #facet_wrap(~ isoacceptor, scales = "free_y", ncol = 3) +
+  scale_x_continuous(limits = c(1, 85), breaks = seq(0, 80, by = 20)) +  labs(
+    x = "Mature tRNA Nucleotide Position",
+    y = "Coverage Normalized \nto Total Reads (RPM)",
+    color = "Isoacceptor",
+    title = "Astrangia poculata"
+  ) +
+  scale_color_manual(values = trna_colors) +
+  theme_classic() +
+  theme_custom; apoc_plot
+```
+
+### Positional coverage - Nvec
+
+Read in df
+```{r}
+nvec_trna <- read_csv("../output/tDR/nvec_trna_positional_coverage.csv")
+```
+
+Extract tRNA and anticodon family 
+```{r}
+nvec_trna_clean <- nvec_trna %>%
+  mutate(isoacceptor = str_extract(tRNA, "[A-Z][a-z]{2}[A-Z]{3}")) %>%
+  filter(!is.na(isoacceptor)) %>%
+  group_by(isoacceptor, Position) %>%
+  summarise(
+    Total_RPM = sum(RPM),
+    Total_Raw = sum(Raw_Count),
+    .groups = "drop") %>%
+  group_by(isoacceptor) %>%
+  filter(Total_Raw > 0) %>%
+  ungroup()
+
+length(unique(nvec_trna_clean$isoacceptor))
+```
+
+Identify most expressed tRNA isoacceptors 
+```{r}
+nvec_top_trnas <- nvec_trna_clean %>%
+  group_by(isoacceptor) %>%
+  summarise(max_rpm = max(Total_RPM)) %>%
+  arrange(desc(max_rpm)) %>%
+  slice_head(n = 4) %>%
+  pull(isoacceptor)
+```
+
+Plot for Nvec
+```{r}
+# Filter for top tRNAs or specific ones (e.g., c("LeuTAG", "GlyGCC", "GluCTC"))
+nvec_trna_plot <- nvec_trna_clean %>%
+  filter(isoacceptor %in% nvec_top_trnas)
+
+nvec_plot <- ggplot(nvec_trna_plot, aes(x = Position, y = Total_RPM, color = isoacceptor)) +
+  geom_line(linewidth = 1.1, alpha = 0.85) +
+  #facet_wrap(~ isoacceptor, scales = "free_y", ncol = 3) +
+  scale_x_continuous(limits = c(1, 85), breaks = seq(0, 80, by = 20)) +  labs(
+    x = "Mature tRNA Nucleotide Position",
+    y = "Coverage Normalized \nto Total Reads (RPM)",
+    color = "Isoacceptor",
+    title = "Nematostella vectensis"
+  ) +
+  scale_color_manual(values = trna_colors) +
+  theme_classic() +
+  theme_custom; nvec_plot
+```
+
+## Plot all tDR things 
+
+```{r}
+# left col 
+left <- plot_grid(
+  tdr_plot, 
+  ncol = 1, 
+  align = "v",
+  labels = c("A"), 
+  label_size = 22)
+
+# right col 
+right <- plot_grid(
+  ahya_plot,
+  apoc_plot,
+  nvec_plot,
+  ncol = 1, 
+  align = "v",
+  labels = c("B", "C", "D"), 
+  label_size = 22)
+
+# combine 
+full_figure <- plot_grid(
+  left, 
+  right, 
+  ncol = 2, 
+  rel_widths = c(0.45, 0.55)); full_figure
+
+ggsave("../output/tDR/tDR_features.pdf",
+       full_figure, width = 20, height = 16, units = "in", dpi = 600, bg = "white")
+ggsave("../output/tDR/tDR_features.png",
+       full_figure, width = 20, height = 16, units = "in", dpi = 600, bg = "white")
+```
+
+
 
 
