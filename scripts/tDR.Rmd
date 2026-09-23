@@ -279,7 +279,7 @@ left <- plot_grid(
   ncol = 1, 
   align = "v",
   labels = c("A"), 
-  label_size = 22)
+  label_size = 35)
 
 # right col 
 right <- plot_grid(
@@ -289,7 +289,7 @@ right <- plot_grid(
   ncol = 1, 
   align = "v",
   labels = c("B", "C", "D"), 
-  label_size = 22)
+  label_size = 35)
 
 # combine 
 full_figure <- plot_grid(
